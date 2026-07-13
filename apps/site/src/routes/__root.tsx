@@ -45,6 +45,10 @@ export const Route = createRootRoute({
         property: "og:type",
         content: "website",
       },
+      {
+        property: "og:url",
+        content: "https://gust.manikrana.dev",
+      },
     ],
     links: [
       {
@@ -55,6 +59,10 @@ export const Route = createRootRoute({
         rel: "icon",
         type: "image/svg+xml",
         href: "/icon.svg",
+      },
+      {
+        rel: "canonical",
+        href: "https://gust.manikrana.dev",
       },
     ],
   }),

@@ -7,6 +7,20 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Matches Liveline's live-dot pulse: 900ms expansion, then a 600ms rest. */
+@keyframes liveline-pulse {
+  0% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+
+  60%,
+  100% {
+    opacity: 0;
+    transform: scale(1.933333);
+  }
+}
+
 :root {
   /* Primitives — neutral ramp (hue 0) */
   --white: oklch(1 0 0);

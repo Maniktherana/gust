@@ -19,5 +19,7 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "registries": {}
+  "registries": {
+    "@maniktherana": "https://gust.manikrana.dev/r/{name}.json"
+  }
 }

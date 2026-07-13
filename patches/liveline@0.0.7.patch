@@ -1,0 +1,348 @@
+diff --git a/Users/manik/code/gust/node_modules/liveline/.bun-tag-37124bb412547385 b/.bun-tag-37124bb412547385
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/Users/manik/code/gust/node_modules/liveline/.bun-tag-9fce028526a26fbc b/.bun-tag-9fce028526a26fbc
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/index.cjs b/dist/index.cjs
+index 4709730f1d6608dee4ffb3a386d1732f776c5f5c..b1b3d88306cb35b21276956ed4f9d4e5978807a4 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -473,20 +473,6 @@ function drawLine(ctx, layout, palette, visible, smoothValue, now, showFill, scr
+     renderCurve(ctx, layout, palette, pts, showFill, lineAlpha, fillAlpha, strokeColor);
+   }
+   ctx.restore();
+-  if (!skipDashLine) {
+-    const realCurrentY = Math.max(pad.top, Math.min(h - pad.bottom, toY(smoothValue)));
+-    const currentY = chartReveal < 1 ? centerY + (realCurrentY - centerY) * chartReveal : realCurrentY;
+-    ctx.setLineDash([4, 4]);
+-    ctx.strokeStyle = palette.dashLine;
+-    ctx.lineWidth = 1;
+-    const dashBase = isScrubbing ? 1 - scrubAmount * 0.2 : 1;
+-    ctx.globalAlpha = incomingAlpha * (chartReveal < 1 ? dashBase * chartReveal : dashBase);
+-    ctx.beginPath();
+-    ctx.moveTo(pad.left, currentY);
+-    ctx.lineTo(layout.w - pad.right, currentY);
+-    ctx.stroke();
+-    ctx.setLineDash([]);
+-  }
+   ctx.globalAlpha = incomingAlpha;
+   const last = pts[pts.length - 1];
+   last[1] = Math.max(10, Math.min(h - 10, last[1]));
+@@ -1497,8 +1483,8 @@ function drawFrame(ctx, layout, palette, opts) {
+     ctx.restore();
+   }
+   const scrubX = opts.scrubAmount > 0.05 ? opts.hoverX : null;
+-  const pts = drawLine(ctx, layout, palette, opts.visible, opts.smoothValue, opts.now, opts.showFill, scrubX, opts.scrubAmount, reveal, opts.now_ms);
+-  {
++  const pts = drawLine(ctx, layout, palette, opts.visible, opts.smoothValue, opts.now, opts.showFill, scrubX, opts.scrubAmount, reveal, opts.now_ms, 1, !opts.showGuides);
++  if (opts.showGuides) {
+     const timeAlpha = reveal < 1 ? revealRamp(0.15, 0.7) : 1;
+     if (timeAlpha > 0.01) {
+       ctx.save();
+@@ -1517,7 +1503,7 @@ function drawFrame(ctx, layout, palette, opts) {
+     }
+     const dotAlpha = reveal < 0.3 ? 0 : (reveal - 0.3) / 0.7;
+     const showPulse = opts.showPulse && reveal > 0.6 && pause < 0.5;
+-    if (dotAlpha > 0.01) {
++    if (opts.showGuides && dotAlpha > 0.01) {
+       ctx.save();
+       if (dotAlpha < 1) ctx.globalAlpha = dotAlpha;
+       drawDot(ctx, lastPt[0], lastPt[1], palette, showPulse, dotScrub, opts.now_ms);
+@@ -1639,14 +1625,16 @@ function drawMultiFrame(ctx, layout, opts) {
+       scrubX,
+       opts.scrubAmount,
+       reveal,
+-      opts.now_ms
++      opts.now_ms,
++      1,
++      !opts.showGuides
+     );
+     ctx.restore();
+     if (pts && pts.length > 0) {
+       allPts.push({ pts, palette: s.palette, label: s.label, alpha: seriesAlpha });
+     }
+   }
+-  {
++  if (opts.showGuides) {
+     const timeAlpha = reveal < 1 ? revealRamp(0.15, 0.7) : 1;
+     if (timeAlpha > 0.01) {
+       ctx.save();
+@@ -1655,7 +1643,7 @@ function drawMultiFrame(ctx, layout, opts) {
+       ctx.restore();
+     }
+   }
+-  if (reveal > 0.3 && allPts.length > 0) {
++  if (opts.showGuides && reveal > 0.3 && allPts.length > 0) {
+     const dotAlpha = (reveal - 0.3) / 0.7;
+     const showPulse = opts.showPulse && reveal > 0.6 && opts.pauseProgress < 0.5;
+     for (const entry of allPts) {
+@@ -1749,7 +1737,7 @@ function drawCandleFrame(ctx, layout, palette, opts) {
+       opts.chartReveal,
+       opts.now_ms,
+       colorBlend,
+-      !fullLineMode,
++      !opts.showGuides || !fullLineMode,
+       opts.lineModeProg
+       // fillScale — fill fades smoothly with line mode transition
+     );
+@@ -1757,7 +1745,7 @@ function drawCandleFrame(ctx, layout, palette, opts) {
+   }
+   const closeAlpha = revealRamp(0.4, 0.8);
+   const closeSource = opts.closePriceCandle ?? opts.liveCandle;
+-  if (closeSource && closeAlpha > 0.01) {
++  if (opts.showGuides && closeSource && closeAlpha > 0.01) {
+     if (lp < 0.99) {
+       ctx.save();
+       ctx.globalAlpha = closeAlpha * (1 - lp);
+@@ -1849,7 +1837,7 @@ function drawCandleFrame(ctx, layout, palette, opts) {
+     }
+     ctx.restore();
+   }
+-  if (lp > 0.5 && linePts && linePts.length > 0 && reveal > 0.3) {
++  if (opts.showGuides && lp > 0.5 && linePts && linePts.length > 0 && reveal > 0.3) {
+     const lastPt = linePts[linePts.length - 1];
+     const dotAlpha = (lp - 0.5) * 2 * ((reveal - 0.3) / 0.7);
+     const showPulse = lp > 0.8 && reveal > 0.6;
+@@ -1861,7 +1849,7 @@ function drawCandleFrame(ctx, layout, palette, opts) {
+     }
+   }
+   const timeAlpha = revealRamp(0.25, 0.6);
+-  if (timeAlpha > 0.01) {
++  if (opts.showGuides && timeAlpha > 0.01) {
+     ctx.save();
+     if (timeAlpha < 1) ctx.globalAlpha = timeAlpha;
+     drawTimeAxis(ctx, layout, palette, opts.targetWindowSecs, opts.targetWindowSecs, opts.formatTime, opts.timeAxisState, opts.dt);
+@@ -3012,6 +3000,7 @@ function useLivelineEngine(canvasRef, containerRef, config) {
+         now,
+         pauseProgress,
+         showGrid: cfg.showGrid,
++        showGuides: cfg.showGuides,
+         scrubAmount,
+         hoverX: drawHoverX,
+         hoverValue: drawHoverCandle?.close ?? null,
+@@ -3279,6 +3268,7 @@ function useLivelineEngine(canvasRef, containerRef, config) {
+         series: seriesEntries,
+         now,
+         showGrid: cfg.showGrid,
++        showGuides: cfg.showGuides,
+         showPulse: cfg.showPulse,
+         referenceLine: cfg.referenceLine,
+         hoverX: drawHoverX,
+@@ -3430,6 +3420,7 @@ function useLivelineEngine(canvasRef, containerRef, config) {
+         momentum,
+         arrowState: arrowStateRef.current,
+         showGrid: cfg.showGrid,
++        showGuides: cfg.showGuides,
+         showMomentum: cfg.showMomentum,
+         showPulse: cfg.showPulse,
+         showFill: cfg.showFill,
+@@ -3522,6 +3513,7 @@ function Liveline({
+   color = "#3b82f6",
+   window: windowSecs = 30,
+   grid = true,
++  guides = true,
+   badge = true,
+   momentum = true,
+   fill = true,
+@@ -3663,6 +3655,7 @@ function Liveline({
+     windowSecs: effectiveWindowSecs,
+     lerpSpeed,
+     showGrid: grid,
++    showGuides: guides,
+     showBadge: isMultiSeries ? false : badge,
+     showMomentum: isMultiSeries ? false : showMomentum,
+     momentumOverride,
+diff --git a/dist/index.d.cts b/dist/index.d.cts
+index 414c4e61bac1017c49bbaedbd1691bcd9cdd667c..03e2ad34073a14e1dad98290808a91827c69b1c6 100644
+--- a/dist/index.d.cts
++++ b/dist/index.d.cts
+@@ -54,6 +54,8 @@ interface LivelineProps {
+     color?: string;
+     window?: number;
+     grid?: boolean;
++    /** Show live-value guides, endpoint markers, and the time axis (default: true). */
++    guides?: boolean;
+     badge?: boolean;
+     momentum?: boolean | Momentum;
+     fill?: boolean;
+@@ -103,7 +105,7 @@ interface CandlePoint {
+     close: number;
+ }
+ 
+-declare function Liveline({ data, value, series: seriesProp, theme, color, window: windowSecs, grid, badge, momentum, fill, scrub, loading, paused, emptyText, exaggerate, degen: degenProp, badgeTail, badgeVariant, showValue, valueMomentumColor, windows, onWindowChange, windowStyle, tooltipY, tooltipOutline, orderbook, referenceLine, formatValue, formatTime, lerpSpeed, padding: paddingOverride, onHover, cursor, pulse, mode, candles, candleWidth, liveCandle, lineMode, lineData, lineValue, onModeChange, onSeriesToggle, seriesToggleCompact, lineWidth, className, style, }: LivelineProps): react_jsx_runtime.JSX.Element;
++declare function Liveline({ data, value, series: seriesProp, theme, color, window: windowSecs, grid, guides, badge, momentum, fill, scrub, loading, paused, emptyText, exaggerate, degen: degenProp, badgeTail, badgeVariant, showValue, valueMomentumColor, windows, onWindowChange, windowStyle, tooltipY, tooltipOutline, orderbook, referenceLine, formatValue, formatTime, lerpSpeed, padding: paddingOverride, onHover, cursor, pulse, mode, candles, candleWidth, liveCandle, lineMode, lineData, lineValue, onModeChange, onSeriesToggle, seriesToggleCompact, lineWidth, className, style, }: LivelineProps): react_jsx_runtime.JSX.Element;
+ 
+ interface LivelineTransitionProps {
+     /** Key of the active child to display. Must match a child's `key` prop. */
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 414c4e61bac1017c49bbaedbd1691bcd9cdd667c..03e2ad34073a14e1dad98290808a91827c69b1c6 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -54,6 +54,8 @@ interface LivelineProps {
+     color?: string;
+     window?: number;
+     grid?: boolean;
++    /** Show live-value guides, endpoint markers, and the time axis (default: true). */
++    guides?: boolean;
+     badge?: boolean;
+     momentum?: boolean | Momentum;
+     fill?: boolean;
+@@ -103,7 +105,7 @@ interface CandlePoint {
+     close: number;
+ }
+ 
+-declare function Liveline({ data, value, series: seriesProp, theme, color, window: windowSecs, grid, badge, momentum, fill, scrub, loading, paused, emptyText, exaggerate, degen: degenProp, badgeTail, badgeVariant, showValue, valueMomentumColor, windows, onWindowChange, windowStyle, tooltipY, tooltipOutline, orderbook, referenceLine, formatValue, formatTime, lerpSpeed, padding: paddingOverride, onHover, cursor, pulse, mode, candles, candleWidth, liveCandle, lineMode, lineData, lineValue, onModeChange, onSeriesToggle, seriesToggleCompact, lineWidth, className, style, }: LivelineProps): react_jsx_runtime.JSX.Element;
++declare function Liveline({ data, value, series: seriesProp, theme, color, window: windowSecs, grid, guides, badge, momentum, fill, scrub, loading, paused, emptyText, exaggerate, degen: degenProp, badgeTail, badgeVariant, showValue, valueMomentumColor, windows, onWindowChange, windowStyle, tooltipY, tooltipOutline, orderbook, referenceLine, formatValue, formatTime, lerpSpeed, padding: paddingOverride, onHover, cursor, pulse, mode, candles, candleWidth, liveCandle, lineMode, lineData, lineValue, onModeChange, onSeriesToggle, seriesToggleCompact, lineWidth, className, style, }: LivelineProps): react_jsx_runtime.JSX.Element;
+ 
+ interface LivelineTransitionProps {
+     /** Key of the active child to display. Must match a child's `key` prop. */
+diff --git a/dist/index.js b/dist/index.js
+index fd0506272e9a54432a0882c3a389ee74302e4718..64965cefe25c1ca4a94f2b98e5217025fc7e3fe5 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -446,20 +446,6 @@ function drawLine(ctx, layout, palette, visible, smoothValue, now, showFill, scr
+     renderCurve(ctx, layout, palette, pts, showFill, lineAlpha, fillAlpha, strokeColor);
+   }
+   ctx.restore();
+-  if (!skipDashLine) {
+-    const realCurrentY = Math.max(pad.top, Math.min(h - pad.bottom, toY(smoothValue)));
+-    const currentY = chartReveal < 1 ? centerY + (realCurrentY - centerY) * chartReveal : realCurrentY;
+-    ctx.setLineDash([4, 4]);
+-    ctx.strokeStyle = palette.dashLine;
+-    ctx.lineWidth = 1;
+-    const dashBase = isScrubbing ? 1 - scrubAmount * 0.2 : 1;
+-    ctx.globalAlpha = incomingAlpha * (chartReveal < 1 ? dashBase * chartReveal : dashBase);
+-    ctx.beginPath();
+-    ctx.moveTo(pad.left, currentY);
+-    ctx.lineTo(layout.w - pad.right, currentY);
+-    ctx.stroke();
+-    ctx.setLineDash([]);
+-  }
+   ctx.globalAlpha = incomingAlpha;
+   const last = pts[pts.length - 1];
+   last[1] = Math.max(10, Math.min(h - 10, last[1]));
+@@ -1470,8 +1456,8 @@ function drawFrame(ctx, layout, palette, opts) {
+     ctx.restore();
+   }
+   const scrubX = opts.scrubAmount > 0.05 ? opts.hoverX : null;
+-  const pts = drawLine(ctx, layout, palette, opts.visible, opts.smoothValue, opts.now, opts.showFill, scrubX, opts.scrubAmount, reveal, opts.now_ms);
+-  {
++  const pts = drawLine(ctx, layout, palette, opts.visible, opts.smoothValue, opts.now, opts.showFill, scrubX, opts.scrubAmount, reveal, opts.now_ms, 1, !opts.showGuides);
++  if (opts.showGuides) {
+     const timeAlpha = reveal < 1 ? revealRamp(0.15, 0.7) : 1;
+     if (timeAlpha > 0.01) {
+       ctx.save();
+@@ -1490,7 +1476,7 @@ function drawFrame(ctx, layout, palette, opts) {
+     }
+     const dotAlpha = reveal < 0.3 ? 0 : (reveal - 0.3) / 0.7;
+     const showPulse = opts.showPulse && reveal > 0.6 && pause < 0.5;
+-    if (dotAlpha > 0.01) {
++    if (opts.showGuides && dotAlpha > 0.01) {
+       ctx.save();
+       if (dotAlpha < 1) ctx.globalAlpha = dotAlpha;
+       drawDot(ctx, lastPt[0], lastPt[1], palette, showPulse, dotScrub, opts.now_ms);
+@@ -1612,14 +1598,16 @@ function drawMultiFrame(ctx, layout, opts) {
+       scrubX,
+       opts.scrubAmount,
+       reveal,
+-      opts.now_ms
++      opts.now_ms,
++      1,
++      !opts.showGuides
+     );
+     ctx.restore();
+     if (pts && pts.length > 0) {
+       allPts.push({ pts, palette: s.palette, label: s.label, alpha: seriesAlpha });
+     }
+   }
+-  {
++  if (opts.showGuides) {
+     const timeAlpha = reveal < 1 ? revealRamp(0.15, 0.7) : 1;
+     if (timeAlpha > 0.01) {
+       ctx.save();
+@@ -1628,7 +1616,7 @@ function drawMultiFrame(ctx, layout, opts) {
+       ctx.restore();
+     }
+   }
+-  if (reveal > 0.3 && allPts.length > 0) {
++  if (opts.showGuides && reveal > 0.3 && allPts.length > 0) {
+     const dotAlpha = (reveal - 0.3) / 0.7;
+     const showPulse = opts.showPulse && reveal > 0.6 && opts.pauseProgress < 0.5;
+     for (const entry of allPts) {
+@@ -1722,7 +1710,7 @@ function drawCandleFrame(ctx, layout, palette, opts) {
+       opts.chartReveal,
+       opts.now_ms,
+       colorBlend,
+-      !fullLineMode,
++      !opts.showGuides || !fullLineMode,
+       opts.lineModeProg
+       // fillScale — fill fades smoothly with line mode transition
+     );
+@@ -1730,7 +1718,7 @@ function drawCandleFrame(ctx, layout, palette, opts) {
+   }
+   const closeAlpha = revealRamp(0.4, 0.8);
+   const closeSource = opts.closePriceCandle ?? opts.liveCandle;
+-  if (closeSource && closeAlpha > 0.01) {
++  if (opts.showGuides && closeSource && closeAlpha > 0.01) {
+     if (lp < 0.99) {
+       ctx.save();
+       ctx.globalAlpha = closeAlpha * (1 - lp);
+@@ -1822,7 +1810,7 @@ function drawCandleFrame(ctx, layout, palette, opts) {
+     }
+     ctx.restore();
+   }
+-  if (lp > 0.5 && linePts && linePts.length > 0 && reveal > 0.3) {
++  if (opts.showGuides && lp > 0.5 && linePts && linePts.length > 0 && reveal > 0.3) {
+     const lastPt = linePts[linePts.length - 1];
+     const dotAlpha = (lp - 0.5) * 2 * ((reveal - 0.3) / 0.7);
+     const showPulse = lp > 0.8 && reveal > 0.6;
+@@ -1834,7 +1822,7 @@ function drawCandleFrame(ctx, layout, palette, opts) {
+     }
+   }
+   const timeAlpha = revealRamp(0.25, 0.6);
+-  if (timeAlpha > 0.01) {
++  if (opts.showGuides && timeAlpha > 0.01) {
+     ctx.save();
+     if (timeAlpha < 1) ctx.globalAlpha = timeAlpha;
+     drawTimeAxis(ctx, layout, palette, opts.targetWindowSecs, opts.targetWindowSecs, opts.formatTime, opts.timeAxisState, opts.dt);
+@@ -2985,6 +2973,7 @@ function useLivelineEngine(canvasRef, containerRef, config) {
+         now,
+         pauseProgress,
+         showGrid: cfg.showGrid,
++        showGuides: cfg.showGuides,
+         scrubAmount,
+         hoverX: drawHoverX,
+         hoverValue: drawHoverCandle?.close ?? null,
+@@ -3252,6 +3241,7 @@ function useLivelineEngine(canvasRef, containerRef, config) {
+         series: seriesEntries,
+         now,
+         showGrid: cfg.showGrid,
++        showGuides: cfg.showGuides,
+         showPulse: cfg.showPulse,
+         referenceLine: cfg.referenceLine,
+         hoverX: drawHoverX,
+@@ -3403,6 +3393,7 @@ function useLivelineEngine(canvasRef, containerRef, config) {
+         momentum,
+         arrowState: arrowStateRef.current,
+         showGrid: cfg.showGrid,
++        showGuides: cfg.showGuides,
+         showMomentum: cfg.showMomentum,
+         showPulse: cfg.showPulse,
+         showFill: cfg.showFill,
+@@ -3495,6 +3486,7 @@ function Liveline({
+   color = "#3b82f6",
+   window: windowSecs = 30,
+   grid = true,
++  guides = true,
+   badge = true,
+   momentum = true,
+   fill = true,
+@@ -3636,6 +3628,7 @@ function Liveline({
+     windowSecs: effectiveWindowSecs,
+     lerpSpeed,
+     showGrid: grid,
++    showGuides: guides,
+     showBadge: isMultiSeries ? false : badge,
+     showMomentum: isMultiSeries ? false : showMomentum,
+     momentumOverride,

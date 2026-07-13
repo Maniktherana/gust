@@ -50,7 +50,7 @@ function Sidebar() {
         </p>
         <div className="-ml-2 flex items-center">
           <a
-            href="https://github.com/maniktherana/manikrana.dev"
+            href="https://github.com/Maniktherana/gust"
             target="_blank"
             rel="noreferrer"
             aria-label="GitHub"
@@ -79,7 +79,7 @@ function MobileHeader() {
           Lab
         </Link>
         <a
-          href="https://github.com/maniktherana/manikrana.dev"
+          href="https://github.com/Maniktherana/gust"
           target="_blank"
           rel="noreferrer"
           aria-label="GitHub"

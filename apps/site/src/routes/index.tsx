@@ -9,9 +9,11 @@ import { SiteShell } from "@/components/site-nav";
 import { Button } from "@/components/ui/button";
 import {
   DEFAULT_DURATION_MS,
+  DEFAULT_ENTER_ANGLE,
   DEFAULT_ENTRANCE_HEIGHT,
   DEFAULT_ENTRANCE_SCALE,
   DEFAULT_EXIT_DURATION_MS,
+  DEFAULT_EXIT_ANGLE,
   DEFAULT_EXIT_HEIGHT,
   DEFAULT_EXIT_SCALE,
   DEFAULT_STAGGER_MS,
@@ -24,7 +26,7 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const installCommand = "bunx shadcn@latest add maniktherana/gust/gust";
+const installCommand = "bunx shadcn@latest add @maniktherana/gust";
 
 const heroWords = ["a gust of wind.", "a gust of words.", "a gust of motion."];
 
@@ -33,7 +35,7 @@ const usageSnippet = `import { Gust } from "@/components/ui/gust";
 // cycle a list of words
 <Gust words={["a gust of wind", "a gust of words"]} />
 
-// or drive it yourself — every change animates
+// or drive it yourself — every change animates immediately
 <Gust text={copied ? "Copied" : "Copy"} />`;
 
 type PropRow = {
@@ -44,7 +46,11 @@ type PropRow = {
 
 const propRows: PropRow[] = [
   { defaultValue: '["a gust of…"]', description: "Words to cycle through.", name: "words" },
-  { defaultValue: "—", description: "Controlled mode — every change animates.", name: "text" },
+  {
+    defaultValue: "—",
+    description: "Controlled mode — every change animates immediately.",
+    name: "text",
+  },
   {
     defaultValue: "—",
     description: "CSS or Tailwind classes for typography, color, and spacing.",
@@ -63,13 +69,28 @@ const propRows: PropRow[] = [
     name: "exitDuration",
   },
   {
+    defaultValue: `${DEFAULT_ENTER_ANGLE}°`,
+    description: "Direction incoming characters travel; -90° is up.",
+    name: "enterAngle",
+  },
+  {
+    defaultValue: `${DEFAULT_EXIT_ANGLE}°`,
+    description: "Direction outgoing characters travel; -90° is up.",
+    name: "exitAngle",
+  },
+  {
+    defaultValue: "false",
+    description: "Set both directions down; explicit angles take precedence.",
+    name: "down",
+  },
+  {
     defaultValue: String(DEFAULT_STAGGER_MS),
     description: "Delay between characters, ms.",
     name: "stagger",
   },
   {
     defaultValue: String(DEFAULT_ENTRANCE_HEIGHT),
-    description: "Overshoot above the baseline.",
+    description: "Overshoot along the entrance direction.",
     name: "entranceHeight",
   },
   {
@@ -79,7 +100,7 @@ const propRows: PropRow[] = [
   },
   {
     defaultValue: String(DEFAULT_EXIT_HEIGHT),
-    description: "Upward exit travel, % of line height.",
+    description: "Exit travel, % of line height.",
     name: "exitHeight",
   },
   {
@@ -101,7 +122,7 @@ const useFor = [
 
 const avoidFor = [
   "Paragraphs or long sentences — it animates characters, not prose.",
-  "Text that changes many times a second; the hold is clamped so updates queue up.",
+  "High-frequency telemetry that changes several times per animation frame.",
   "Anything the user is in the middle of reading or editing.",
 ];
 

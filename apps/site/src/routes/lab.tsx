@@ -2,12 +2,15 @@ import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { IconBadgeCheck, IconCloneFilled } from "@/components/icons";
 import { SiteShell } from "@/components/site-nav";
+import { AngleControl } from "@/components/ui/angle-control";
 import { Button } from "@/components/ui/button";
 import {
   DEFAULT_DURATION_MS,
+  DEFAULT_ENTER_ANGLE,
   DEFAULT_ENTRANCE_HEIGHT,
   DEFAULT_ENTRANCE_SCALE,
   DEFAULT_EXIT_DURATION_MS,
+  DEFAULT_EXIT_ANGLE,
   DEFAULT_EXIT_HEIGHT,
   DEFAULT_EXIT_SCALE,
   DEFAULT_STAGGER_MS,
@@ -20,7 +23,6 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/lab")({
   component: Lab,
@@ -28,9 +30,11 @@ export const Route = createFileRoute("/lab")({
 
 type MotionValues = {
   duration: number;
+  enterAngle: number;
   entranceHeight: number;
   entranceScale: number;
   exitDuration: number;
+  exitAngle: number;
   exitHeight: number;
   exitScale: number;
   interval: number;
@@ -45,9 +49,11 @@ type MotionToggles = {
 
 const defaultValues: MotionValues = {
   duration: DEFAULT_DURATION_MS,
+  enterAngle: DEFAULT_ENTER_ANGLE,
   entranceHeight: DEFAULT_ENTRANCE_HEIGHT,
   entranceScale: DEFAULT_ENTRANCE_SCALE,
   exitDuration: DEFAULT_EXIT_DURATION_MS,
+  exitAngle: DEFAULT_EXIT_ANGLE,
   exitHeight: DEFAULT_EXIT_HEIGHT,
   exitScale: DEFAULT_EXIT_SCALE,
   interval: WORD_HOLD_MS,
@@ -76,7 +82,7 @@ const sliderConfigs: SliderConfig[] = [
   { key: "interval", label: "Hold", max: 5000, min: 800, step: 100, unit: "ms" },
   { key: "entranceHeight", label: "Entrance bounce", max: 120, min: 0, step: 2, unit: "" },
   { key: "entranceScale", label: "Entrance scale", max: 2, min: 1, step: 0.05, unit: "×" },
-  { key: "exitHeight", label: "Exit rise", max: 200, min: 0, step: 5, unit: "%" },
+  { key: "exitHeight", label: "Exit travel", max: 200, min: 0, step: 5, unit: "%" },
   { key: "exitScale", label: "Exit scale", max: 1.5, min: 0, step: 0.05, unit: "×" },
 ];
 
@@ -137,16 +143,6 @@ const presets: Preset[] = [
   },
 ];
 
-const inkColor = "text-foreground";
-
-const colorSwatches = [
-  { className: "bg-foreground", name: "Ink", value: inkColor },
-  { className: "bg-ok", name: "Green", value: "text-ok" },
-  { className: "bg-info", name: "Blue", value: "text-info" },
-  { className: "bg-warn", name: "Amber", value: "text-warn" },
-  { className: "bg-bad", name: "Red", value: "text-bad" },
-];
-
 const defaultWordsInput = [
   "a gust of wind",
   "a gust of words",
@@ -155,14 +151,12 @@ const defaultWordsInput = [
 ].join("\n");
 
 function buildJsx({
-  color,
   mode,
   toggles,
   typed,
   values,
   words,
 }: {
-  color: string;
   mode: string;
   toggles: MotionToggles;
   typed: string;
@@ -179,10 +173,20 @@ function buildJsx({
     if (values.interval !== defaultValues.interval) parts.push(`interval={${values.interval}}`);
   }
 
-  if (color !== inkColor) parts.push(`className=${JSON.stringify(color)}`);
+  if (values.enterAngle === 90 && values.exitAngle === 90) {
+    parts.push("down");
+  } else {
+    if (values.enterAngle !== defaultValues.enterAngle) {
+      parts.push(`enterAngle={${values.enterAngle}}`);
+    }
+
+    if (values.exitAngle !== defaultValues.exitAngle) {
+      parts.push(`exitAngle={${values.exitAngle}}`);
+    }
+  }
 
   (Object.keys(defaultValues) as (keyof MotionValues)[]).forEach((key) => {
-    if (key === "interval") return;
+    if (key === "interval" || key === "enterAngle" || key === "exitAngle") return;
     if (values[key] !== defaultValues[key]) parts.push(`${key}={${values[key]}}`);
   });
 
@@ -199,7 +203,6 @@ function Lab() {
   const [mode, setMode] = React.useState("cycle");
   const [wordsInput, setWordsInput] = React.useState(defaultWordsInput);
   const [typed, setTyped] = React.useState("hello, world");
-  const [color, setColor] = React.useState(inkColor);
   const [copied, setCopied] = React.useState(false);
   const copyTimer = React.useRef<number | null>(null);
 
@@ -218,7 +221,7 @@ function Lab() {
   };
 
   const copyJsx = async () => {
-    const jsx = buildJsx({ color, mode, toggles, typed, values, words });
+    const jsx = buildJsx({ mode, toggles, typed, values, words });
 
     try {
       await navigator.clipboard.writeText(jsx);
@@ -246,9 +249,11 @@ function Lab() {
   const sharedGustProps = {
     blur: toggles.blur,
     duration: values.duration,
+    enterAngle: values.enterAngle,
     entranceHeight: values.entranceHeight,
     entranceScale: values.entranceScale,
     exitDuration: values.exitDuration,
+    exitAngle: values.exitAngle,
     exitHeight: values.exitHeight,
     exitScale: values.exitScale,
     preservePrefix: toggles.preservePrefix,
@@ -273,43 +278,23 @@ function Lab() {
               {...sharedGustProps}
               words={words}
               interval={values.interval}
-              className={cn("max-w-full text-3xl font-medium tracking-tight sm:text-4xl", color)}
+              className="max-w-full text-3xl font-medium tracking-tight sm:text-4xl"
             />
           ) : (
             <Gust
               {...sharedGustProps}
               text={typed}
-              className={cn("max-w-full text-3xl font-medium tracking-tight sm:text-4xl", color)}
+              className="max-w-full text-3xl font-medium tracking-tight sm:text-4xl"
             />
           )}
         </div>
 
         <Tabs value={mode} onValueChange={(value) => setMode(String(value))} className="gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <TabsList>
               <TabsTrigger value="cycle">Cycle words</TabsTrigger>
               <TabsTrigger value="type">Type freely</TabsTrigger>
             </TabsList>
-            <div className="flex items-center gap-1">
-              {colorSwatches.map((swatch) => (
-                <button
-                  key={swatch.name}
-                  type="button"
-                  aria-label={`${swatch.name} text`}
-                  aria-pressed={color === swatch.value}
-                  onClick={() => setColor(swatch.value)}
-                  className={cn(
-                    "grid size-8 place-items-center rounded-full transition-[scale] duration-150 active:scale-[0.96]",
-                    color === swatch.value && "shadow-[var(--shadow-control-focus)]",
-                  )}
-                >
-                  <span
-                    aria-hidden="true"
-                    className={cn("size-4 rounded-full", swatch.className)}
-                  />
-                </button>
-              ))}
-            </div>
           </div>
           <TabsContent value="cycle">
             <Textarea
@@ -343,6 +328,19 @@ function Lab() {
           ))}
         </div>
 
+        <div className="grid gap-4 sm:grid-cols-2">
+          <AngleControl
+            label="Enter direction"
+            value={values.enterAngle}
+            onValueChange={(enterAngle) => setValues((current) => ({ ...current, enterAngle }))}
+          />
+          <AngleControl
+            label="Exit direction"
+            value={values.exitAngle}
+            onValueChange={(exitAngle) => setValues((current) => ({ ...current, exitAngle }))}
+          />
+        </div>
+
         <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
           {sliderConfigs.map((config) => (
             <Slider
@@ -362,6 +360,21 @@ function Lab() {
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
           <div className="flex flex-wrap items-center gap-6">
+            <div className="flex items-center gap-2">
+              <Switch
+                id="toggle-both-down"
+                aria-label="Both directions down"
+                checked={values.enterAngle === 90 && values.exitAngle === 90}
+                onCheckedChange={(checked) =>
+                  setValues((current) => ({
+                    ...current,
+                    enterAngle: checked ? 90 : DEFAULT_ENTER_ANGLE,
+                    exitAngle: checked ? 90 : DEFAULT_EXIT_ANGLE,
+                  }))
+                }
+              />
+              <Label htmlFor="toggle-both-down">Both down</Label>
+            </div>
             {(
               [
                 { key: "blur", label: "Blur" },
