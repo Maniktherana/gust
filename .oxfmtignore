@@ -1,0 +1,4 @@
+apps/site/public/r
+apps/site/src/routeTree.gen.ts
+playwright-report
+test-results

@@ -1,0 +1,125 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "gust",
+  "homepage": "https://gust.manikrana.dev",
+  "items": [
+    {
+      "name": "gust",
+      "type": "registry:ui",
+      "title": "Gust",
+      "description": "Dependency-free animated text transitions for React.",
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "packages/gust/src/index.ts",
+          "target": "@ui/gust/index.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "packages/gust/src/gust.tsx",
+          "target": "@ui/gust/gust.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "packages/gust/src/characters.ts",
+          "target": "@ui/gust/characters.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "packages/gust/src/config.ts",
+          "target": "@ui/gust/config.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "packages/gust/src/easing.ts",
+          "target": "@ui/gust/easing.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "packages/gust/src/hooks.ts",
+          "target": "@ui/gust/hooks.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "packages/gust/src/keyframes.ts",
+          "target": "@ui/gust/keyframes.ts",
+          "type": "registry:ui"
+        },
+        {
+          "path": "packages/gust/src/measure.ts",
+          "target": "@ui/gust/measure.ts",
+          "type": "registry:ui"
+        }
+      ],
+      "css": {
+        "@layer components": {
+          ":where([data-slot=\"gust\"])": {
+            "position": "relative",
+            "isolation": "isolate",
+            "display": "inline-grid",
+            "width": "max-content",
+            "overflow": "visible"
+          },
+          ":where([data-gust-part=\"sizer\"], [data-gust-part=\"text\"])": {
+            "grid-area": "1 / 1",
+            "white-space": "nowrap"
+          },
+          ":where([data-gust-part=\"sizer\"])": {
+            "display": "inline-block",
+            "visibility": "hidden",
+            "pointer-events": "none"
+          },
+          ":where([data-gust-part=\"text\"])": {
+            "display": "inline-flex",
+            "justify-self": "start",
+            "user-select": "none"
+          },
+          ":where([data-slot=\"gust\"][data-align=\"center\"] [data-gust-part=\"text\"])": {
+            "justify-self": "center"
+          },
+          ":where([data-slot=\"gust\"][data-align=\"end\"] [data-gust-part=\"text\"])": {
+            "justify-self": "end"
+          },
+          ":where([data-gust-part=\"slot\"])": {
+            "display": "inline-block"
+          },
+          ":where([data-gust-part=\"slot\"][data-animated=\"true\"])": {
+            "position": "relative",
+            "vertical-align": "baseline"
+          },
+          ":where([data-gust-part=\"placeholder\"])": {
+            "visibility": "hidden"
+          },
+          ":where([data-gust-part=\"glyph\"], [data-gust-part=\"exit\"])": {
+            "position": "absolute",
+            "top": "0",
+            "left": "0",
+            "display": "inline-block",
+            "transform-origin": "center"
+          },
+          ":where([data-gust-part=\"glyph\"])": {
+            "opacity": "0"
+          },
+          ":where([data-gust-part=\"exit\"])": {
+            "pointer-events": "none"
+          },
+          ":where([data-gust-part=\"sr-only\"])": {
+            "position": "absolute",
+            "width": "1px",
+            "height": "1px",
+            "padding": "0",
+            "margin": "-1px",
+            "overflow": "hidden",
+            "clip": "rect(0, 0, 0, 0)",
+            "white-space": "nowrap",
+            "border": "0"
+          }
+        }
+      },
+      "meta": {
+        "version": "0.1.0"
+      }
+    }
+  ]
+}

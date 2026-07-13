@@ -1,0 +1,9 @@
+node_modules
+.turbo
+.output
+dist
+coverage
+.tmp
+apps/site/public/r
+playwright-report
+test-results

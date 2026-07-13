@@ -1,0 +1,312 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/geist-mono";
+@import "@gust/core/styles.css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Primitives — neutral ramp (hue 0) */
+  --white: oklch(1 0 0);
+  --gray-50: oklch(0.985 0 0);
+  --gray-100: oklch(0.97 0 0);
+  --gray-200: oklch(0.92 0 0);
+  --gray-300: oklch(0.871 0 0);
+  --gray-400: oklch(0.712 0 0);
+  --gray-500: oklch(0.552 0 0);
+  --gray-600: oklch(0.442 0 0);
+  --gray-700: oklch(0.37 0 0);
+  --gray-800: oklch(0.274 0 0);
+  --gray-850: oklch(0.249 0 0);
+  --gray-900: oklch(0.21 0 0);
+  --gray-950: oklch(0.1496 0 0);
+  --black: oklch(0 0 0);
+
+  /* Primitives — brand */
+  --red-400: oklch(0.711 0.166 22.22);
+  --red-600: oklch(0.577 0.215 27.33);
+  --rose-600: oklch(0.586 0.222 17.58);
+  --rose-700: oklch(0.514 0.198 16.93);
+  --rose-800: oklch(0.455 0.171 13.7);
+
+  /* Semantic tokens */
+  --shell: var(--white);
+  --page-background: var(--white);
+  --surface: var(--white);
+  --surface-raised: var(--gray-50);
+  --surface-control: var(--white);
+  --surface-control-hover: var(--gray-100);
+  --field: var(--background);
+  --field-hover: var(--surface-control-hover);
+  --outline: oklch(0.21 0 0 / 8%);
+  --outline-subtle: oklch(0.21 0 0 / 6%);
+  --outline-strong: oklch(0.21 0 0 / 16%);
+  --background: var(--surface);
+  --foreground: var(--gray-900);
+  --card: var(--surface);
+  --card-foreground: var(--gray-900);
+  --popover: var(--card);
+  --popover-foreground: var(--gray-900);
+  --primary: var(--gray-900);
+  --primary-foreground: var(--white);
+  --secondary: var(--surface-raised);
+  --secondary-foreground: var(--gray-600);
+  --muted: var(--surface-raised);
+  --muted-foreground: var(--gray-500);
+  --accent: var(--surface-control-hover);
+  --accent-foreground: var(--gray-900);
+  --destructive: var(--red-600);
+  --destructive-action: var(--rose-600);
+  --destructive-action-hover: var(--rose-700);
+  --destructive-action-foreground: var(--white);
+  --component: var(--surface-raised);
+  --button-primary: var(--gray-800);
+  --button-primary-pressed: var(--gray-600);
+  --button-primary-foreground: var(--white);
+  --button-secondary: var(--gray-200);
+  --button-secondary-hover: var(--gray-300);
+  --button-secondary-foreground: var(--gray-900);
+  --button-outline-fill: var(--field);
+  --button-outline-fill-hover: oklch(1 0 0 / 10.7%);
+  --control-unchecked-bg: var(--gray-50);
+  --control-unchecked-hover-bg: var(--gray-100);
+  --control-unchecked-border: var(--gray-300);
+  --control-unchecked-hover-border: var(--gray-400);
+  --switch-checked-bg: var(--button-primary);
+  --control-checked-bg: var(--switch-checked-bg);
+  --control-checked-foreground: var(--white);
+  --tabs-list-bg: var(--muted);
+  --tabs-indicator-bg: var(--card);
+  --border: var(--outline);
+  --border-strong: var(--outline-strong);
+  --input: oklch(0.21 0 0 / 10%);
+  --ring: var(--gray-300);
+  --radius: 8px;
+  --control-height: 32px;
+
+  /* Status hues (inherited through Gust's standard `style` prop) */
+  --ok: oklch(0.55 0.13 155);
+  --info: oklch(0.55 0.15 250);
+  --warn: oklch(0.6 0.13 70);
+  --bad: oklch(0.55 0.19 25);
+
+  --shadow-card:
+    0 0 0 1px var(--outline), 0 1px 2px -1px rgb(0 0 0 / 8%), 0 2px 4px 0 rgb(0 0 0 / 4%);
+  --shadow-surface: var(--shadow-card);
+  --shadow-highlight: 0 1px 0 0 rgb(0 0 0 / 4%);
+  --shadow-control: 0 1px 2px -1px rgb(0 0 0 / 8%), 0 2px 4px 0 rgb(0 0 0 / 4%);
+  --shadow-control-hover: 0 1px 2px -1px rgb(0 0 0 / 8%), 0 2px 4px 0 rgb(0 0 0 / 4%);
+  --shadow-button-primary: 0 1px 2px 0 rgb(0 0 0 / 40%), 0 0 0 1px #18181b;
+  --shadow-control-focus:
+    0 0 0 1px var(--ring), 0 0 0 3px color-mix(in srgb, var(--ring) 24%, transparent),
+    0 1px 2px -1px rgb(0 0 0 / 8%), 0 2px 4px 0 rgb(0 0 0 / 4%);
+  --shadow-control-unchecked:
+    0 1px 2px 0 rgb(0 0 0 / 10%), 0 0 0 1px var(--control-unchecked-border);
+  --shadow-control-unchecked-hover:
+    0 1px 2px 0 rgb(0 0 0 / 12%), 0 0 0 1px var(--control-unchecked-hover-border);
+  --shadow-switch-track:
+    0 2px 4px 0 rgb(0 0 0 / 4%), inset 0 1px 1px 0 rgb(0 0 0 / 4%),
+    inset 0 2px 4px 0 rgb(0 0 0 / 4%), inset 0 0 0 0.75px rgb(0 0 0 / 6%),
+    inset 0 0 8px 0 rgb(0 0 0 / 2%);
+  --shadow-switch-thumb:
+    0 0 0 0.5px rgb(0 0 0 / 2%), 0 5px 4px 0 rgb(0 0 0 / 2%), 0 3px 3px 0 rgb(0 0 0 / 4%),
+    0 1px 2px 0 rgb(0 0 0 / 12%), 0 0 1px 0 rgb(0 0 0 / 8%), inset 0 0 2px 1px #ffffff,
+    inset 0 1px 0 0 #ffffff;
+  --shadow-destructive-action:
+    0 1px 2px 0 rgb(190 18 60 / 32%), inset 0 0.75px 0 0 rgb(255 255 255 / 16%);
+}
+
+.dark {
+  /* Surfaces / neutrals */
+  --shell: var(--black);
+  --page-background: var(--black);
+  --surface: var(--gray-900);
+  --surface-raised: var(--gray-950);
+  --surface-control: var(--gray-950);
+  --surface-control-hover: var(--gray-800);
+  --field: oklch(1 0 0 / 5.35%);
+  --field-hover: oklch(1 0 0 / 8%);
+  --outline: oklch(1 0 0 / 8%);
+  --outline-subtle: oklch(1 0 0 / 5%);
+  --outline-strong: oklch(1 0 0 / 20%);
+  --background: var(--page-background);
+  --foreground: var(--gray-100);
+  --card-foreground: var(--gray-100);
+  --popover-foreground: var(--gray-100);
+  --primary: var(--gray-100);
+  --primary-foreground: var(--gray-900);
+  --secondary-foreground: var(--gray-400);
+  --muted-foreground: var(--gray-500);
+  --accent: oklch(1 0 0 / 8%);
+  --accent-foreground: var(--gray-100);
+  --destructive: var(--red-400);
+  --destructive-action: var(--rose-700);
+  --destructive-action-hover: var(--rose-800);
+  --button-primary: var(--foreground);
+  --button-primary-pressed: var(--gray-300);
+  --button-primary-foreground: var(--gray-900);
+  --button-secondary: var(--gray-700);
+  --button-secondary-hover: var(--gray-600);
+  --button-secondary-foreground: var(--gray-100);
+  --button-outline-fill-hover: var(--field-hover);
+  --control-unchecked-bg: var(--gray-800);
+  --control-unchecked-hover-bg: var(--gray-700);
+  --control-unchecked-border: oklch(1 0 0 / 16%);
+  --control-unchecked-hover-border: oklch(1 0 0 / 24%);
+  --switch-checked-bg: var(--gray-500);
+  --control-checked-bg: var(--white);
+  --control-checked-foreground: var(--gray-900);
+  --tabs-list-bg: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(1 0 0 / 48%);
+
+  --ok: oklch(0.78 0.13 155);
+  --info: oklch(0.75 0.12 250);
+  --warn: oklch(0.82 0.13 80);
+  --bad: oklch(0.72 0.16 25);
+
+  --shadow-card:
+    0 0 0 1px rgb(255 255 255 / 7%), 0 -1px 0 0 rgb(255 255 255 / 6%), 0 0 0 1px #27272a,
+    0 1px 2px 0 rgb(0 0 0 / 42%), 0 3px 6px -1px rgb(0 0 0 / 44%);
+  --shadow-surface:
+    0 0 0 1px rgb(255 255 255 / 8%), 0 1px 0 0 rgb(255 255 255 / 3%),
+    0 2px 5px -2px rgb(0 0 0 / 42%);
+  --shadow-highlight: 0 -1px 0 0 rgb(255 255 255 / 7%);
+  --shadow-control:
+    0 1px 0 0 rgb(255 255 255 / 3%), 0 1px 1px 0 rgb(0 0 0 / 22%), 0 2px 3px -2px rgb(0 0 0 / 36%);
+  --shadow-control-hover:
+    0 1px 0 0 rgb(255 255 255 / 4%), 0 1px 1px 0 rgb(0 0 0 / 24%), 0 2px 3px -2px rgb(0 0 0 / 38%);
+  --shadow-control-focus:
+    0 0 0 1px var(--ring), 0 0 0 3px color-mix(in srgb, var(--ring) 20%, transparent),
+    0 -1px 0 0 rgb(255 255 255 / 8%), 0 1px 0 0 rgb(255 255 255 / 4%), 0 1px 1px 0 rgb(0 0 0 / 24%),
+    0 2px 3px -2px rgb(0 0 0 / 38%);
+  --shadow-control-unchecked:
+    0 1px 2px 0 rgb(0 0 0 / 32%), 0 0 0 1px var(--control-unchecked-border);
+  --shadow-control-unchecked-hover:
+    0 1px 2px 0 rgb(0 0 0 / 36%), 0 0 0 1px var(--control-unchecked-hover-border);
+  --shadow-switch-track:
+    0 2px 4px 0 rgb(0 0 0 / 24%), inset 0 1px 1px 0 rgb(255 255 255 / 4%),
+    inset 0 0 0 0.75px rgb(255 255 255 / 8%), inset 0 0 8px 0 rgb(0 0 0 / 24%);
+  --shadow-switch-thumb:
+    0 0 0 0.5px rgb(255 255 255 / 10%), 0 5px 4px 0 rgb(0 0 0 / 18%), 0 3px 3px 0 rgb(0 0 0 / 20%),
+    0 1px 2px 0 rgb(0 0 0 / 32%), 0 0 1px 0 rgb(0 0 0 / 32%),
+    inset 0 0 2px 1px rgb(255 255 255 / 16%), inset 0 1px 0 0 rgb(255 255 255 / 20%);
+  --shadow-destructive-action:
+    0 1px 2px 0 rgb(0 0 0 / 32%), inset 0 0.75px 0 0 rgb(255 255 255 / 14%);
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", "Geist Mono", "SFMono-Regular", ui-monospace, monospace;
+  --color-black: var(--black);
+  --color-gray-50: var(--gray-50);
+  --color-gray-100: var(--gray-100);
+  --color-gray-200: var(--gray-200);
+  --color-gray-300: var(--gray-300);
+  --color-gray-400: var(--gray-400);
+  --color-gray-500: var(--gray-500);
+  --color-gray-600: var(--gray-600);
+  --color-gray-700: var(--gray-700);
+  --color-gray-800: var(--gray-800);
+  --color-gray-850: var(--gray-850);
+  --color-gray-900: var(--gray-900);
+  --color-gray-950: var(--gray-950);
+  --color-shell: var(--shell);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-control: var(--surface-control);
+  --color-field: var(--field);
+  --color-outline: var(--outline);
+  --color-outline-subtle: var(--outline-subtle);
+  --color-outline-strong: var(--outline-strong);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border-strong: var(--border-strong);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-page-background: var(--page-background);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --color-ok: var(--ok);
+  --color-info: var(--info);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  /* Inner radii for 1px-border concentric highlights (rounded-*-inner) */
+  --radius-md-inner: calc(var(--radius-md) - 1px);
+  --radius-lg-inner: calc(var(--radius-lg) - 1px);
+  --radius-xl-inner: calc(var(--radius-xl) - 1px);
+  --radius-2xl-inner: calc(var(--radius-2xl) - 1px);
+}
+
+/* Subtle blueprint box grid for diagram surfaces. Vertical offset via
+   --grid-offset-y lets a horizontal line be pinned to a text baseline. */
+@utility box-grid {
+  background-image:
+    linear-gradient(var(--outline-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--outline-subtle) 1px, transparent 1px);
+  background-position: 0 var(--grid-offset-y, 0);
+  background-size: 32px 32px;
+}
+
+/* Shiki dual-theme support: light colors are inline, dark colors ride along as
+   CSS variables that the .dark class activates. */
+.shiki {
+  background-color: transparent !important;
+}
+
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark) !important;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  ::selection {
+    background-color: var(--foreground);
+    color: var(--background);
+  }
+  body {
+    @apply bg-page-background text-foreground;
+    overscroll-behavior: none;
+    scrollbar-width: thin;
+    scrollbar-color: gray transparent;
+  }
+  html {
+    @apply font-sans;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-optical-sizing: auto;
+    font-synthesis-weight: none;
+    text-rendering: optimizeSpeed;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}

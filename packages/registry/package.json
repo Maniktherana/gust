@@ -1,0 +1,18 @@
+{
+  "name": "@gust/registry",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun src/build-registry.ts && bun src/build-static.ts",
+    "check": "bun src/build-registry.ts --check && bun src/build-static.ts && bun src/smoke-install.ts",
+    "lint": "oxlint src",
+    "test": "bun test src",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.2",
+    "postcss": "^8.5.6",
+    "shadcn": "^4.12.0"
+  }
+}
