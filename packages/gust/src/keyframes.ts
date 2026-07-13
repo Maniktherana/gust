@@ -1,6 +1,6 @@
 // Bakes Motion-style per-property variant timing into Web Animations API
 // keyframes. Each property keeps its own duration and easing (opacity overruns
-// slightly, filter lands early, y/scale share the base window) — all tracks are
+// slightly, filter lands early, travel/scale share the base window) — all tracks are
 // sampled at a shared set of offsets so a single WAAPI animation reproduces the
 // exact per-property curve.
 
@@ -103,6 +103,15 @@ function entranceTiming(height: number) {
   };
 }
 
+function directionalTranslate(distance: number, angle: number) {
+  const radians = (angle * Math.PI) / 180;
+  const x = Math.cos(radians) * (distance / 100);
+  const y = Math.sin(radians) * (distance / 100);
+  const clean = (value: number) => (Math.abs(value) < 0.0001 ? 0 : Number(value.toFixed(4)));
+
+  return `translate(${clean(x)}em, ${clean(y)}em)`;
+}
+
 export function characterTransitionWindow(
   text: string,
   duration: number,
@@ -146,7 +155,7 @@ export function buildEnterKeyframes(config: GustConfig, reduceMotion: boolean): 
     times: [0, 1],
     values: [0, 1],
   };
-  const yTrack: MotionTrack = {
+  const distanceTrack: MotionTrack = {
     duration: enter,
     ease: timing.ease,
     times: [0, 1],
@@ -178,7 +187,7 @@ export function buildEnterKeyframes(config: GustConfig, reduceMotion: boolean): 
       filter: filterTrack ? `blur(${evalTrack(filterTrack, globalTime)}px)` : "blur(0px)",
       offset,
       opacity: evalTrack(opacityTrack, globalTime),
-      transform: `translateY(${evalTrack(yTrack, globalTime)}%) scale(${evalTrack(scaleTrack, globalTime)})`,
+      transform: `${directionalTranslate(-evalTrack(distanceTrack, globalTime), config.enterAngle)} scale(${evalTrack(scaleTrack, globalTime)})`,
     });
   }
 
@@ -204,11 +213,11 @@ export function buildExitKeyframes(config: GustConfig, reduceMotion: boolean): G
     times: [0, 1],
     values: [1, 0],
   };
-  const yTrack: MotionTrack = {
+  const distanceTrack: MotionTrack = {
     duration: exit,
     ease: easeOutStrongFn,
     times: [0, 1],
-    values: [0, -config.exitHeight],
+    values: [0, config.exitHeight],
   };
   const scaleTrack: MotionTrack = {
     duration: exit,
@@ -235,7 +244,7 @@ export function buildExitKeyframes(config: GustConfig, reduceMotion: boolean): G
       filter: filterTrack ? `blur(${evalTrack(filterTrack, globalTime)}px)` : "blur(0px)",
       offset,
       opacity: evalTrack(opacityTrack, globalTime),
-      transform: `translateY(${evalTrack(yTrack, globalTime)}%) scale(${evalTrack(scaleTrack, globalTime)})`,
+      transform: `${directionalTranslate(evalTrack(distanceTrack, globalTime), config.exitAngle)} scale(${evalTrack(scaleTrack, globalTime)})`,
     });
   }
 

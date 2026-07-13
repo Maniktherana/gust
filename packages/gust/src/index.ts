@@ -2,9 +2,11 @@ export { Gust, defaultGustWords } from "./gust";
 export type { GustProps } from "./gust";
 export {
   DEFAULT_DURATION_MS,
+  DEFAULT_ENTER_ANGLE,
   DEFAULT_ENTRANCE_HEIGHT,
   DEFAULT_ENTRANCE_SCALE,
   DEFAULT_EXIT_DURATION_MS,
+  DEFAULT_EXIT_ANGLE,
   DEFAULT_EXIT_HEIGHT,
   DEFAULT_EXIT_SCALE,
   DEFAULT_STAGGER_MS,

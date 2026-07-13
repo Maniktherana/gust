@@ -1,7 +1,7 @@
 "use client";
 
-// Gust animates text changes character by character: outgoing characters lift
-// up and away while incoming ones ride in from below on a slight overshoot,
+// Gust animates text changes character by character: outgoing characters travel
+// away while incoming ones ride in on a slight overshoot,
 // with optional blur, per-character stagger, shared-prefix preservation and a
 // width morph on the container. Dependency-free — the motion curves are
 // sampled into Web Animations API keyframes. React only, no animation libraries.
@@ -27,9 +27,11 @@ import {
 import type { GustCharacterMeasure } from "./measure";
 import {
   DEFAULT_DURATION_MS,
+  DEFAULT_ENTER_ANGLE,
   DEFAULT_ENTRANCE_HEIGHT,
   DEFAULT_ENTRANCE_SCALE,
   DEFAULT_EXIT_DURATION_MS,
+  DEFAULT_EXIT_ANGLE,
   DEFAULT_EXIT_HEIGHT,
   DEFAULT_EXIT_SCALE,
   DEFAULT_STAGGER_MS,
@@ -52,10 +54,13 @@ const fallbackWords = [""] as const;
 
 type GustProps = Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> & {
   blur?: boolean;
+  down?: boolean;
   duration?: number;
+  enterAngle?: number;
   entranceHeight?: number;
   entranceScale?: number;
   exitDuration?: number;
+  exitAngle?: number;
   exitHeight?: number;
   exitScale?: number;
   index?: number;
@@ -153,10 +158,13 @@ function GustExitingCharacters({
 function Gust({
   blur = true,
   className,
+  down = false,
   duration = DEFAULT_DURATION_MS,
+  enterAngle,
   entranceHeight = DEFAULT_ENTRANCE_HEIGHT,
   entranceScale = DEFAULT_ENTRANCE_SCALE,
   exitDuration = DEFAULT_EXIT_DURATION_MS,
+  exitAngle,
   exitHeight = DEFAULT_EXIT_HEIGHT,
   exitScale = DEFAULT_EXIT_SCALE,
   index: controlledIndex,
@@ -188,9 +196,11 @@ function Gust({
       resolveGustConfig({
         blur,
         duration,
+        enterAngle: enterAngle ?? (down ? 90 : DEFAULT_ENTER_ANGLE),
         entranceHeight,
         entranceScale,
         exitDuration,
+        exitAngle: exitAngle ?? (down ? 90 : DEFAULT_EXIT_ANGLE),
         exitHeight,
         exitScale,
         scale,
@@ -198,10 +208,13 @@ function Gust({
       }),
     [
       blur,
+      down,
       duration,
+      enterAngle,
       entranceHeight,
       entranceScale,
       exitDuration,
+      exitAngle,
       exitHeight,
       exitScale,
       scale,
@@ -290,7 +303,6 @@ function Gust({
   });
   useRootWidthMorph({
     activeWord,
-    previousText,
     reduceMotion,
     rootElement,
     rootTransitionDuration,
@@ -302,8 +314,8 @@ function Gust({
     rootElement,
   });
 
-  // The exit layer needs the slot measurements taken before this transition's
-  // prefix-slide effect overwrites them — snapshot once per version, in render.
+  // The exit layer needs the outgoing slots' measurements. Snapshot the prior
+  // render's measurements once per transition version.
   const transitionExitMeasureSnapshot = React.useRef({
     measures: previousSlotMeasures.current,
     version: transitionState.version,
@@ -348,9 +360,9 @@ function Gust({
 
   return (
     <span {...props} className={className} data-slot="gust" ref={rootElement}>
-      <span data-gust-part="sr-only">{activeWord}</span>
+      <span data-gust-part="sr-only">{word}</span>
       <span aria-hidden="true" data-gust-part="sizer" ref={sizingElement}>
-        {activeWord}
+        {activeWord || "\u200B"}
       </span>
       <GustExitingCharacters
         previousMeasures={transitionExitMeasureSnapshot.current.measures}

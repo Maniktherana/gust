@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "gust",
-  "homepage": "https://github.com/Maniktherana/gust",
+  "homepage": "https://gust.manikrana.dev",
   "items": [
     {
       "name": "gust",

@@ -1,4 +1,4 @@
-// DOM measurement helpers for the width morph and the prefix FLIP slide.
+// DOM measurement helpers for the root width morph and outgoing character layer.
 
 export type GustRootSize = {
   height: number;

@@ -4,6 +4,8 @@ export const WORD_HOLD_MS = 1600;
 export const DEFAULT_DURATION_MS = 440;
 export const DEFAULT_EXIT_DURATION_MS = 360;
 export const DEFAULT_STAGGER_MS = 12;
+export const DEFAULT_ENTER_ANGLE = -90;
+export const DEFAULT_EXIT_ANGLE = -90;
 export const DEFAULT_ENTRANCE_OFFSET = 72;
 export const DEFAULT_ENTRANCE_HEIGHT = 8;
 export const DEFAULT_ENTRANCE_SCALE = 1.1;
@@ -13,11 +15,13 @@ export const DEFAULT_EXIT_SCALE = 0.4;
 export type GustConfig = {
   blur: boolean;
   duration: number;
+  enterAngle: number;
   enterDuration: number;
   entranceHeight: number;
   entranceScale: number;
   enterStagger: number;
   exitDuration: number;
+  exitAngle: number;
   exitHeight: number;
   exitScale: number;
   exitStagger: number;
@@ -36,12 +40,22 @@ function clampPeakScale(value: number, fallback: number) {
   return Math.min(2, Math.max(1, clampMotionNumber(value, fallback)));
 }
 
+function normalizeAngle(value: number, fallback: number) {
+  if (!Number.isFinite(value)) return fallback;
+
+  const normalized = ((((value + 180) % 360) + 360) % 360) - 180;
+
+  return Object.is(normalized, -0) ? 0 : normalized;
+}
+
 export function resolveGustConfig(input: {
   blur: boolean;
   duration: number;
+  enterAngle: number;
   entranceHeight: number;
   entranceScale: number;
   exitDuration: number;
+  exitAngle: number;
   exitHeight: number;
   exitScale: number;
   scale: boolean;
@@ -53,11 +67,13 @@ export function resolveGustConfig(input: {
   return {
     blur: input.blur,
     duration: resolvedDuration,
+    enterAngle: normalizeAngle(input.enterAngle, DEFAULT_ENTER_ANGLE),
     enterDuration: resolvedDuration,
     entranceHeight: clampMotionNumber(input.entranceHeight, DEFAULT_ENTRANCE_HEIGHT),
     entranceScale: clampPeakScale(input.entranceScale, DEFAULT_ENTRANCE_SCALE),
     enterStagger: resolvedStagger,
     exitDuration: clampMotionNumber(input.exitDuration, DEFAULT_EXIT_DURATION_MS),
+    exitAngle: normalizeAngle(input.exitAngle, DEFAULT_EXIT_ANGLE),
     exitHeight: clampMotionNumber(input.exitHeight, DEFAULT_EXIT_HEIGHT),
     exitScale: clampScale(input.exitScale, DEFAULT_EXIT_SCALE),
     exitStagger: resolvedStagger,

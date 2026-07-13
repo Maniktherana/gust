@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-import { createRegistry } from "./build-registry";
+import { createRegistry, registryHomepage, registryNamespace, registryUrl } from "./build-registry";
 
 const root = resolve(import.meta.dir, "../../..");
 
@@ -21,7 +21,9 @@ test("release metadata stays synchronized", async () => {
   expect(rootManifest.license).toBe("MIT");
   expect(componentManifest.license).toBe("MIT");
   expect(license).toStartWith("MIT License");
-  expect(registry.homepage).toBe("https://github.com/Maniktherana/gust");
+  expect(registry.homepage).toBe(registryHomepage);
+  expect(registryNamespace).toBe("@maniktherana");
+  expect(registryUrl).toBe("https://gust.manikrana.dev/r/{name}.json");
   expect(componentManifest.private).toBe(true);
   expect(componentManifest.exports["./styles.css"]).toBe("./src/gust.css");
   expect(item.meta.version).toBe(componentManifest.version);

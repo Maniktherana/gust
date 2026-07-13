@@ -14,9 +14,11 @@ import { resolveGustConfig } from "../src/config";
 const config = resolveGustConfig({
   blur: true,
   duration: 440,
+  enterAngle: -90,
   entranceHeight: 8,
   entranceScale: 1.1,
   exitDuration: 360,
+  exitAngle: -90,
   exitHeight: 90,
   exitScale: 0.4,
   scale: true,

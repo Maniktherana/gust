@@ -2,9 +2,11 @@ import { describe, expect, test } from "bun:test";
 
 import {
   DEFAULT_DURATION_MS,
+  DEFAULT_ENTER_ANGLE,
   DEFAULT_ENTRANCE_HEIGHT,
   DEFAULT_ENTRANCE_SCALE,
   DEFAULT_EXIT_DURATION_MS,
+  DEFAULT_EXIT_ANGLE,
   DEFAULT_EXIT_HEIGHT,
   DEFAULT_EXIT_SCALE,
   DEFAULT_STAGGER_MS,
@@ -21,9 +23,11 @@ function resolve(overrides: Partial<Parameters<typeof resolveGustConfig>[0]> = {
   return resolveGustConfig({
     blur: true,
     duration: DEFAULT_DURATION_MS,
+    enterAngle: DEFAULT_ENTER_ANGLE,
     entranceHeight: DEFAULT_ENTRANCE_HEIGHT,
     entranceScale: DEFAULT_ENTRANCE_SCALE,
     exitDuration: DEFAULT_EXIT_DURATION_MS,
+    exitAngle: DEFAULT_EXIT_ANGLE,
     exitHeight: DEFAULT_EXIT_HEIGHT,
     exitScale: DEFAULT_EXIT_SCALE,
     scale: true,
@@ -41,6 +45,13 @@ describe("motion configuration", () => {
       entranceScale: 2,
       exitScale: 1.5,
       enterStagger: DEFAULT_STAGGER_MS,
+    });
+  });
+
+  test("wraps directional angles", () => {
+    expect(resolve({ enterAngle: 450, exitAngle: -450 })).toMatchObject({
+      enterAngle: 90,
+      exitAngle: -90,
     });
   });
 

@@ -6,7 +6,6 @@ import * as React from "react";
 
 import type { GustKeyframes } from "./keyframes";
 import type { RenderedGustCharacter } from "./characters";
-import { isForwardAppend } from "./characters";
 import type { GustCharacterMeasure, GustRootSize } from "./measure";
 import { measureElementSize, measureGustCharacterSlots, widthsMatch } from "./measure";
 
@@ -206,7 +205,6 @@ export function useExitAnimations({
 // large width delta never sits still and then appears to snap.
 export function useRootWidthMorph({
   activeWord,
-  previousText,
   reduceMotion,
   rootElement,
   rootTransitionDuration,
@@ -214,7 +212,6 @@ export function useRootWidthMorph({
   version,
 }: {
   activeWord: string;
-  previousText: string;
   reduceMotion: boolean;
   rootElement: React.RefObject<HTMLSpanElement | null>;
   rootTransitionDuration: number;
@@ -243,10 +240,10 @@ export function useRootWidthMorph({
 
     if (!previousSize || reduceMotion) return;
 
-    const fromSize =
-      hadActiveWidthAnimation && !isForwardAppend(previousText, activeWord)
-        ? visualSize
-        : previousSize;
+    // An interrupted morph must resume from the width currently on screen.
+    // Starting from the prior animation's target creates a one-frame snap,
+    // especially while typing or deleting quickly.
+    const fromSize = hadActiveWidthAnimation ? visualSize : previousSize;
 
     if (widthsMatch(fromSize, nextSize)) return;
 
@@ -265,15 +262,7 @@ export function useRootWidthMorph({
       rootSizeAnimation.current = null;
       animation.cancel();
     };
-  }, [
-    activeWord,
-    previousText,
-    reduceMotion,
-    rootElement,
-    rootTransitionDuration,
-    sizingElement,
-    version,
-  ]);
+  }, [activeWord, reduceMotion, rootElement, rootTransitionDuration, sizingElement, version]);
 
   React.useEffect(
     () => () => {
