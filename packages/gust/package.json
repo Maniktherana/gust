@@ -2,6 +2,13 @@
   "name": "@gust/core",
   "version": "0.1.0",
   "private": true,
+  "description": "Canonical Gust component source for the shadcn registry.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Maniktherana/gust.git",
+    "directory": "packages/gust"
+  },
   "type": "module",
   "sideEffects": [
     "./src/gust.css"

@@ -45,7 +45,11 @@ type PropRow = {
 const propRows: PropRow[] = [
   { defaultValue: '["a gust of…"]', description: "Words to cycle through.", name: "words" },
   { defaultValue: "—", description: "Controlled mode — every change animates.", name: "text" },
-  { defaultValue: "—", description: "Standard CSS styles, including text color.", name: "style" },
+  {
+    defaultValue: "—",
+    description: "CSS or Tailwind classes for typography, color, and spacing.",
+    name: "className",
+  },
   { defaultValue: "—", description: "Pin a specific word, disables the cycle.", name: "index" },
   { defaultValue: String(WORD_HOLD_MS), description: "Hold per word, ms.", name: "interval" },
   {
@@ -87,11 +91,6 @@ const propRows: PropRow[] = [
   { defaultValue: "true", description: "Scale in and out.", name: "scale" },
   { defaultValue: "true", description: "Keep the shared prefix still.", name: "preservePrefix" },
   { defaultValue: '"center"', description: "Edge the text grows from.", name: "align" },
-  {
-    defaultValue: "—",
-    description: "Classes for typography, color and spacing.",
-    name: "className",
-  },
 ];
 
 const useFor = [

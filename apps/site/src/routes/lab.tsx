@@ -137,14 +137,14 @@ const presets: Preset[] = [
   },
 ];
 
-const inkColor = "var(--foreground)";
+const inkColor = "text-foreground";
 
 const colorSwatches = [
   { className: "bg-foreground", name: "Ink", value: inkColor },
-  { className: "bg-(--ok)", name: "Green", value: "var(--ok)" },
-  { className: "bg-(--info)", name: "Blue", value: "var(--info)" },
-  { className: "bg-(--warn)", name: "Amber", value: "var(--warn)" },
-  { className: "bg-(--bad)", name: "Red", value: "var(--bad)" },
+  { className: "bg-ok", name: "Green", value: "text-ok" },
+  { className: "bg-info", name: "Blue", value: "text-info" },
+  { className: "bg-warn", name: "Amber", value: "text-warn" },
+  { className: "bg-bad", name: "Red", value: "text-bad" },
 ];
 
 const defaultWordsInput = [
@@ -179,7 +179,7 @@ function buildJsx({
     if (values.interval !== defaultValues.interval) parts.push(`interval={${values.interval}}`);
   }
 
-  if (color !== inkColor) parts.push(`style={{ color: ${JSON.stringify(color)} }}`);
+  if (color !== inkColor) parts.push(`className=${JSON.stringify(color)}`);
 
   (Object.keys(defaultValues) as (keyof MotionValues)[]).forEach((key) => {
     if (key === "interval") return;
@@ -273,15 +273,13 @@ function Lab() {
               {...sharedGustProps}
               words={words}
               interval={values.interval}
-              className="max-w-full text-3xl font-medium tracking-tight sm:text-4xl"
-              style={{ color }}
+              className={cn("max-w-full text-3xl font-medium tracking-tight sm:text-4xl", color)}
             />
           ) : (
             <Gust
               {...sharedGustProps}
               text={typed}
-              className="max-w-full text-3xl font-medium tracking-tight sm:text-4xl"
-              style={{ color }}
+              className={cn("max-w-full text-3xl font-medium tracking-tight sm:text-4xl", color)}
             />
           )}
         </div>

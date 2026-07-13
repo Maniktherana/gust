@@ -9,7 +9,7 @@
 
   :where([data-gust-part="sizer"], [data-gust-part="text"]) {
     grid-area: 1 / 1;
-    white-space: nowrap;
+    white-space: pre;
   }
 
   :where([data-gust-part="sizer"]) {

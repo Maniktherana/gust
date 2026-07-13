@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "gust",
-  "homepage": "https://gust.manikrana.dev",
+  "homepage": "https://github.com/Maniktherana/gust",
   "items": [
     {
       "name": "gust",
@@ -63,7 +63,7 @@
           },
           ":where([data-gust-part=\"sizer\"], [data-gust-part=\"text\"])": {
             "grid-area": "1 / 1",
-            "white-space": "nowrap"
+            "white-space": "pre"
           },
           ":where([data-gust-part=\"sizer\"])": {
             "display": "inline-block",

@@ -14,7 +14,10 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "outputs": ["coverage/**"]
+      "outputs": []
+    },
+    "@gust/registry#build": {
+      "cache": false
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],

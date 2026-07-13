@@ -37,9 +37,16 @@ await Promise.all(
 );
 
 const stylesheet = await readFile(resolve(fixture, "src/styles.css"), "utf8");
+const consumerManifest = JSON.parse(await readFile(resolve(fixture, "package.json"), "utf8")) as {
+  dependencies?: Record<string, string>;
+};
 
 if (!stylesheet.includes('[data-slot="gust"]')) {
   throw new Error("Gust CSS was not merged into the consumer stylesheet.");
+}
+
+if (JSON.stringify(consumerManifest.dependencies) !== JSON.stringify({ react: "19" })) {
+  throw new Error("Installing Gust added an unexpected runtime package dependency.");
 }
 
 await writeFile(

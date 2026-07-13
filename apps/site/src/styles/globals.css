@@ -86,7 +86,7 @@
   --radius: 8px;
   --control-height: 32px;
 
-  /* Status hues (inherited through Gust's standard `style` prop) */
+  /* Status hues (inherited through Gust's standard `className` prop) */
   --ok: oklch(0.55 0.13 155);
   --info: oklch(0.55 0.15 250);
   --warn: oklch(0.6 0.13 70);

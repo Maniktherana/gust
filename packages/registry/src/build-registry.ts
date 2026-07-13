@@ -10,6 +10,7 @@ interface CssTree {
 const root = resolve(import.meta.dir, "../../..");
 const componentRoot = resolve(root, "packages/gust");
 const registryPath = resolve(root, "registry.json");
+const repositoryUrl = "https://github.com/Maniktherana/gust";
 const sourceFiles = [
   "index.ts",
   "gust.tsx",
@@ -67,7 +68,7 @@ export async function createRegistry() {
   return {
     $schema: "https://ui.shadcn.com/schema/registry.json",
     name: "gust",
-    homepage: "https://gust.manikrana.dev",
+    homepage: repositoryUrl,
     items: [
       {
         name: "gust",

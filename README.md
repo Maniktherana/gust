@@ -95,4 +95,5 @@ bun run test:browser    # run Chrome motion and reduced-motion checks
 bun run verify          # the complete release gate
 ```
 
-See [docs/releasing.md](docs/releasing.md) for the release flow.
+See [docs/deploying.md](docs/deploying.md) for Vercel setup and
+[docs/releasing.md](docs/releasing.md) for the release flow.

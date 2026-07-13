@@ -57,10 +57,10 @@ function CopyDemo() {
 }
 
 const deploySteps = [
-  { color: "var(--muted-foreground)", key: "queued", label: "Queued" },
-  { color: "var(--warn)", key: "building", label: "Building" },
-  { color: "var(--info)", key: "deploying", label: "Deploying" },
-  { color: "var(--ok)", key: "live", label: "Live" },
+  { colorClassName: "text-muted-foreground", key: "queued", label: "Queued" },
+  { colorClassName: "text-warn", key: "building", label: "Building" },
+  { colorClassName: "text-info", key: "deploying", label: "Deploying" },
+  { colorClassName: "text-ok", key: "live", label: "Live" },
 ] as const;
 
 function StatusGlyph({ children, shown }: { children: React.ReactNode; shown: boolean }) {
@@ -94,8 +94,10 @@ function StatusDemo() {
   return (
     <span className="flex h-8 items-center gap-2 rounded-full border border-border bg-field pr-3.5 pl-3 shadow-[var(--shadow-highlight)]">
       <span
-        className="grid size-4 place-items-center text-(--status-color) transition-colors duration-500"
-        style={{ "--status-color": active.color } as React.CSSProperties}
+        className={cn(
+          "grid size-4 place-items-center transition-colors duration-500",
+          active.colorClassName,
+        )}
       >
         <StatusGlyph shown={active.key === "queued"}>
           <span className="size-3 animate-pulse rounded-full border-[1.5px] border-current" />
@@ -116,8 +118,7 @@ function StatusDemo() {
       <Gust
         text={active.label}
         align="start"
-        className="text-sm font-medium"
-        style={{ color: active.color }}
+        className={cn("text-sm font-medium", active.colorClassName)}
       />
     </span>
   );
@@ -235,8 +236,6 @@ function TickerDemo() {
   const price = tickerPrices[priceIndex];
   const previous = tickerPrices[(priceIndex + tickerPrices.length - 1) % tickerPrices.length];
   const up = price >= previous;
-  const directionColor = up ? "var(--ok)" : "var(--bad)";
-
   return (
     <span
       className={cn(
@@ -254,7 +253,6 @@ function TickerDemo() {
         exitDuration={260}
         stagger={10}
         className="text-xl font-semibold tabular-nums"
-        style={{ color: directionColor }}
       />
     </span>
   );
