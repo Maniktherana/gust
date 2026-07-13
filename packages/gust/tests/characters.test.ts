@@ -24,8 +24,8 @@ const config = resolveGustConfig({
 });
 
 describe("text bookkeeping", () => {
-  test("keeps consumer-provided empty and whitespace values intact", () => {
-    expect(normalizeWords(["", "  ", "word"])).toEqual(["", "  ", "word"]);
+  test("normalizes outer whitespace but preserves internal character slots", () => {
+    expect(normalizeWords(["", "  ", " word "])).toEqual(["", "", "word"]);
     expect(splitCharacters(" a ").map(({ character }) => character)).toEqual([" ", "a", " "]);
     expect(displayCharacter(" ")).toBe("\u00a0");
   });

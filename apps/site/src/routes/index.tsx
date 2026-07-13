@@ -90,7 +90,6 @@ const propRows: PropRow[] = [
   { defaultValue: "true", description: "Blur in and out.", name: "blur" },
   { defaultValue: "true", description: "Scale in and out.", name: "scale" },
   { defaultValue: "true", description: "Keep the shared prefix still.", name: "preservePrefix" },
-  { defaultValue: '"center"', description: "Edge the text grows from.", name: "align" },
 ];
 
 const useFor = [

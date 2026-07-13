@@ -2,8 +2,8 @@
 
 // Gust animates text changes character by character: outgoing characters lift
 // up and away while incoming ones ride in from below on a slight overshoot,
-// with optional blur, per-character stagger, a shared-prefix slide (FLIP) and
-// a width morph on the container. Dependency-free — the motion curves are
+// with optional blur, per-character stagger, shared-prefix preservation and a
+// width morph on the container. Dependency-free — the motion curves are
 // sampled into Web Animations API keyframes. React only, no animation libraries.
 //
 // Two ways to drive it: pass `words` to cycle on an interval (or control the
@@ -14,6 +14,8 @@ import * as React from "react";
 
 import {
   displayCharacter,
+  isWhitespaceCharacter,
+  normalizeText,
   normalizeWords,
   resolveGustCharacterRenderState,
   splitCharacters,
@@ -36,11 +38,11 @@ import {
 } from "./config";
 import { buildEnterKeyframes, buildExitKeyframes, characterTransitionWindow } from "./keyframes";
 import {
+  useCharacterMeasurements,
   useEnterAnimations,
   useExitAnimations,
   useGustTransitionState,
   usePrefersReducedMotion,
-  usePrefixSlide,
   useRootWidthMorph,
 } from "./hooks";
 
@@ -48,10 +50,7 @@ const defaultGustWords = ["a gust of wind", "a gust of words", "a gust of motion
 
 const fallbackWords = [""] as const;
 
-type GustAlign = "center" | "end" | "start";
-
 type GustProps = Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> & {
-  align?: GustAlign;
   blur?: boolean;
   duration?: number;
   entranceHeight?: number;
@@ -123,7 +122,8 @@ function GustExitingCharacters({
   transitionKey: string;
 }) {
   const previousCharacters = splitCharacters(previousText).filter(
-    (character) => character.index >= preservedPrefixLength,
+    (character) =>
+      character.index >= preservedPrefixLength && !isWhitespaceCharacter(character.character),
   );
 
   return (
@@ -151,7 +151,6 @@ function GustExitingCharacters({
 }
 
 function Gust({
-  align = "center",
   blur = true,
   className,
   duration = DEFAULT_DURATION_MS,
@@ -175,7 +174,7 @@ function Gust({
   const [index, setIndex] = React.useState(0);
   const activeIndex = controlledIndex ?? index;
   const safeIndex = ((activeIndex % safeWords.length) + safeWords.length) % safeWords.length;
-  const word = text ?? safeWords[safeIndex] ?? "";
+  const word = normalizeText(text ?? safeWords[safeIndex] ?? "");
   const transitionState = useGustTransitionState(word);
   const activeWord = transitionState.current;
   const previousText = transitionState.previous;
@@ -250,9 +249,16 @@ function Gust({
 
   const renderedCharacters = characterRenderState.current.characters;
   const preservedPrefixLength = characterRenderState.current.preservedPrefixLength;
-  const stablePrefixLength = characterRenderState.current.stablePrefixLength;
   const longestWordLength = React.useMemo(
-    () => safeWords.reduce((longest, next) => Math.max(longest, splitGraphemes(next).length), 0),
+    () =>
+      safeWords.reduce(
+        (longest, next) =>
+          Math.max(
+            longest,
+            splitGraphemes(next).filter((character) => !isWhitespaceCharacter(character)).length,
+          ),
+        0,
+      ),
     [safeWords],
   );
   const rootTransitionDuration = Math.max(
@@ -271,7 +277,7 @@ function Gust({
     ),
   );
 
-  // Hook call order preserves effect order: enter, exit, width morph, prefix.
+  // Hook call order preserves effect order: enter, exit, width, measurement.
   const setEnterRef = useEnterAnimations({
     enterKeyframes,
     enterStagger: config.enterStagger,
@@ -284,9 +290,6 @@ function Gust({
   });
   useRootWidthMorph({
     activeWord,
-    exitDuration: config.exitDuration,
-    exitStagger: config.exitStagger,
-    preservedPrefixLength,
     previousText,
     reduceMotion,
     rootElement,
@@ -294,13 +297,9 @@ function Gust({
     sizingElement,
     version: transitionState.version,
   });
-  const { previousSlotMeasures, setSlotRef } = usePrefixSlide({
+  const { previousSlotMeasures, setSlotRef } = useCharacterMeasurements({
     activeWord,
-    duration: config.duration,
-    preservePrefix,
-    reduceMotion,
     rootElement,
-    stablePrefixLength,
   });
 
   // The exit layer needs the slot measurements taken before this transition's
@@ -348,7 +347,7 @@ function Gust({
   ]);
 
   return (
-    <span {...props} className={className} data-align={align} data-slot="gust" ref={rootElement}>
+    <span {...props} className={className} data-slot="gust" ref={rootElement}>
       <span data-gust-part="sr-only">{activeWord}</span>
       <span aria-hidden="true" data-gust-part="sizer" ref={sizingElement}>
         {activeWord}

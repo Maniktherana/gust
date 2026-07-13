@@ -1,16 +1,16 @@
 // The imperative half of Gust: each hook owns the refs and WAAPI animations for
-// one concern (entrance, exit, width morph, prefix slide). Hook call order in
-// the component preserves the original effect order — enter, exit, width, prefix.
+// one concern (entrance, exit, width morph, slot measurement). Hook call order
+// in the component preserves the required effect order.
 
 import * as React from "react";
 
 import type { GustKeyframes } from "./keyframes";
-import { lastCharacterStartDelay } from "./keyframes";
 import type { RenderedGustCharacter } from "./characters";
 import { isForwardAppend } from "./characters";
 import type { GustCharacterMeasure, GustRootSize } from "./measure";
 import { measureElementSize, measureGustCharacterSlots, widthsMatch } from "./measure";
-import { easeOutStrongCss } from "./easing";
+
+const layoutEaseCss = "cubic-bezier(0.4, 0, 0.2, 1)";
 
 export type GustTransitionState = {
   current: string;
@@ -201,13 +201,11 @@ export function useExitAnimations({
   return setExitRef;
 }
 
-// Morph the root's width from the outgoing word to the incoming one. Shrinks
-// wait for the last exiting character to start lifting; growth starts at once.
+// Morph the root's width from the outgoing word to the incoming one. Layout
+// starts immediately and uses a gentler curve than the character motion so a
+// large width delta never sits still and then appears to snap.
 export function useRootWidthMorph({
   activeWord,
-  exitDuration,
-  exitStagger,
-  preservedPrefixLength,
   previousText,
   reduceMotion,
   rootElement,
@@ -216,9 +214,6 @@ export function useRootWidthMorph({
   version,
 }: {
   activeWord: string;
-  exitDuration: number;
-  exitStagger: number;
-  preservedPrefixLength: number;
   previousText: string;
   reduceMotion: boolean;
   rootElement: React.RefObject<HTMLSpanElement | null>;
@@ -255,18 +250,11 @@ export function useRootWidthMorph({
 
     if (widthsMatch(fromSize, nextSize)) return;
 
-    const isShrinking = fromSize.width > nextSize.width;
-    const resizeDelay = isShrinking
-      ? lastCharacterStartDelay(previousText, exitStagger, preservedPrefixLength)
-      : 0;
-    const resizeDuration = isShrinking ? exitDuration : rootTransitionDuration;
-
     const animation = root.animate(
       [{ width: `${fromSize.width}px` }, { width: `${nextSize.width}px` }],
       {
-        delay: resizeDelay,
-        duration: resizeDuration,
-        easing: easeOutStrongCss,
+        duration: rootTransitionDuration,
+        easing: layoutEaseCss,
         fill: "both",
       },
     );
@@ -279,9 +267,6 @@ export function useRootWidthMorph({
     };
   }, [
     activeWord,
-    exitDuration,
-    exitStagger,
-    preservedPrefixLength,
     previousText,
     reduceMotion,
     rootElement,
@@ -299,27 +284,18 @@ export function useRootWidthMorph({
   );
 }
 
-// FLIP-slide preserved-prefix characters into their new x position, and keep
-// the per-character slot measurements the exit layer needs for the next
-// transition. Returns the slot ref setter and the live measure map.
-export function usePrefixSlide({
+// Keep the per-character measurements that the next transition's exit layer
+// needs. Horizontal movement belongs exclusively to the root width morph; the
+// text row stays start-anchored so centering and FLIP cannot fight each other.
+export function useCharacterMeasurements({
   activeWord,
-  duration,
-  preservePrefix,
-  reduceMotion,
   rootElement,
-  stablePrefixLength,
 }: {
   activeWord: string;
-  duration: number;
-  preservePrefix: boolean;
-  reduceMotion: boolean;
   rootElement: React.RefObject<HTMLSpanElement | null>;
-  stablePrefixLength: number;
 }) {
   const slotElements = React.useRef(new Map<number, HTMLSpanElement>());
   const previousSlotMeasures = React.useRef(new Map<number, GustCharacterMeasure>());
-  const prefixAnimations = React.useRef(new Map<number, Animation>());
 
   const setSlotRef = React.useCallback((index: number, element: HTMLSpanElement | null) => {
     if (element) {
@@ -334,64 +310,8 @@ export function usePrefixSlide({
 
     if (!root) return;
 
-    const currentMeasures = measureGustCharacterSlots(root, slotElements.current);
-    const activePrefixIndexes = new Set(
-      Array.from({ length: stablePrefixLength }, (_, index) => index),
-    );
-
-    prefixAnimations.current.forEach((animation, index) => {
-      if (!activePrefixIndexes.has(index) || reduceMotion || !preservePrefix) {
-        animation.cancel();
-        prefixAnimations.current.delete(index);
-      }
-    });
-
-    if (!reduceMotion && preservePrefix) {
-      activePrefixIndexes.forEach((index) => {
-        const element = slotElements.current.get(index);
-        const previousMeasure = previousSlotMeasures.current.get(index);
-        const currentMeasure = currentMeasures.get(index);
-
-        if (!element || !previousMeasure || !currentMeasure) return;
-
-        const deltaX = previousMeasure.x - currentMeasure.x;
-        const deltaY = 0;
-
-        if (Math.abs(deltaX) < 0.5 && Math.abs(deltaY) < 0.5) return;
-
-        prefixAnimations.current.get(index)?.cancel();
-
-        const animation = element.animate(
-          [
-            { transform: `translate(${deltaX}px, ${deltaY}px)` },
-            { transform: "translate(0px, 0px)" },
-          ],
-          {
-            duration,
-            easing: easeOutStrongCss,
-            fill: "both",
-          },
-        );
-
-        prefixAnimations.current.set(index, animation);
-        animation.onfinish = () => {
-          if (prefixAnimations.current.get(index) !== animation) return;
-          prefixAnimations.current.delete(index);
-          animation.cancel();
-        };
-      });
-    }
-
-    previousSlotMeasures.current = currentMeasures;
-  }, [duration, preservePrefix, reduceMotion, rootElement, activeWord, stablePrefixLength]);
-
-  React.useEffect(
-    () => () => {
-      prefixAnimations.current.forEach((animation) => animation.cancel());
-      prefixAnimations.current.clear();
-    },
-    [],
-  );
+    previousSlotMeasures.current = measureGustCharacterSlots(root, slotElements.current);
+  }, [activeWord, rootElement]);
 
   return { previousSlotMeasures, setSlotRef };
 }

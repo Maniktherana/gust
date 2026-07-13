@@ -51,7 +51,7 @@ function CopyDemo() {
         <IconCloneFilled className={cn(glyphTransition, copied ? glyphHidden : glyphVisible)} />
         <IconBadgeCheck className={cn(glyphTransition, copied ? glyphVisible : glyphHidden)} />
       </span>
-      <Gust text={copied ? "Copied" : "Copy"} align="start" />
+      <Gust text={copied ? "Copied" : "Copy"} />
     </Button>
   );
 }
@@ -115,11 +115,7 @@ function StatusDemo() {
           <IconBadgeCheck className="size-4" />
         </StatusGlyph>
       </span>
-      <Gust
-        text={active.label}
-        align="start"
-        className={cn("text-sm font-medium", active.colorClassName)}
-      />
+      <Gust text={active.label} className={cn("text-sm font-medium", active.colorClassName)} />
     </span>
   );
 }
@@ -199,7 +195,6 @@ function OtpDemo() {
         <div className="relative flex h-10 items-start">
           <Gust
             text={code}
-            align="start"
             // -mr compensates the trailing letter-spacing after the last digit
             // so a full code sits optically centered in the phone.
             className="-mr-[0.1em] font-mono text-3xl font-semibold tracking-widest tabular-nums"
@@ -248,7 +243,6 @@ function TickerDemo() {
       />
       <Gust
         text={`$${price.toFixed(2)}`}
-        align="start"
         duration={320}
         exitDuration={260}
         stagger={10}

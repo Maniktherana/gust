@@ -15,7 +15,7 @@ test("renders semantic text and animates a controlled change", async ({ page }) 
   await expect(gust).not.toHaveAttribute("style", /.*/);
   await expect(gust).toHaveClass(/text-3xl/);
   expect(await visualText.evaluate((element) => getComputedStyle(element).justifySelf)).toBe(
-    "center",
+    "start",
   );
 
   await page.getByRole("button", { name: "Next" }).click();

@@ -6,7 +6,7 @@
 
 import { clamp01, cubicBezier, easeOutStrongFn, lerp } from "./easing";
 import { DEFAULT_ENTRANCE_OFFSET, type GustConfig } from "./config";
-import { splitGraphemes } from "./characters";
+import { isWhitespaceCharacter, splitGraphemes } from "./characters";
 
 const ENTER_SAMPLE_COUNT = 40;
 const EXIT_SAMPLE_COUNT = 28;
@@ -109,8 +109,9 @@ export function characterTransitionWindow(
   stagger: number,
   firstAnimatedIndex = 0,
 ) {
-  const characterCount = splitGraphemes(text).length;
-  const animatedCount = Math.max(0, characterCount - firstAnimatedIndex);
+  const animatedCount = splitGraphemes(text)
+    .slice(firstAnimatedIndex)
+    .filter((character) => !isWhitespaceCharacter(character)).length;
 
   if (animatedCount === 0) return 0;
 
@@ -118,7 +119,9 @@ export function characterTransitionWindow(
 }
 
 export function lastCharacterStartDelay(text: string, stagger: number, firstAnimatedIndex = 0) {
-  const animatedCount = Math.max(0, splitGraphemes(text).length - firstAnimatedIndex);
+  const animatedCount = splitGraphemes(text)
+    .slice(firstAnimatedIndex)
+    .filter((character) => !isWhitespaceCharacter(character)).length;
 
   return Math.max(0, animatedCount - 1) * stagger;
 }

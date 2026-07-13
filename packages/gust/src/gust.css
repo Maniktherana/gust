@@ -24,14 +24,6 @@
     user-select: none;
   }
 
-  :where([data-slot="gust"][data-align="center"] [data-gust-part="text"]) {
-    justify-self: center;
-  }
-
-  :where([data-slot="gust"][data-align="end"] [data-gust-part="text"]) {
-    justify-self: end;
-  }
-
   :where([data-gust-part="slot"]) {
     display: inline-block;
   }

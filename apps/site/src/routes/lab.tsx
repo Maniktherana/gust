@@ -388,7 +388,7 @@ function Lab() {
             ) : (
               <IconCloneFilled data-icon="inline-start" />
             )}
-            <Gust text={copied ? "Copied" : "Copy JSX"} align="start" />
+            <Gust text={copied ? "Copied" : "Copy JSX"} />
           </Button>
         </div>
       </main>

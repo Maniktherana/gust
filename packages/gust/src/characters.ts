@@ -33,13 +33,21 @@ export type GustCharacterRenderState = {
   stablePrefixLength: number;
 };
 
+export function isWhitespaceCharacter(character: string) {
+  return /^\s+$/u.test(character);
+}
+
+export function normalizeText(text: string) {
+  return text.trim();
+}
+
 const graphemeSegmenter =
   typeof Intl !== "undefined" && "Segmenter" in Intl
     ? new Intl.Segmenter(undefined, { granularity: "grapheme" })
     : null;
 
 export function normalizeWords(words: readonly string[]) {
-  return Array.from(words);
+  return Array.from(words, normalizeText);
 }
 
 export function splitGraphemes(text: string) {
@@ -77,7 +85,7 @@ export function splitCharacters(text: string): GustCharacter[] {
 }
 
 export function displayCharacter(character: string) {
-  return character === " " ? SPACE_GLYPH : character;
+  return isWhitespaceCharacter(character) ? SPACE_GLYPH : character;
 }
 
 export function resolveGustCharacterRenderState({
@@ -102,6 +110,7 @@ export function resolveGustCharacterRenderState({
   const entries = new Map<number, GustCharacterEntry>();
   let stablePrefixLength = 0;
   let canExtendStablePrefix = true;
+  let nextAnimatedOrder = 0;
 
   if (transitionVersion === 0) {
     characters.forEach((character) => {
@@ -127,10 +136,11 @@ export function resolveGustCharacterRenderState({
   }
 
   characters.forEach((character) => {
+    const isWhitespace = isWhitespaceCharacter(character.character);
     const previousEntry = previousEntries.get(character.index);
     const preservesEntry =
       character.index < preservedPrefixLength && previousEntry?.character === character.character;
-    const order = Math.max(0, character.index - preservedPrefixLength);
+    const order = isWhitespace ? 0 : nextAnimatedOrder;
     const entry =
       preservesEntry && previousEntry
         ? previousEntry
@@ -138,8 +148,10 @@ export function resolveGustCharacterRenderState({
             character: character.character,
             entryKey: `${transitionVersion}-${character.index}-${character.character}`,
             order,
-            settleAt: now + order * config.enterStagger + config.enterDuration,
+            settleAt: isWhitespace ? 0 : now + order * config.enterStagger + config.enterDuration,
           };
+
+    if (!preservesEntry && !isWhitespace) nextAnimatedOrder += 1;
 
     // A common-prefix character is only "stable" after its own entrance has landed.
     // Until then, keep its entryKey so the WAAPI loop can finish the full y/scale arc.
@@ -161,7 +173,7 @@ export function resolveGustCharacterRenderState({
         entryKey:
           entry?.entryKey ?? `${transitionVersion}-${character.index}-${character.character}`,
         order: entry?.order ?? Math.max(0, character.index - preservedPrefixLength),
-        stable: character.index < stablePrefixLength,
+        stable: isWhitespaceCharacter(character.character) || character.index < stablePrefixLength,
       };
     }),
     entries,
