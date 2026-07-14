@@ -21,7 +21,9 @@
 		"typecheck": "turbo run typecheck",
 		"test": "turbo run test",
 		"test:browser": "playwright test",
-		"release": "bash scripts/release.sh",
+		"release:major": "bash scripts/release.sh major",
+		"release:minor": "bash scripts/release.sh minor",
+		"release:patch": "bash scripts/release.sh patch",
 		"registry:build": "bun run --cwd apps/site registry:build",
 		"registry:check": "bun run --cwd apps/site registry:check"
 	},

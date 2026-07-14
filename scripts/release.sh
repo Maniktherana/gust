@@ -2,11 +2,14 @@
 
 set -euo pipefail
 
-release="${1:-patch}"
+release="${1:?Pass major, minor, or patch}"
 
-npm version "$release" \
-  --workspace=@maniktherana/gust \
-  --no-git-tag-version
+(
+  cd packages/gust
+  npm version "$release" \
+    --no-git-tag-version \
+    --workspaces=false
+)
 
 bun install --lockfile-only
 
@@ -17,9 +20,12 @@ git add packages/gust/package.json bun.lock
 git commit -m "release: $tag"
 git tag -a "$tag" -m "$tag"
 
-npm publish \
-  --workspace=@maniktherana/gust \
-  --access public
+(
+  cd packages/gust
+  npm publish \
+    --access public \
+    --workspaces=false
+)
 
 git push origin main --follow-tags
 gh release create "$tag" --verify-tag --generate-notes
