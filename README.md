@@ -2,7 +2,7 @@
 
 Text that moves like air. A React text transition built on the Web Animations API.
 
-[Demo and docs](https://gust.manikrana.dev)
+[gust.manikrana.dev](https://gust.manikrana.dev)
 
 ## Install
 
