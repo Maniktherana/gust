@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const installCommand = "bunx shadcn@latest add @maniktherana/gust";
+const installCommand = "bunx shadcn@latest add https://gust.manikrana.dev/r/gust.json";
 
 const heroWords = ["a gust of wind.", "a gust of words.", "a gust of motion."];
 
@@ -164,7 +164,7 @@ function InstallCommand() {
 
   return (
     <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-raised py-2 pr-2 pl-5">
-      <code className="font-mono text-xs sm:text-sm">
+      <code className="min-w-0 overflow-x-auto font-mono text-xs whitespace-nowrap sm:text-sm">
         <span className="text-muted-foreground select-none">$ </span>
         {installCommand}
       </code>

@@ -7,7 +7,7 @@ Text that moves like air. A React text transition built on the Web Animations AP
 ## Install
 
 ```sh
-bunx shadcn@latest add @maniktherana/gust
+bunx shadcn@latest add https://gust.manikrana.dev/r/gust.json
 ```
 
 ## Usage

@@ -11,7 +11,6 @@ const root = resolve(import.meta.dir, "../../..");
 const componentRoot = resolve(root, "packages/gust");
 const registryPath = resolve(root, "registry.json");
 export const registryHomepage = "https://gust.manikrana.dev";
-export const registryNamespace = "@maniktherana";
 export const registryUrl = `${registryHomepage}/r/{name}.json`;
 const sourceFiles = [
   "index.ts",
