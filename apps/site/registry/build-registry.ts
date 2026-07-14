@@ -75,7 +75,7 @@ export async function createRegistry() {
         name: "gust",
         type: "registry:ui",
         title: "Gust",
-        description: "Dependency-free animated text transitions for React.",
+        description: "A React text transition built on the Web Animations API",
         dependencies: [],
         registryDependencies: [],
         files: sourceFiles.map((file) => ({
@@ -91,7 +91,7 @@ export async function createRegistry() {
 }
 
 if (import.meta.main) {
-  const expected = `${JSON.stringify(await createRegistry(), null, 2)}\n`;
+  const expected = `${JSON.stringify(await createRegistry(), null, "\t")}\n`;
 
   if (process.argv.includes("--check")) {
     const current = await readFile(registryPath, "utf8").catch(() => "");

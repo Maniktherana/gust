@@ -19,18 +19,28 @@ import {
   DEFAULT_STAGGER_MS,
   Gust,
   WORD_HOLD_MS,
-} from "@gust/core";
+} from "@maniktherana/gust";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const installCommand = "bunx shadcn@latest add https://gust.manikrana.dev/r/gust.json";
+const installOptions = [
+  { command: "bun add @maniktherana/gust", id: "package", label: "Package" },
+  {
+    command: "bunx shadcn@latest add https://gust.manikrana.dev/r/gust.json",
+    id: "source",
+    label: "Own the source",
+  },
+] as const;
 
 const heroWords = ["a gust of wind.", "a gust of words.", "a gust of motion."];
 
-const usageSnippet = `import { Gust } from "@/components/ui/gust";
+const usageSnippet = `import { Gust } from "@maniktherana/gust";
+import "@maniktherana/gust/styles.css";
+
+// shadcn source install: import { Gust } from "@/components/ui/gust";
 
 // cycle a list of words
 <Gust words={["a gust of wind", "a gust of words"]} />
@@ -135,12 +145,14 @@ function SectionHeading({ id, children }: { id: string; children: React.ReactNod
 }
 
 function InstallCommand() {
+  const [method, setMethod] = React.useState<(typeof installOptions)[number]["id"]>("package");
   const [copied, setCopied] = React.useState(false);
   const resetTimer = React.useRef<number | null>(null);
+  const selected = installOptions.find((option) => option.id === method) ?? installOptions[0];
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(installCommand);
+      await navigator.clipboard.writeText(selected.command);
     } catch {
       return;
     }
@@ -163,32 +175,55 @@ function InstallCommand() {
   );
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-raised py-2 pr-2 pl-5">
-      <code className="min-w-0 overflow-x-auto font-mono text-xs whitespace-nowrap sm:text-sm">
-        <span className="text-muted-foreground select-none">$ </span>
-        {installCommand}
-      </code>
-      <button
-        type="button"
-        aria-label={copied ? "Copied" : "Copy install command"}
-        onClick={copy}
-        className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition-[color,scale] duration-200 hover:text-foreground active:scale-[0.96]"
-      >
-        <span className="grid place-items-center [&>svg]:col-start-1 [&>svg]:row-start-1 [&>svg]:size-4">
-          <IconCloneFilled
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-4 px-1">
+        {installOptions.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            aria-pressed={method === option.id}
+            onClick={() => {
+              setMethod(option.id);
+              setCopied(false);
+            }}
             className={cn(
-              "transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
-              copied ? "scale-25 opacity-0 blur-[4px]" : "scale-100 opacity-100 blur-none",
+              "text-xs transition-colors duration-200",
+              method === option.id
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground",
             )}
-          />
-          <IconBadgeCheck
-            className={cn(
-              "transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
-              copied ? "scale-100 opacity-100 blur-none" : "scale-25 opacity-0 blur-[4px]",
-            )}
-          />
-        </span>
-      </button>
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+      <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-raised py-2 pr-2 pl-5">
+        <code className="min-w-0 overflow-x-auto font-mono text-xs whitespace-nowrap sm:text-sm">
+          <span className="text-muted-foreground select-none">$ </span>
+          {selected.command}
+        </code>
+        <button
+          type="button"
+          aria-label={copied ? "Copied" : "Copy install command"}
+          onClick={copy}
+          className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition-[color,scale] duration-200 hover:text-foreground active:scale-[0.96]"
+        >
+          <span className="grid place-items-center [&>svg]:col-start-1 [&>svg]:row-start-1 [&>svg]:size-4">
+            <IconCloneFilled
+              className={cn(
+                "transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
+                copied ? "scale-25 opacity-0 blur-[4px]" : "scale-100 opacity-100 blur-none",
+              )}
+            />
+            <IconBadgeCheck
+              className={cn(
+                "transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
+                copied ? "scale-100 opacity-100 blur-none" : "scale-25 opacity-0 blur-[4px]",
+              )}
+            />
+          </span>
+        </button>
+      </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { IconArrowRotateAnticlockwise, IconBadgeCheck } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { Gust } from "@gust/core";
+import { Gust } from "@maniktherana/gust";
 
 const glyphVisible = "scale-100 opacity-100 blur-none";
 const glyphHidden = "scale-25 opacity-0 blur-[4px]";

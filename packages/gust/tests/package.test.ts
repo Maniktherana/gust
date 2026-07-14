@@ -14,6 +14,12 @@ test("the distributed component has no runtime package dependencies", async () =
     })),
   );
 
+  expect(manifest.name).toBe("@maniktherana/gust");
+  expect(manifest.private).toBeUndefined();
+  expect(manifest.files).toEqual(["dist", "src/gust.css"]);
+  expect(manifest.exports["."].import).toBe("./dist/index.js");
+  expect(manifest.exports["."].types).toBe("./dist/index.d.ts");
+  expect(manifest.exports["./styles.css"]).toBe("./src/gust.css");
   expect(manifest.dependencies).toEqual({});
   expect(manifest.peerDependencies).toEqual({ react: ">=18" });
 

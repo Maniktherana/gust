@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "types": ["bun", "node", "react"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"]

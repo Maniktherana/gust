@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 const root = resolve(import.meta.dir, "../../..");
 const command = Bun.spawn(
   [
-    resolve(root, "node_modules/.bin/shadcn"),
+    resolve(root, "apps/site/node_modules/.bin/shadcn"),
     "build",
     "registry.json",
     "--output",

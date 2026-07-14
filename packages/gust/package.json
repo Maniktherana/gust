@@ -1,32 +1,48 @@
 {
-  "name": "@gust/core",
+  "name": "@maniktherana/gust",
   "version": "0.1.0",
-  "private": true,
-  "description": "Canonical Gust component source for the shadcn registry.",
+  "description": "Animated text transitions for React.",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Maniktherana/gust.git",
     "directory": "packages/gust"
   },
+  "files": [
+    "dist",
+    "src/gust.css"
+  ],
   "type": "module",
   "sideEffects": [
     "./src/gust.css"
   ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./styles.css": "./src/gust.css"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./src/gust.css",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsup",
     "lint": "oxlint src tests",
+    "prepublishOnly": "bun run build && bun run test",
     "test": "bun test tests",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {},
   "devDependencies": {
     "@types/react": "^19.2.17",
-    "react": "19"
+    "react": "19",
+    "tsup": "^8.5.1"
   },
   "peerDependencies": {
     "react": ">=18"

@@ -18,8 +18,5 @@
     "ui": "@/components/ui",
     "lib": "@/lib",
     "hooks": "@/hooks"
-  },
-  "registries": {
-    "@maniktherana": "https://gust.manikrana.dev/r/{name}.json"
   }
 }

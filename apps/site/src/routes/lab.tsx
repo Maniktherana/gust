@@ -16,7 +16,7 @@ import {
   DEFAULT_STAGGER_MS,
   Gust,
   WORD_HOLD_MS,
-} from "@gust/core";
+} from "@maniktherana/gust";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";

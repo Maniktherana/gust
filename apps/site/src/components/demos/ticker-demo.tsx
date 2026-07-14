@@ -3,7 +3,7 @@ import * as React from "react";
 import { IconTriangleFilled } from "@/components/icons";
 import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
-import { Gust } from "@gust/core";
+import { Gust } from "@maniktherana/gust";
 import { Liveline } from "liveline";
 import type { LivelinePoint } from "liveline";
 

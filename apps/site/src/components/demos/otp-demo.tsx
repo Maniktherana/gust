@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { Gust } from "@gust/core";
+import { Gust } from "@maniktherana/gust";
 
 // Each step also says how it leaves: "wipe" clears the whole code in one
 // staggered exit, "backspace" deletes digit by digit down to the shared prefix
