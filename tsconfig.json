@@ -3,5 +3,5 @@
   "compilerOptions": {
     "types": ["bun", "node"]
   },
-  "include": ["playwright.config.ts", "tests/browser/**/*.ts"]
+  "include": ["playwright.config.ts", "packages/gust/tests/browser/**/*.ts"]
 }

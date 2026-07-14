@@ -17,7 +17,7 @@
     "dev": "turbo run dev",
     "format": "oxfmt --ignore-path=.oxfmtignore --write .",
     "format:check": "oxfmt --ignore-path=.oxfmtignore --check .",
-    "lint": "oxlint playwright.config.ts tests/browser && turbo run lint",
+    "lint": "oxlint playwright.config.ts && turbo run lint",
     "registry:build": "bun run --cwd apps/site registry:build",
     "registry:check": "bun run --cwd apps/site registry:check",
     "test": "turbo run test",

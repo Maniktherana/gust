@@ -35,7 +35,7 @@
     "build": "tsup",
     "lint": "oxlint src tests",
     "prepublishOnly": "bun run build && bun run test",
-    "test": "bun test tests",
+    "test": "bun test tests/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {},
