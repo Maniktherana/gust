@@ -9,6 +9,12 @@
       "cache": false,
       "persistent": true
     },
+    "format": {
+      "cache": false
+    },
+    "format:check": {
+      "outputs": []
+    },
     "lint": {
       "outputs": []
     },

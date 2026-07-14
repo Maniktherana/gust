@@ -1,41 +1,41 @@
 {
-  "name": "gust",
-  "version": "0.1.0",
-  "private": true,
-  "description": "Animated text transitions for React, available through npm or shadcn.",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Maniktherana/gust.git"
-  },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "format": "oxfmt --ignore-path=.oxfmtignore --write .",
-    "format:check": "oxfmt --ignore-path=.oxfmtignore --check .",
-    "lint": "oxlint playwright.config.ts && turbo run lint",
-    "registry:build": "bun run --cwd apps/site registry:build",
-    "registry:check": "bun run --cwd apps/site registry:check",
-    "test": "turbo run test",
-    "test:browser": "playwright test",
-    "typecheck": "tsc --noEmit -p tsconfig.json && turbo run typecheck",
-    "verify": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run registry:check && bun run test:browser && bun run build"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.58.2",
-    "@types/bun": "^1.3.11",
-    "@types/node": "^25.9.2",
-    "oxfmt": "^0.54.0",
-    "oxlint": "^1.69.0",
-    "turbo": "^2.9.16",
-    "typescript": "^6.0.3"
-  },
-  "packageManager": "bun@1.3.11",
-  "patchedDependencies": {
-    "liveline@0.0.7": "patches/liveline@0.0.7.patch"
-  }
+	"name": "gust",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Animated text transitions for React, available through npm or shadcn.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Maniktherana/gust.git"
+	},
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
+	"scripts": {
+		"build": "turbo run build",
+		"dev": "turbo run dev",
+		"lint": "turbo run lint",
+		"format": "turbo run format",
+		"format:check": "turbo run format:check",
+		"typecheck": "turbo run typecheck",
+		"test": "turbo run test",
+		"test:browser": "playwright test",
+		"release": "bash scripts/release.sh",
+		"registry:build": "bun run --cwd apps/site registry:build",
+		"registry:check": "bun run --cwd apps/site registry:check"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.58.2",
+		"@types/bun": "^1.3.11",
+		"@types/node": "^25.9.2",
+		"oxfmt": "^0.54.0",
+		"oxlint": "^1.69.0",
+		"turbo": "^2.9.16",
+		"typescript": "^6.0.3"
+	},
+	"packageManager": "bun@1.3.11",
+	"patchedDependencies": {
+		"liveline@0.0.7": "patches/liveline@0.0.7.patch"
+	}
 }
