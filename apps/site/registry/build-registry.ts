@@ -56,7 +56,7 @@ function cssContainerToObject(container: Container<ChildNode>) {
   return result;
 }
 
-export function cssToRegistryObject(css: string) {
+function cssToRegistryObject(css: string) {
   return cssContainerToObject(postcss.parse(css));
 }
 

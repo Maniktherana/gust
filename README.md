@@ -22,7 +22,10 @@ bunx shadcn@latest add https://gust.manikrana.dev/r/gust.json
 
 ```tsx
 import { Gust } from "@maniktherana/gust";
+import "@maniktherana/gust/styles.css";
 
 <Gust text={saved ? "Saved" : "Save"} />;
 <Gust words={["Queued", "Building", "Live"]} />;
 ```
+
+The stylesheet contains Gust's structural layout. Import it when you use the npm package.

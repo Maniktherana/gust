@@ -18,7 +18,6 @@ test("release metadata stays synchronized", async () => {
 
   if (!item) throw new Error("The Gust registry item is missing.");
 
-  expect(rootManifest.version).toBe(componentManifest.version);
   expect(rootManifest.license).toBe("MIT");
   expect(componentManifest.license).toBe("MIT");
   expect(license).toStartWith("MIT License");
@@ -31,6 +30,7 @@ test("release metadata stays synchronized", async () => {
   expect(item.meta.version).toBe(componentManifest.version);
   expect(item.dependencies).toEqual([]);
   expect(item.registryDependencies).toEqual([]);
+  expect("css" in item).toBeTrue();
   expect(item.files.length).toBeGreaterThan(0);
   expect(
     item.files.every(

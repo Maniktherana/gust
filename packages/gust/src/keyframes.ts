@@ -135,17 +135,7 @@ export function lastCharacterStartDelay(text: string, stagger: number, firstAnim
   return Math.max(0, animatedCount - 1) * stagger;
 }
 
-export function buildEnterKeyframes(config: GustConfig, reduceMotion: boolean): GustKeyframes {
-  if (reduceMotion) {
-    return {
-      duration: Math.min(config.enterDuration, 180),
-      keyframes: [
-        { easing: "linear", offset: 0, opacity: 0 },
-        { easing: "linear", offset: 1, opacity: 1 },
-      ],
-    };
-  }
-
+export function buildEnterKeyframes(config: GustConfig): GustKeyframes {
   const enter = config.enterDuration;
   const timing = entranceTiming(config.entranceHeight);
   const peakScale = config.scale ? config.entranceScale : 1;
@@ -194,17 +184,7 @@ export function buildEnterKeyframes(config: GustConfig, reduceMotion: boolean): 
   return { duration: maxDuration, keyframes };
 }
 
-export function buildExitKeyframes(config: GustConfig, reduceMotion: boolean): GustKeyframes {
-  if (reduceMotion) {
-    return {
-      duration: Math.min(config.exitDuration, 180),
-      keyframes: [
-        { easing: "linear", offset: 0, opacity: 1 },
-        { easing: "linear", offset: 1, opacity: 0 },
-      ],
-    };
-  }
-
+export function buildExitKeyframes(config: GustConfig): GustKeyframes {
   const exit = config.exitDuration;
   const exitScale = config.scale ? config.exitScale : 1;
   const opacityTrack: MotionTrack = {

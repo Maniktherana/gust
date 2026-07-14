@@ -12,11 +12,10 @@ test("renders semantic text and animates a controlled change", async ({ page }) 
 
   await expect(semanticText).toHaveText("a gust of wind.");
   await expect(visualText).toHaveAttribute("aria-hidden", "true");
-  await expect(gust).not.toHaveAttribute("style", /.*/);
+  await expect(gust).toHaveCSS("display", /^(inline-)?grid$/);
+  await expect(semanticText).toHaveCSS("position", "absolute");
+  await expect(gust.locator('[data-gust-part="sizer"]')).toHaveCSS("visibility", "hidden");
   await expect(gust).toHaveClass(/text-3xl/);
-  expect(await visualText.evaluate((element) => getComputedStyle(element).justifySelf)).toBe(
-    "start",
-  );
 
   await page.getByRole("button", { name: "Next" }).click();
   await expect(semanticText).toHaveText("a gust of words.");
@@ -38,6 +37,7 @@ test("transitions between package and source install commands", async ({ page })
   const usage = page.locator("#usage + div");
 
   await expect(semanticText).toHaveText("bun add @maniktherana/gust");
+  await expect(usage).toContainText('import "@maniktherana/gust/styles.css"');
   await expect(usage).toContainText('from "@maniktherana/gust"');
 
   await page.getByRole("button", { name: "shadcn cli" }).click();
@@ -51,58 +51,4 @@ test("transitions between package and source install commands", async ({ page })
 
   await page.getByRole("button", { name: "npm" }).click();
   await expect(semanticText).toHaveText("bun add @maniktherana/gust");
-});
-
-test.describe("reduced motion", () => {
-  test("keeps the transition short and opacity-only", async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.addInitScript(() => {
-      const animate = Element.prototype.animate;
-      const calls: Array<{ keyframes: Keyframe[]; options?: number | KeyframeAnimationOptions }> =
-        [];
-
-      Object.defineProperty(window, "__gustAnimationCalls", { value: calls });
-      Element.prototype.animate = function (keyframes, options) {
-        if (this.closest('[data-testid="hero-gust"]')) {
-          const resolvedKeyframes = Array.isArray(keyframes) ? (keyframes as Keyframe[]) : [];
-          calls.push({ keyframes: resolvedKeyframes, options });
-        }
-
-        return animate.call(this, keyframes, options);
-      };
-    });
-
-    await page.goto("/");
-    expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(
-      true,
-    );
-
-    const gust = page.getByTestId("hero-gust");
-    await page.getByRole("button", { name: "Next" }).click();
-    await expect(gust.locator('[data-gust-part="sr-only"]')).toHaveText("a gust of words.");
-
-    const animations = await page.evaluate(
-      () =>
-        (
-          window as unknown as Window & {
-            __gustAnimationCalls: Array<{
-              keyframes: Keyframe[];
-              options?: number | KeyframeAnimationOptions;
-            }>;
-          }
-        ).__gustAnimationCalls,
-    );
-
-    expect(animations.length).toBeGreaterThan(0);
-    expect(
-      animations.every(({ options }) =>
-        typeof options === "number" ? options <= 180 : Number(options?.duration) <= 180,
-      ),
-    ).toBe(true);
-    expect(
-      animations.every(({ keyframes }) =>
-        keyframes.every((keyframe) => !keyframe.transform && !keyframe.filter),
-      ),
-    ).toBe(true);
-  });
 });

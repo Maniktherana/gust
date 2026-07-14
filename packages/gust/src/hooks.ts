@@ -38,22 +38,6 @@ export function useGustTransitionState(word: string) {
   return transitionState;
 }
 
-// Dependency-free replacement for Motion's useReducedMotion.
-export function usePrefersReducedMotion() {
-  return React.useSyncExternalStore(
-    React.useCallback((onStoreChange) => {
-      if (typeof window === "undefined" || !window.matchMedia) return () => undefined;
-
-      const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-      query.addEventListener("change", onStoreChange);
-
-      return () => query.removeEventListener("change", onStoreChange);
-    }, []),
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    () => true,
-  );
-}
-
 // Fire the per-character entrance. Keyframes are config-only (order-independent),
 // so each character reuses the same baked set and varies only its delay. The
 // guard keys on entryKey *and* the live animation state: a preserved prefix
@@ -205,14 +189,12 @@ export function useExitAnimations({
 // large width delta never sits still and then appears to snap.
 export function useRootWidthMorph({
   activeWord,
-  reduceMotion,
   rootElement,
   rootTransitionDuration,
   sizingElement,
   version,
 }: {
   activeWord: string;
-  reduceMotion: boolean;
   rootElement: React.RefObject<HTMLSpanElement | null>;
   rootTransitionDuration: number;
   sizingElement: React.RefObject<HTMLSpanElement | null>;
@@ -238,7 +220,7 @@ export function useRootWidthMorph({
 
     previousRootSize.current = nextSize;
 
-    if (!previousSize || reduceMotion) return;
+    if (!previousSize) return;
 
     // An interrupted morph must resume from the width currently on screen.
     // Starting from the prior animation's target creates a one-frame snap,
@@ -262,7 +244,7 @@ export function useRootWidthMorph({
       rootSizeAnimation.current = null;
       animation.cancel();
     };
-  }, [activeWord, reduceMotion, rootElement, rootTransitionDuration, sizingElement, version]);
+  }, [activeWord, rootElement, rootTransitionDuration, sizingElement, version]);
 
   React.useEffect(
     () => () => {

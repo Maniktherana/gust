@@ -41,6 +41,7 @@ const heroWords = ["a gust of wind.", "a gust of words.", "a gust of motion."];
 
 const usageSnippets: Record<InstallMethod, string> = {
   package: `import { Gust } from "@maniktherana/gust";
+import "@maniktherana/gust/styles.css";
 
 export function GustExample() {
   return (
@@ -337,13 +338,19 @@ function Home() {
         <section className="flex flex-col gap-4">
           <SectionHeading id="usage">Usage</SectionHeading>
           <CodeBlock key={installMethod} code={usageSnippets[installMethod]} />
+          <p className="text-xs text-muted-foreground">
+            {installMethod === "package"
+              ? "Import the stylesheet once in your app."
+              : "The shadcn CLI adds the required styles to globals.css automatically."}
+          </p>
         </section>
 
         <section className="flex flex-col gap-4">
           <SectionHeading id="how-it-works">How it works</SectionHeading>
           <p className="text-sm text-pretty text-muted-foreground">
             Gust compares strings, keeps shared characters still, then lifts changed glyphs out as
-            replacements rise and settle. The Web Animations API drives each glyph.
+            replacements rise and settle. CSS handles the layout; the Web Animations API drives each
+            glyph.
           </p>
         </section>
 

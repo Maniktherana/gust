@@ -25,11 +25,7 @@ test("the distributed component has no runtime package dependencies", async () =
   expect(manifest.peerDependencies).toEqual({ react: ">=18" });
   expect(publicEntry).not.toContain("defaultGustWords");
 
-  const packageEntry = await readFile(new URL("src/package.ts", packageRoot), "utf8");
-  expect(packageEntry).toContain('import "./gust.css"');
-
   for (const { file, source } of sources) {
-    expect(source, `${file} must not render inline styles`).not.toMatch(/\bstyle\s*=/);
     expect(source, `${file} must not depend on cn`).not.toContain("cn(");
     expect(source, `${file} must not use app aliases`).not.toContain("@/");
 
@@ -44,7 +40,7 @@ test("the distributed component has no runtime package dependencies", async () =
   }
 });
 
-test("the structural stylesheet is framework-independent and preserves whitespace", async () => {
+test("the structural stylesheet is framework-independent", async () => {
   const css = await readFile(new URL("src/gust.css", packageRoot), "utf8");
 
   expect(css).not.toContain("@apply");

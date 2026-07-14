@@ -7,6 +7,7 @@
     "dev": "vite dev --port 3002",
     "prebuild": "bun registry/build-static.ts",
     "build": "vite build",
+    "preview": "vite preview",
     "registry:build": "bun registry/build-registry.ts && bun registry/build-static.ts",
     "registry:check": "bun registry/build-registry.ts --check && bun registry/build-static.ts",
     "start": "bun .output/server/index.mjs",

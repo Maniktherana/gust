@@ -3,8 +3,7 @@
 // Gust animates text changes character by character: outgoing characters travel
 // away while incoming ones ride in on a slight overshoot,
 // with optional blur, per-character stagger, shared-prefix preservation and a
-// width morph on the container. Dependency-free: the motion curves are
-// sampled into Web Animations API keyframes. React only, no animation libraries.
+// width morph on the container. React only, no animation libraries.
 //
 // Two ways to drive it: pass `words` to cycle on an interval (or control the
 // cycle with `index`), or pass `text` and Gust animates every change: button
@@ -44,7 +43,6 @@ import {
   useEnterAnimations,
   useExitAnimations,
   useGustTransitionState,
-  usePrefersReducedMotion,
   useRootWidthMorph,
 } from "./hooks";
 
@@ -174,7 +172,6 @@ function Gust({
   words,
   ...props
 }: GustProps) {
-  const reduceMotion = usePrefersReducedMotion();
   const normalizedWords = React.useMemo(() => normalizeWords(words ?? fallbackWords), [words]);
   const safeWords = normalizedWords.length > 0 ? normalizedWords : fallbackWords;
   const [index, setIndex] = React.useState(0);
@@ -219,14 +216,8 @@ function Gust({
       stagger,
     ],
   );
-  const enterKeyframes = React.useMemo(
-    () => buildEnterKeyframes(config, reduceMotion),
-    [config, reduceMotion],
-  );
-  const exitKeyframes = React.useMemo(
-    () => buildExitKeyframes(config, reduceMotion),
-    [config, reduceMotion],
-  );
+  const enterKeyframes = React.useMemo(() => buildEnterKeyframes(config), [config]);
+  const exitKeyframes = React.useMemo(() => buildExitKeyframes(config), [config]);
   // Character identity across transitions is resolved once per version (and
   // per preservePrefix flip), cached in refs so re-renders mid-animation don't
   // re-key entrances.
@@ -301,7 +292,6 @@ function Gust({
   });
   useRootWidthMorph({
     activeWord,
-    reduceMotion,
     rootElement,
     rootTransitionDuration,
     sizingElement,

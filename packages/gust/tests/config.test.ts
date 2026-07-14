@@ -12,12 +12,7 @@ import {
   DEFAULT_STAGGER_MS,
   resolveGustConfig,
 } from "../src/config";
-import {
-  buildEnterKeyframes,
-  buildExitKeyframes,
-  characterTransitionWindow,
-  lastCharacterStartDelay,
-} from "../src/keyframes";
+import { characterTransitionWindow, lastCharacterStartDelay } from "../src/keyframes";
 
 function resolve(overrides: Partial<Parameters<typeof resolveGustConfig>[0]> = {}) {
   return resolveGustConfig({
@@ -58,15 +53,5 @@ describe("motion configuration", () => {
   test("uses grapheme counts for stagger windows", () => {
     expect(characterTransitionWindow("A👨‍👩‍👧‍👦B", 100, 20)).toBe(140);
     expect(lastCharacterStartDelay("A👨‍👩‍👧‍👦B", 20, 1)).toBe(20);
-  });
-
-  test("reduced motion removes transforms, filters, and long timings", () => {
-    const enter = buildEnterKeyframes(resolve(), true);
-    const exit = buildExitKeyframes(resolve(), true);
-
-    expect(enter.duration).toBeLessThanOrEqual(180);
-    expect(exit.duration).toBeLessThanOrEqual(180);
-    expect(enter.keyframes.every(({ transform, filter }) => !transform && !filter)).toBe(true);
-    expect(exit.keyframes.every(({ transform, filter }) => !transform && !filter)).toBe(true);
   });
 });
