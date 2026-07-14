@@ -7,7 +7,7 @@
 			"name": "gust",
 			"type": "registry:ui",
 			"title": "Gust",
-			"description": "Animated text component for React.",
+			"description": "A React text transition built on the Web Animations API",
 			"dependencies": [],
 			"registryDependencies": [],
 			"files": [
