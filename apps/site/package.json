@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 3002",
+    "prebuild": "bun run --cwd ../../packages/registry build:static",
     "build": "vite build",
     "start": "bun .output/server/index.mjs",
     "lint": "oxlint .",
