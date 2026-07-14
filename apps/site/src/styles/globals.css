@@ -3,8 +3,6 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/geist-mono";
-@import "@maniktherana/gust/styles.css";
-
 @custom-variant dark (&:is(.dark *));
 
 /* Matches Liveline's live-dot pulse: 900ms expansion, then a 600ms rest. */
@@ -22,7 +20,7 @@
 }
 
 :root {
-  /* Primitives — neutral ramp (hue 0) */
+  /* Primitives: neutral ramp (hue 0) */
   --white: oklch(1 0 0);
   --gray-50: oklch(0.985 0 0);
   --gray-100: oklch(0.97 0 0);
@@ -38,7 +36,7 @@
   --gray-950: oklch(0.1496 0 0);
   --black: oklch(0 0 0);
 
-  /* Primitives — brand */
+  /* Primitives: brand */
   --red-400: oklch(0.711 0.166 22.22);
   --red-600: oklch(0.577 0.215 27.33);
   --rose-600: oklch(0.586 0.222 17.58);

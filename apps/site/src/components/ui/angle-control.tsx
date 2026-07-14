@@ -78,17 +78,20 @@ function AngleControl({
 
   return (
     <div
+      data-active={dragging ? "true" : undefined}
+      data-slot="angle-control"
       className={cn(
-        "flex min-w-0 items-center justify-between gap-4 rounded-xl border border-border bg-surface-raised p-3",
+        "group/angle flex h-10 min-w-0 items-center rounded-lg bg-field pr-1 pl-2.5 shadow-[var(--shadow-control)] transition-[box-shadow,opacity] duration-150 ease-out",
+        disabled && "cursor-not-allowed opacity-50",
         className,
       )}
     >
-      <div className="min-w-0 self-start pt-1">
-        <div className="text-sm font-medium">{label}</div>
-        <div className="mt-1 font-mono text-xs text-muted-foreground tabular-nums">
-          {angle}° · {describeAngle(angle)}
-        </div>
-      </div>
+      <span className="min-w-0 truncate text-[13px] leading-none font-medium text-muted-foreground transition-colors duration-150 group-data-[active=true]/angle:text-foreground">
+        {label}
+      </span>
+      <span className="ml-auto font-mono text-[13px] leading-none font-medium text-muted-foreground tabular-nums transition-colors duration-150 group-data-[active=true]/angle:text-foreground">
+        {angle}°
+      </span>
 
       <button
         type="button"
@@ -105,28 +108,21 @@ function AngleControl({
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerEnd}
-        className="relative size-24 shrink-0 touch-none rounded-full border border-border bg-background outline-none shadow-[var(--shadow-control)] transition-[box-shadow,scale] duration-150 focus-visible:shadow-[var(--shadow-control-focus)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+        className="relative size-10 shrink-0 touch-none rounded-full outline-none transition-transform duration-150 focus-visible:[&_[data-slot=angle-track]]:shadow-[var(--shadow-control-focus)] active:scale-[0.96] disabled:cursor-not-allowed"
       >
         <span
           aria-hidden="true"
-          className="absolute inset-2 rounded-full border border-border/70"
-        />
-        <span aria-hidden="true" className="absolute top-1/2 left-2 h-px w-1.5 bg-border" />
-        <span aria-hidden="true" className="absolute top-1/2 right-2 h-px w-1.5 bg-border" />
-        <span aria-hidden="true" className="absolute top-2 left-1/2 h-1.5 w-px bg-border" />
-        <span aria-hidden="true" className="absolute bottom-2 left-1/2 h-1.5 w-px bg-border" />
-        <span
-          aria-hidden="true"
-          data-dragging={dragging ? "true" : undefined}
-          className="absolute top-1/2 left-1/2 h-px w-[34px] origin-left bg-foreground transition-transform duration-150 ease-out data-dragging:transition-none"
-          style={{ transform: `rotate(${angle}deg)` }}
+          data-slot="angle-track"
+          className="absolute inset-1.5 rounded-full bg-muted-foreground/20 shadow-[var(--shadow-control)] transition-[box-shadow] duration-150"
         >
-          <span className="absolute top-1/2 right-0 size-3.5 translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-background bg-foreground shadow-sm" />
+          <span
+            data-dragging={dragging ? "true" : undefined}
+            className="absolute inset-[8px] transition-transform duration-150 ease-out data-dragging:transition-none"
+            style={{ transform: `rotate(${angle}deg)` }}
+          >
+            <span className="absolute top-1/2 right-0 size-2.5 translate-x-1/2 -translate-y-1/2 rounded-full bg-muted-foreground" />
+          </span>
         </span>
-        <span
-          aria-hidden="true"
-          className="absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-foreground"
-        />
       </button>
     </div>
   );

@@ -328,7 +328,7 @@ function Lab() {
           ))}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
           <AngleControl
             label="Enter direction"
             value={values.enterAngle}

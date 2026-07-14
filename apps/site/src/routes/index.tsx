@@ -27,26 +27,38 @@ export const Route = createFileRoute("/")({
 });
 
 const installOptions = [
-  { command: "bun add @maniktherana/gust", id: "package", label: "Package" },
+  { command: "bun add @maniktherana/gust", id: "package", label: "npm" },
   {
     command: "bunx shadcn@latest add https://gust.manikrana.dev/r/gust.json",
     id: "source",
-    label: "Own the source",
+    label: "shadcn cli",
   },
 ] as const;
 
+type InstallMethod = (typeof installOptions)[number]["id"];
+
 const heroWords = ["a gust of wind.", "a gust of words.", "a gust of motion."];
 
-const usageSnippet = `import { Gust } from "@maniktherana/gust";
-import "@maniktherana/gust/styles.css";
+const usageSnippets: Record<InstallMethod, string> = {
+  package: `import { Gust } from "@maniktherana/gust";
 
-// shadcn source install: import { Gust } from "@/components/ui/gust";
+export function GustExample() {
+  return (
+    <div>
+      <Gust words={["a gust of wind", "a gust of words"]} />
+    </div>
+  );
+}`,
+  source: `import { Gust } from "@/components/ui/gust";
 
-// cycle a list of words
-<Gust words={["a gust of wind", "a gust of words"]} />
-
-// or drive it yourself — every change animates immediately
-<Gust text={copied ? "Copied" : "Copy"} />`;
+export function GustExample() {
+  return (
+    <div>
+      <Gust words={["a gust of wind", "a gust of words"]} />
+    </div>
+  );
+}`,
+};
 
 type PropRow = {
   defaultValue: string;
@@ -55,85 +67,105 @@ type PropRow = {
 };
 
 const propRows: PropRow[] = [
-  { defaultValue: '["a gust of…"]', description: "Words to cycle through.", name: "words" },
   {
-    defaultValue: "—",
-    description: "Controlled mode — every change animates immediately.",
+    defaultValue: "-",
+    description: "Controlled mode. Animates whenever this string changes.",
     name: "text",
   },
   {
-    defaultValue: "—",
-    description: "CSS or Tailwind classes for typography, color, and spacing.",
+    defaultValue: "-",
+    description: "Cycle mode. Rotates through this list automatically.",
+    name: "words",
+  },
+  {
+    defaultValue: "-",
+    description: "Style the rendered text with CSS or utility classes.",
     name: "className",
   },
-  { defaultValue: "—", description: "Pin a specific word, disables the cycle.", name: "index" },
-  { defaultValue: String(WORD_HOLD_MS), description: "Hold per word, ms.", name: "interval" },
+  {
+    defaultValue: "-",
+    description: "Control the active word and disable the internal timer.",
+    name: "index",
+  },
+  {
+    defaultValue: String(WORD_HOLD_MS),
+    description: "Time between automatic transitions, in milliseconds.",
+    name: "interval",
+  },
   {
     defaultValue: String(DEFAULT_DURATION_MS),
-    description: "Enter duration per character, ms.",
+    description: "Incoming character duration, in milliseconds.",
     name: "duration",
   },
   {
     defaultValue: String(DEFAULT_EXIT_DURATION_MS),
-    description: "Exit duration per character, ms.",
+    description: "Outgoing character duration, in milliseconds.",
     name: "exitDuration",
   },
   {
     defaultValue: `${DEFAULT_ENTER_ANGLE}°`,
-    description: "Direction incoming characters travel; -90° is up.",
+    description: "Incoming travel direction. -90° moves up.",
     name: "enterAngle",
   },
   {
     defaultValue: `${DEFAULT_EXIT_ANGLE}°`,
-    description: "Direction outgoing characters travel; -90° is up.",
+    description: "Outgoing travel direction. -90° moves up.",
     name: "exitAngle",
   },
   {
     defaultValue: "false",
-    description: "Set both directions down; explicit angles take precedence.",
+    description: "Send both directions down unless an angle overrides it.",
     name: "down",
   },
   {
     defaultValue: String(DEFAULT_STAGGER_MS),
-    description: "Delay between characters, ms.",
+    description: "Delay between neighboring characters, in milliseconds.",
     name: "stagger",
   },
   {
     defaultValue: String(DEFAULT_ENTRANCE_HEIGHT),
-    description: "Overshoot along the entrance direction.",
+    description: "Entrance overshoot distance.",
     name: "entranceHeight",
   },
   {
     defaultValue: String(DEFAULT_ENTRANCE_SCALE),
-    description: "Peak scale mid-entrance.",
+    description: "Peak scale during entrance.",
     name: "entranceScale",
   },
   {
     defaultValue: String(DEFAULT_EXIT_HEIGHT),
-    description: "Exit travel, % of line height.",
+    description: "Exit distance as a percentage of line height.",
     name: "exitHeight",
   },
   {
     defaultValue: String(DEFAULT_EXIT_SCALE),
-    description: "Scale characters shrink to on exit.",
+    description: "Final scale for outgoing characters.",
     name: "exitScale",
   },
-  { defaultValue: "true", description: "Blur in and out.", name: "blur" },
-  { defaultValue: "true", description: "Scale in and out.", name: "scale" },
-  { defaultValue: "true", description: "Keep the shared prefix still.", name: "preservePrefix" },
+  { defaultValue: "true", description: "Blur characters as they enter and exit.", name: "blur" },
+  {
+    defaultValue: "true",
+    description: "Scale characters as they enter and exit.",
+    name: "scale",
+  },
+  {
+    defaultValue: "true",
+    description: "Keep matching leading characters still.",
+    name: "preservePrefix",
+  },
 ];
 
 const useFor = [
-  "Button labels that confirm an action — Save, Saving…, Saved.",
-  "Prices, counts and totals where only some digits change.",
-  "Statuses: deploys, uploads, presence, build pipelines.",
-  "Short headlines cycling through a few words.",
+  "Action labels that move through states: Save, Saving…, Saved.",
+  "Prices and counters where only a few digits change.",
+  "Status changes such as deploys, uploads, presence, and build steps.",
+  "Compact headlines cycling through a few phrases.",
 ];
 
 const avoidFor = [
-  "Paragraphs or long sentences — it animates characters, not prose.",
-  "High-frequency telemetry that changes several times per animation frame.",
-  "Anything the user is in the middle of reading or editing.",
+  "Paragraphs and long sentences. Gust animates characters, not reading flow.",
+  "Telemetry that updates before the current transition can finish.",
+  "Editable text or anything someone is actively reading.",
 ];
 
 function SectionHeading({ id, children }: { id: string; children: React.ReactNode }) {
@@ -144,8 +176,13 @@ function SectionHeading({ id, children }: { id: string; children: React.ReactNod
   );
 }
 
-function InstallCommand() {
-  const [method, setMethod] = React.useState<(typeof installOptions)[number]["id"]>("package");
+function InstallCommand({
+  method,
+  onMethodChange,
+}: {
+  method: InstallMethod;
+  onMethodChange: (method: InstallMethod) => void;
+}) {
   const [copied, setCopied] = React.useState(false);
   const resetTimer = React.useRef<number | null>(null);
   const selected = installOptions.find((option) => option.id === method) ?? installOptions[0];
@@ -183,7 +220,7 @@ function InstallCommand() {
             type="button"
             aria-pressed={method === option.id}
             onClick={() => {
-              setMethod(option.id);
+              onMethodChange(option.id);
               setCopied(false);
             }}
             className={cn(
@@ -198,10 +235,25 @@ function InstallCommand() {
         ))}
       </div>
       <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-raised py-2 pr-2 pl-5">
-        <code className="min-w-0 overflow-x-auto font-mono text-xs whitespace-nowrap sm:text-sm">
-          <span className="text-muted-foreground select-none">$ </span>
-          {selected.command}
-        </code>
+        <div
+          className="-my-3 min-w-0 flex-1 overflow-x-auto py-3"
+          data-testid="install-command-viewport"
+        >
+          <code className="block w-max font-mono text-[11px] leading-5 whitespace-nowrap sm:text-xs">
+            <span className="text-muted-foreground select-none">$ </span>
+            <Gust
+              data-testid="install-command"
+              text={selected.command}
+              duration={320}
+              exitDuration={220}
+              stagger={3}
+              entranceHeight={4}
+              entranceScale={1.04}
+              exitHeight={48}
+              exitScale={0.72}
+            />
+          </code>
+        </div>
         <button
           type="button"
           aria-label={copied ? "Copied" : "Copy install command"}
@@ -261,6 +313,8 @@ function HeroPreview() {
 }
 
 function Home() {
+  const [installMethod, setInstallMethod] = React.useState<InstallMethod>("package");
+
   return (
     <SiteShell>
       <main className="flex flex-col gap-14 pt-2 pb-24 lg:pt-10">
@@ -271,20 +325,26 @@ function Home() {
 
         <section id="about" className="flex scroll-mt-10 flex-col gap-6">
           <div className="flex flex-col gap-3">
-            <h1 className="text-sm font-medium">gust</h1>
+            <h1 className="text-sm font-medium">Text that moves like air.</h1>
             <p className="text-sm text-pretty text-muted-foreground">
-              gust is a zero-added-dependency text animation for React. When a label changes,
-              outgoing characters lift away and incoming ones settle in on a staggered draft — the
-              shared prefix never moves, so only the difference animates. It's driven by the Web
-              Animations API, respects reduced motion, and adds no animation runtime.
+              Gust animates changing React text one character at a time. Shared prefixes stay put
+              while old glyphs lift out and new ones settle in.
             </p>
           </div>
-          <InstallCommand />
+          <InstallCommand method={installMethod} onMethodChange={setInstallMethod} />
         </section>
 
         <section className="flex flex-col gap-4">
           <SectionHeading id="usage">Usage</SectionHeading>
-          <CodeBlock code={usageSnippet} />
+          <CodeBlock key={installMethod} code={usageSnippets[installMethod]} />
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <SectionHeading id="how-it-works">How it works</SectionHeading>
+          <p className="text-sm text-pretty text-muted-foreground">
+            Gust compares strings, keeps shared characters still, then lifts changed glyphs out as
+            replacements rise and settle. The Web Animations API drives each glyph.
+          </p>
         </section>
 
         <section className="flex flex-col gap-4">
@@ -314,10 +374,10 @@ function Home() {
         </section>
 
         <section className="flex flex-col gap-4">
-          <SectionHeading id="best-practices">Best practices</SectionHeading>
+          <SectionHeading id="best-practices">When Gust fits</SectionHeading>
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
-              <h3 className="text-sm text-muted-foreground">Use gust for:</h3>
+              <h3 className="text-sm text-muted-foreground">Good for</h3>
               <ul className="flex flex-col gap-1.5">
                 {useFor.map((item) => (
                   <li key={item} className="flex gap-3 text-sm text-pretty text-muted-foreground">
@@ -331,7 +391,7 @@ function Home() {
               </ul>
             </div>
             <div className="flex flex-col gap-2">
-              <h3 className="text-sm text-muted-foreground">Avoid gust for:</h3>
+              <h3 className="text-sm text-muted-foreground">Skip it for</h3>
               <ul className="flex flex-col gap-1.5">
                 {avoidFor.map((item) => (
                   <li key={item} className="flex gap-3 text-sm text-pretty text-muted-foreground">

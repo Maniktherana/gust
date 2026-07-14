@@ -127,7 +127,7 @@ export function IconPlus({ size = "20px", ...props }: IconProps) {
   );
 }
 
-// IconTriangleWarningFilled with the exclamation subpaths removed — a plain
+// IconTriangleWarningFilled with the exclamation subpaths removed: a plain
 // solid rounded triangle, used as a stock-ticker direction marker.
 export function IconTriangleFilled({ size = "20px", ...props }: IconProps) {
   return (

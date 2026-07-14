@@ -24,7 +24,7 @@ export function OtpDemo() {
   const [stepIndex, setStepIndex] = React.useState(0);
   const [code, setCode] = React.useState("");
   const [deleting, setDeleting] = React.useState(false);
-  // Each round gets its own typing cadence — some entries fast, some hesitant.
+  // Each round gets its own typing cadence: some entries fast, some hesitant.
   const cadence = React.useRef(140);
   const step = otpSteps[stepIndex % otpSteps.length];
   const target = step.code;
@@ -71,7 +71,7 @@ export function OtpDemo() {
     <div className="absolute top-6 left-1/2 h-72 w-52 -translate-x-1/2 rounded-t-[2.5rem] border border-b-0 border-border-strong">
       <div className="flex flex-col items-center pt-14">
         {/* The caret is absolutely positioned off the digits' right edge so it
-            never participates in centering — the code alone defines the box.
+            never participates in centering. The code alone defines the box.
             items-start keeps the Gust root's top edge fixed while its height
             collapses on an empty code, so exiting digits don't dip mid-wipe. */}
         <div className="relative flex h-10 items-start">

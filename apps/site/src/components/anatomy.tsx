@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 type FlyingCharacter = {
   character: string;
-  /** Tailwind offset for the label, e.g. "-bottom-13" — staggered per letter. */
+  /** Tailwind offset for the label, e.g. "-bottom-13", staggered per letter. */
   connectorClassName?: string;
   glyphClassName: string;
   label?: string;

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@maniktherana/gust": ["../../packages/gust/src/index.ts"]
+      "@maniktherana/gust": ["../../packages/gust/src/package.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "registry/**/*.ts", "vite.config.ts"],

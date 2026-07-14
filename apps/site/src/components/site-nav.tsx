@@ -4,10 +4,11 @@ import { IconGithub } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const sectionLinks = [
-  { href: "/#about", label: "About" },
+  { href: "/#about", label: "Overview" },
   { href: "/#usage", label: "Usage" },
+  { href: "/#how-it-works", label: "How it works" },
   { href: "/#props", label: "Props" },
-  { href: "/#best-practices", label: "Best practices" },
+  { href: "/#best-practices", label: "Use cases" },
 ];
 
 function Sidebar() {
@@ -36,9 +37,9 @@ function Sidebar() {
         </nav>
       </div>
       <div className="flex flex-col gap-3">
-        <p className="text-xs text-muted-foreground">v0.1 · MIT</p>
+        <p className="text-xs text-muted-foreground">MIT licensed</p>
         <p className="text-xs text-muted-foreground">
-          made by{" "}
+          By{" "}
           <a
             href="https://manikrana.dev"
             target="_blank"

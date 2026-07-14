@@ -8,7 +8,7 @@ import { Liveline } from "liveline";
 import type { LivelinePoint } from "liveline";
 
 const tickerPrices = [
-  // Original phrase — keep this order intact for the digit/direction demo.
+  // Original phrase. Keep this order intact for the digit/direction demo.
   199.85, 199.86, 199.91, 200.54, 201, 190.42, 189.76, 189.37, 196, 193.98,
   // A quiet climb with mixed cent-level reversals.
   194.01, 194.06, 194.18, 194.14, 194.39, 194.72, 194.68, 195.04, 195.83, 195.77, 196.22, 196.86,

@@ -26,12 +26,12 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "Gust — text that moves like air",
+        title: "Gust: React text transitions",
       },
       {
         name: "description",
         content:
-          "Gust is a zero-added-dependency React text animation. Characters lift out and settle in on a draft of air — staggered, prefix-aware, reduced-motion safe.",
+          "Animate changing React text one character at a time. No animation runtime, stable shared prefixes, and built-in reduced-motion support.",
       },
       {
         property: "og:title",
@@ -39,7 +39,7 @@ export const Route = createRootRoute({
       },
       {
         property: "og:description",
-        content: "A zero-added-dependency React text animation. Text that moves like air.",
+        content: "Animate changing React text one character at a time. Text that moves like air.",
       },
       {
         property: "og:type",
