@@ -166,7 +166,6 @@ const useFor = [
 const avoidFor = [
   "Paragraphs and long sentences. Gust animates characters, not reading flow.",
   "Telemetry that updates before the current transition can finish.",
-  "Editable text or anything someone is actively reading.",
 ];
 
 function SectionHeading({ id, children }: { id: string; children: React.ReactNode }) {
@@ -348,9 +347,10 @@ function Home() {
         <section className="flex flex-col gap-4">
           <SectionHeading id="how-it-works">How it works</SectionHeading>
           <p className="text-sm text-pretty text-muted-foreground">
-            Gust compares strings, keeps shared characters still, then lifts changed glyphs out as
-            replacements rise and settle. CSS handles the layout; the Web Animations API drives each
-            glyph.
+            Gust leaves the shared prefix untouched and staggers only the characters that changed.
+            New glyphs rise from below, fade and sharpen into view, overshoot slightly, then settle;
+            outgoing glyphs lift away, blur, shrink, and disappear while the word eases to its new
+            width.
           </p>
         </section>
 
