@@ -38,6 +38,6 @@
 	},
 	"packageManager": "bun@1.3.11",
 	"patchedDependencies": {
-		"liveline@0.0.7": "patches/liveline@0.0.7.patch"
+		"liveline@0.0.7": "apps/site/patches/liveline@0.0.7.patch"
 	}
 }

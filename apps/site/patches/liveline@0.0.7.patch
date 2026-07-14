@@ -1,9 +1,3 @@
-diff --git a/Users/manik/code/gust/node_modules/liveline/.bun-tag-37124bb412547385 b/.bun-tag-37124bb412547385
-new file mode 100644
-index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
-diff --git a/Users/manik/code/gust/node_modules/liveline/.bun-tag-9fce028526a26fbc b/.bun-tag-9fce028526a26fbc
-new file mode 100644
-index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/dist/index.cjs b/dist/index.cjs
 index 4709730f1d6608dee4ffb3a386d1732f776c5f5c..b1b3d88306cb35b21276956ed4f9d4e5978807a4 100644
 --- a/dist/index.cjs
