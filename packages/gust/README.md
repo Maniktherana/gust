@@ -8,7 +8,6 @@ bun add @maniktherana/gust
 
 ```tsx
 import { Gust } from "@maniktherana/gust";
-import "@maniktherana/gust/styles.css";
 
 <Gust text={saved ? "Saved" : "Save"} />;
 ```

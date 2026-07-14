@@ -1,4 +1,4 @@
-export { Gust, defaultGustWords } from "./gust";
+export { Gust } from "./gust";
 export type { GustProps } from "./gust";
 export {
   DEFAULT_DURATION_MS,

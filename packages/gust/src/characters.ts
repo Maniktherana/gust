@@ -4,7 +4,7 @@
 
 import type { GustConfig } from "./config";
 
-// Non-breaking space — a plain " " would be collapsed by HTML whitespace
+// Non-breaking space: a plain " " would be collapsed by HTML whitespace
 // handling and render space slots at zero width.
 const SPACE_GLYPH = "\u00A0";
 

@@ -13,6 +13,7 @@ test("the distributed component has no runtime package dependencies", async () =
       source: await readFile(new URL(file, sourceDirectory), "utf8"),
     })),
   );
+  const publicEntry = await readFile(new URL("src/index.ts", packageRoot), "utf8");
 
   expect(manifest.name).toBe("@maniktherana/gust");
   expect(manifest.private).toBeUndefined();
@@ -22,6 +23,10 @@ test("the distributed component has no runtime package dependencies", async () =
   expect(manifest.exports["./styles.css"]).toBe("./src/gust.css");
   expect(manifest.dependencies).toEqual({});
   expect(manifest.peerDependencies).toEqual({ react: ">=18" });
+  expect(publicEntry).not.toContain("defaultGustWords");
+
+  const packageEntry = await readFile(new URL("src/package.ts", packageRoot), "utf8");
+  expect(packageEntry).toContain('import "./gust.css"');
 
   for (const { file, source } of sources) {
     expect(source, `${file} must not render inline styles`).not.toMatch(/\bstyle\s*=/);

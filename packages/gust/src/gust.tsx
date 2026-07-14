@@ -3,11 +3,11 @@
 // Gust animates text changes character by character: outgoing characters travel
 // away while incoming ones ride in on a slight overshoot,
 // with optional blur, per-character stagger, shared-prefix preservation and a
-// width morph on the container. Dependency-free — the motion curves are
+// width morph on the container. Dependency-free: the motion curves are
 // sampled into Web Animations API keyframes. React only, no animation libraries.
 //
 // Two ways to drive it: pass `words` to cycle on an interval (or control the
-// cycle with `index`), or pass `text` and Gust animates every change — button
+// cycle with `index`), or pass `text` and Gust animates every change: button
 // labels, statuses, prices, timestamps.
 
 import * as React from "react";
@@ -47,8 +47,6 @@ import {
   usePrefersReducedMotion,
   useRootWidthMorph,
 } from "./hooks";
-
-const defaultGustWords = ["a gust of wind", "a gust of words", "a gust of motion"] as const;
 
 const fallbackWords = [""] as const;
 
@@ -173,11 +171,11 @@ function Gust({
   scale = true,
   stagger = DEFAULT_STAGGER_MS,
   text,
-  words = defaultGustWords,
+  words,
   ...props
 }: GustProps) {
   const reduceMotion = usePrefersReducedMotion();
-  const normalizedWords = React.useMemo(() => normalizeWords(words), [words]);
+  const normalizedWords = React.useMemo(() => normalizeWords(words ?? fallbackWords), [words]);
   const safeWords = normalizedWords.length > 0 ? normalizedWords : fallbackWords;
   const [index, setIndex] = React.useState(0);
   const activeIndex = controlledIndex ?? index;
@@ -385,5 +383,5 @@ function Gust({
   );
 }
 
-export { Gust, defaultGustWords };
+export { Gust };
 export type { GustProps };

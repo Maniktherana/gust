@@ -29,6 +29,30 @@ test("renders semantic text and animates a controlled change", async ({ page }) 
   expect(pageErrors).toEqual([]);
 });
 
+test("transitions between package and source install commands", async ({ page }) => {
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+
+  const command = page.getByTestId("install-command");
+  const semanticText = command.locator('[data-gust-part="sr-only"]');
+  const usage = page.locator("#usage + div");
+
+  await expect(semanticText).toHaveText("bun add @maniktherana/gust");
+  await expect(usage).toContainText('from "@maniktherana/gust"');
+
+  await page.getByRole("button", { name: "shadcn cli" }).click();
+  await expect(semanticText).toHaveText(
+    "bunx shadcn@latest add https://gust.manikrana.dev/r/gust.json",
+  );
+  await expect(usage).toContainText('from "@/components/ui/gust"');
+  expect(
+    await command.evaluate((element) => element.getAnimations({ subtree: true }).length),
+  ).toBeGreaterThan(0);
+
+  await page.getByRole("button", { name: "npm" }).click();
+  await expect(semanticText).toHaveText("bun add @maniktherana/gust");
+});
+
 test.describe("reduced motion", () => {
   test("keeps the transition short and opacity-only", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });

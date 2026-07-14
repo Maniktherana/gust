@@ -58,8 +58,8 @@ export function usePrefersReducedMotion() {
 // so each character reuses the same baked set and varies only its delay. The
 // guard keys on entryKey *and* the live animation state: a preserved prefix
 // character whose entrance is still running is left alone (no replay), but if
-// its animation was cancelled — e.g. a dev StrictMode/HMR remount tore it down
-// between mount passes — we refire so it can't get stuck at its opacity:0
+// its animation was cancelled, such as when a dev StrictMode/HMR remount tore it down
+// between mount passes, we refire so it can't get stuck at its opacity:0
 // initial frame. Entrance/exit animations are intentionally never cancelled on
 // unmount: a StrictMode/HMR remount runs cleanup between two mount passes while
 // keeping the same DOM, and cancelling would strand characters at opacity:0. On
@@ -135,7 +135,7 @@ export function useEnterAnimations({
 }
 
 // Fire the per-character exit for the outgoing word. Exit spans remount each
-// transition, so we fire once per version — but as with the entrance, refire
+// transition, so we fire once per version. As with the entrance, refire
 // if the tracked animations were torn down (remount) so they don't freeze.
 export function useExitAnimations({
   exitKeyframes,

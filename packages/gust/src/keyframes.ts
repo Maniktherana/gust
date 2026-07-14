@@ -1,6 +1,6 @@
 // Bakes Motion-style per-property variant timing into Web Animations API
 // keyframes. Each property keeps its own duration and easing (opacity overruns
-// slightly, filter lands early, travel/scale share the base window) — all tracks are
+// slightly, filter lands early, travel/scale share the base window). All tracks are
 // sampled at a shared set of offsets so a single WAAPI animation reproduces the
 // exact per-property curve.
 
