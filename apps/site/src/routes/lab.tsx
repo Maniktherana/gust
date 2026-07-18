@@ -261,13 +261,7 @@ function Lab() {
   return (
     <SiteShell>
       <main className="flex flex-col gap-8 pt-2 pb-24 lg:pt-10">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-medium tracking-tight">Lab</h1>
-          <p className="text-sm text-pretty text-muted-foreground">
-            Every tweakable, live. Cycle a list of words or type freely and watch the prefix logic
-            keep still what didn't change. Copy the JSX when it feels right.
-          </p>
-        </div>
+        <h1 className="shrink-0 text-2xl font-medium tracking-tight">Lab</h1>
 
         <div className="sticky top-0 z-50 grid h-56 place-items-center overflow-hidden rounded-xl bg-surface-raised px-8 sm:relative sm:z-auto sm:h-64">
           {mode === "cycle" ? (
@@ -291,107 +285,110 @@ function Lab() {
           />
         </div>
 
-        <Tabs value={mode} onValueChange={(value) => setMode(String(value))} className="gap-4">
-          <div className="flex flex-wrap items-center gap-4">
-            <TabsList variant="ghost">
-              <TabsTrigger value="cycle">Cycle words</TabsTrigger>
-              <TabsTrigger value="type">Type freely</TabsTrigger>
-            </TabsList>
-          </div>
-          <TabsContent value="cycle">
-            <Textarea
-              aria-label="Words to cycle, one per line"
-              className="h-28 resize-none"
-              value={wordsInput}
-              onChange={(event) => setWordsInput(event.target.value)}
-            />
-          </TabsContent>
-          <TabsContent value="type">
-            <Input
-              aria-label="Text to animate"
-              placeholder="Type anything…"
-              value={typed}
-              onChange={(event) => setTyped(event.target.value)}
-            />
-          </TabsContent>
-        </Tabs>
+        <div className="contents">
+          <Tabs value={mode} onValueChange={(value) => setMode(String(value))} className="gap-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <TabsList variant="ghost">
+                <TabsTrigger value="cycle">Cycle words</TabsTrigger>
+                <TabsTrigger value="type">Type freely</TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="cycle">
+              <Textarea
+                aria-label="Words to cycle, one per line"
+                className="h-28 resize-none text-base sm:text-sm"
+                value={wordsInput}
+                onChange={(event) => setWordsInput(event.target.value)}
+              />
+            </TabsContent>
+            <TabsContent value="type">
+              <Input
+                aria-label="Text to animate"
+                placeholder="Type anything…"
+                value={typed}
+                onChange={(event) => setTyped(event.target.value)}
+                className="text-base sm:text-sm"
+              />
+            </TabsContent>
+          </Tabs>
 
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 text-xs text-muted-foreground">Presets</span>
-          {presets.map((preset) => (
-            <Button
-              key={preset.name}
-              variant="secondary"
-              size="xs"
-              onClick={() => applyPreset(preset)}
-            >
-              {preset.name}
-            </Button>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Switch
-              id="toggle-both-down"
-              aria-label="Both directions down"
-              checked={values.enterAngle === 90 && values.exitAngle === 90}
-              onCheckedChange={(checked) =>
-                setValues((current) => ({
-                  ...current,
-                  enterAngle: checked ? 90 : DEFAULT_ENTER_ANGLE,
-                  exitAngle: checked ? 90 : DEFAULT_EXIT_ANGLE,
-                }))
-              }
-            />
-            <Label htmlFor="toggle-both-down">flip direction</Label>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 text-xs text-muted-foreground">Presets</span>
+            {presets.map((preset) => (
+              <Button
+                key={preset.name}
+                variant="secondary"
+                size="xs"
+                onClick={() => applyPreset(preset)}
+              >
+                {preset.name}
+              </Button>
+            ))}
           </div>
-          {(
-            [
-              { key: "blur", label: "Exit blur" },
-              { key: "scale", label: "Scale" },
-              { key: "preservePrefix", label: "Preserve prefix" },
-            ] as const
-          ).map((toggle) => (
-            <div key={toggle.key} className="flex items-center gap-2">
+
+          <div className="flex flex-wrap items-center gap-6">
+            <div className="flex items-center gap-2">
               <Switch
-                id={`toggle-${toggle.key}`}
-                aria-label={toggle.label}
-                checked={toggles[toggle.key]}
+                id="toggle-both-down"
+                aria-label="Both directions down"
+                checked={values.enterAngle === 90 && values.exitAngle === 90}
                 onCheckedChange={(checked) =>
-                  setToggles((current) => ({ ...current, [toggle.key]: checked }))
+                  setValues((current) => ({
+                    ...current,
+                    enterAngle: checked ? 90 : DEFAULT_ENTER_ANGLE,
+                    exitAngle: checked ? 90 : DEFAULT_EXIT_ANGLE,
+                  }))
                 }
               />
-              <Label htmlFor={`toggle-${toggle.key}`}>{toggle.label}</Label>
+              <Label htmlFor="toggle-both-down">flip direction</Label>
             </div>
-          ))}
-        </div>
+            {(
+              [
+                { key: "blur", label: "Exit blur" },
+                { key: "scale", label: "Scale" },
+                { key: "preservePrefix", label: "Preserve prefix" },
+              ] as const
+            ).map((toggle) => (
+              <div key={toggle.key} className="flex items-center gap-2">
+                <Switch
+                  id={`toggle-${toggle.key}`}
+                  aria-label={toggle.label}
+                  checked={toggles[toggle.key]}
+                  onCheckedChange={(checked) =>
+                    setToggles((current) => ({ ...current, [toggle.key]: checked }))
+                  }
+                />
+                <Label htmlFor={`toggle-${toggle.key}`}>{toggle.label}</Label>
+              </div>
+            ))}
+          </div>
 
-        <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
-          <AngleControl
-            label="Enter direction"
-            value={values.enterAngle}
-            onValueChange={(enterAngle) => setValues((current) => ({ ...current, enterAngle }))}
-          />
-          <AngleControl
-            label="Exit direction"
-            value={values.exitAngle}
-            onValueChange={(exitAngle) => setValues((current) => ({ ...current, exitAngle }))}
-          />
-          {sliderConfigs.map((config) => (
-            <Slider
-              key={config.key}
-              label={config.label}
-              min={config.min}
-              max={config.max}
-              step={config.step}
-              unit={config.unit}
-              value={[values[config.key]]}
-              onValueChange={(next) =>
-                setValues((current) => ({ ...current, [config.key]: next[0] ?? 0 }))
-              }
+          <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+            <AngleControl
+              label="Enter direction"
+              value={values.enterAngle}
+              onValueChange={(enterAngle) => setValues((current) => ({ ...current, enterAngle }))}
             />
-          ))}
+            <AngleControl
+              label="Exit direction"
+              value={values.exitAngle}
+              onValueChange={(exitAngle) => setValues((current) => ({ ...current, exitAngle }))}
+            />
+            {sliderConfigs.map((config) => (
+              <Slider
+                key={config.key}
+                label={config.label}
+                min={config.min}
+                max={config.max}
+                step={config.step}
+                unit={config.unit}
+                value={[values[config.key]]}
+                onValueChange={(next) =>
+                  setValues((current) => ({ ...current, [config.key]: next[0] ?? 0 }))
+                }
+              />
+            ))}
+          </div>
         </div>
       </main>
     </SiteShell>

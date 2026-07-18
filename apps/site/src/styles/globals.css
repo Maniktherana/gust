@@ -304,13 +304,11 @@
   }
   body {
     @apply bg-page-background text-foreground;
-    overscroll-behavior: none;
     scrollbar-width: thin;
     scrollbar-color: gray transparent;
   }
   html {
     @apply font-sans;
-    overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-optical-sizing: auto;
