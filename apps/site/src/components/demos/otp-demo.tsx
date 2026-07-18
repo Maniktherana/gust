@@ -7,7 +7,7 @@ import { Gust } from "@maniktherana/gust";
 // staggered exit, "backspace" deletes digit by digit down to the shared prefix
 // with the next code (7402 → 74 → 7482).
 const otpSteps = [
-  { code: "1234", exit: "wipe" },
+  { code: "1234", exit: "backspace" },
   { code: "4589", exit: "backspace" },
   { code: "4567", exit: "wipe" },
 ] as const;
