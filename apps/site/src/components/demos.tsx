@@ -20,10 +20,10 @@ function DemoBox({ children, padded = true }: { children: React.ReactNode; padde
 }
 
 const demoBoxes = [
-  { demo: CopyDemo, key: "copy" },
-  { demo: StatusDemo, key: "status" },
-  { demo: OtpDemo, key: "otp" },
   { demo: TickerDemo, key: "ticker" },
+  { demo: StatusDemo, key: "status" },
+  { demo: CopyDemo, key: "copy" },
+  { demo: OtpDemo, key: "otp" },
 ];
 
 export function DemoGrid() {
