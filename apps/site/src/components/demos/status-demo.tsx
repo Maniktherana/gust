@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useDialKit } from "dialkit";
 
 import { IconArrowRotateAnticlockwise, IconBadgeCheck } from "@/components/icons";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,31 @@ function StatusGlyph({ children, shown }: { children: React.ReactNode; shown: bo
 }
 
 export function StatusDemo() {
+  const controls = useDialKit(
+    "Status demo",
+    {
+      timing: {
+        duration: [440, 0, 1200, 10],
+        exitDuration: [360, 0, 1200, 10],
+        stagger: [20, 0, 80, 1],
+      },
+      entrance: {
+        height: [10, 0, 120, 1],
+        scale: [1.15, 1, 2, 0.01],
+      },
+      exit: {
+        blurCap: [4, 0, 12, 0.25],
+        height: [120, 0, 200, 1],
+        scale: [0.4, 0, 1.5, 0.01],
+      },
+      effects: {
+        blur: true,
+        scale: true,
+        preservePrefix: true,
+      },
+    },
+    { id: "gust-demo:status" },
+  );
   const [step, setStep] = React.useState(0);
 
   React.useEffect(() => {
@@ -45,30 +71,44 @@ export function StatusDemo() {
   const active = deploySteps[step];
 
   return (
-    <span className="flex h-8 items-center gap-2 rounded-full border border-border bg-field pr-3.5 pl-3 shadow-[var(--shadow-highlight)]">
+    <span className="flex items-center gap-2.5 rounded-full bg-field px-4 py-1.5 shadow-[var(--shadow-highlight)]">
       <span
         className={cn(
-          "grid size-4 place-items-center transition-colors duration-500",
+          "grid size-5 place-items-center transition-colors duration-500",
           active.colorClassName,
         )}
       >
         <StatusGlyph shown={active.key === "queued"}>
-          <span className="size-3 animate-pulse rounded-full border-[1.5px] border-current" />
+          <span className="size-4 animate-pulse rounded-full border-[2px] border-current" />
         </StatusGlyph>
         <StatusGlyph shown={active.key === "building"}>
-          <IconArrowRotateAnticlockwise className="size-3.5 animate-spin [animation-direction:reverse]" />
+          <IconArrowRotateAnticlockwise className="size-[18px] animate-spin [animation-direction:reverse]" />
         </StatusGlyph>
         <StatusGlyph shown={active.key === "deploying"}>
           <span className="relative grid place-items-center">
-            <span className="absolute size-[18px] rounded-full border-[1.5px] border-current opacity-0 motion-safe:animate-[liveline-pulse_1500ms_linear_infinite]" />
-            <span className="relative size-2 rounded-full bg-current" />
+            <span className="absolute size-5 rounded-full border-[1.5px] border-current opacity-0 motion-safe:animate-[liveline-pulse_1000ms_linear_infinite]" />
+            <span className="relative size-2.5 rounded-full bg-current" />
           </span>
         </StatusGlyph>
         <StatusGlyph shown={active.key === "live"}>
-          <IconBadgeCheck className="size-4" />
+          <IconBadgeCheck className="size-5" />
         </StatusGlyph>
       </span>
-      <Gust text={active.label} className={cn("text-sm font-medium", active.colorClassName)} />
+      <Gust
+        value={active.label}
+        duration={controls.timing.duration}
+        exitDuration={controls.timing.exitDuration}
+        stagger={controls.timing.stagger}
+        entranceHeight={controls.entrance.height}
+        entranceScale={controls.entrance.scale}
+        exitBlurCap={controls.exit.blurCap}
+        exitHeight={controls.exit.height}
+        exitScale={controls.exit.scale}
+        blur={controls.effects.blur}
+        scale={controls.effects.scale}
+        preservePrefix={controls.effects.preservePrefix}
+        className={cn("text-xl font-semibold", active.colorClassName)}
+      />
     </span>
   );
 }

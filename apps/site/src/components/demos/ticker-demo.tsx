@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useDialKit } from "dialkit";
 
 import { IconTriangleFilled } from "@/components/icons";
 import { useTheme } from "@/components/theme-provider";
@@ -45,6 +46,31 @@ function usePrefersReducedMotion() {
 }
 
 export function TickerDemo() {
+  const controls = useDialKit(
+    "Ticker demo",
+    {
+      timing: {
+        duration: [320, 0, 1200, 10],
+        exitDuration: [260, 0, 1200, 10],
+        stagger: [10, 0, 80, 1],
+      },
+      entrance: {
+        height: [8, 0, 120, 1],
+        scale: [1.1, 1, 2, 0.01],
+      },
+      exit: {
+        blurCap: [4, 0, 12, 0.25],
+        height: [90, 0, 200, 1],
+        scale: [0.4, 0, 1.5, 0.01],
+      },
+      effects: {
+        blur: true,
+        scale: true,
+        preservePrefix: true,
+      },
+    },
+    { id: "gust-demo:ticker" },
+  );
   const { resolvedTheme } = useTheme();
   const prefersReducedMotion = usePrefersReducedMotion();
   const [data, setData] = React.useState<LivelinePoint[]>([]);
@@ -138,10 +164,19 @@ export function TickerDemo() {
             )}
           />
           <Gust
-            text={`$${price.toFixed(2)}`}
-            duration={320}
-            exitDuration={260}
-            stagger={10}
+            value={`$${price.toFixed(2)}`}
+            down={!up}
+            duration={controls.timing.duration}
+            exitDuration={controls.timing.exitDuration}
+            stagger={controls.timing.stagger}
+            entranceHeight={controls.entrance.height}
+            entranceScale={controls.entrance.scale}
+            exitBlurCap={controls.exit.blurCap}
+            exitHeight={controls.exit.height}
+            exitScale={controls.exit.scale}
+            blur={controls.effects.blur}
+            scale={controls.effects.scale}
+            preservePrefix={controls.effects.preservePrefix}
             className="text-xl font-semibold tabular-nums"
           />
         </span>

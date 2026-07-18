@@ -1,44 +1,51 @@
-import * as React from "react";
-
-import { IconBadgeCheck, IconCloneFilled } from "@/components/icons";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Gust } from "@maniktherana/gust";
-
-const glyphVisible = "scale-100 opacity-100 blur-none";
-const glyphHidden = "scale-25 opacity-0 blur-[4px]";
-const glyphTransition =
-  "transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]";
+import { CopyButton } from "@/components/copy-button";
+import { useDialKit } from "dialkit";
 
 export function CopyDemo() {
-  const [copied, setCopied] = React.useState(false);
-  const resetTimer = React.useRef<number | null>(null);
-
-  const copy = () => {
-    setCopied(true);
-
-    if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
-
-    resetTimer.current = window.setTimeout(() => {
-      resetTimer.current = null;
-      setCopied(false);
-    }, 1800);
-  };
-
-  React.useEffect(
-    () => () => {
-      if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
+  const controls = useDialKit(
+    "Copy demo",
+    {
+      timing: {
+        duration: [440, 0, 1200, 10],
+        exitDuration: [360, 0, 1200, 10],
+        stagger: [40, 0, 80, 1],
+      },
+      entrance: {
+        height: [0, 0, 120, 1],
+        scale: [1, 1, 2, 0.01],
+      },
+      exit: {
+        blurCap: [4, 0, 12, 0.25],
+        height: [100, 0, 200, 1],
+        scale: [0.6, 0, 1.5, 0.01],
+      },
+      effects: {
+        blur: false,
+        scale: true,
+        preservePrefix: true,
+      },
     },
-    [],
+    { id: "gust-demo:copy" },
   );
 
   return (
-    <Button variant="outline" onClick={copy}>
-      <span className="grid place-items-center [&>svg]:col-start-1 [&>svg]:row-start-1">
-        <IconCloneFilled className={cn(glyphTransition, copied ? glyphHidden : glyphVisible)} />
-        <IconBadgeCheck className={cn(glyphTransition, copied ? glyphVisible : glyphHidden)} />
-      </span>
-      <Gust text={copied ? "Copied" : "Copy"} />
-    </Button>
+    <CopyButton
+      value="Gust copied this text"
+      variant="outline"
+      resetAfter={1800}
+      gustProps={{
+        blur: controls.effects.blur,
+        duration: controls.timing.duration,
+        entranceHeight: controls.entrance.height,
+        entranceScale: controls.entrance.scale,
+        exitDuration: controls.timing.exitDuration,
+        exitBlurCap: controls.exit.blurCap,
+        exitHeight: controls.exit.height,
+        exitScale: controls.exit.scale,
+        preservePrefix: controls.effects.preservePrefix,
+        scale: controls.effects.scale,
+        stagger: controls.timing.stagger,
+      }}
+    />
   );
 }

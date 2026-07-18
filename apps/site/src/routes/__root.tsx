@@ -1,4 +1,6 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
+import { DialRoot } from "dialkit";
+import "dialkit/styles.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -82,6 +84,7 @@ function RootDocument() {
             <Outlet />
           </div>
         </ThemeProvider>
+        <DialRoot position="bottom-right" theme="system" />
         <Scripts />
       </body>
     </html>
