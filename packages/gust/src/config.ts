@@ -1,8 +1,8 @@
 // Motion defaults and the resolved, clamped config the animation runs on.
 
-export const DEFAULT_DURATION_MS = 400;
+export const DEFAULT_DURATION_MS = 440;
 export const MAX_LAYOUT_DURATION_MS = 240;
-export const DEFAULT_EXIT_DURATION_MS = 360;
+export const DEFAULT_EXIT_DURATION_MS = 400;
 export const DEFAULT_STAGGER_MS = 20;
 export const DEFAULT_ENTER_ANGLE = -90;
 export const DEFAULT_EXIT_ANGLE = -90;

@@ -21,11 +21,11 @@ type OtpState = {
 };
 
 const otpTiming = {
-  backspace: 95,
+  backspace: 150,
   firstDigit: 280,
   hold: 1250,
-  type: 135,
-  wipe: 240,
+  type: 200,
+  wipe: 200,
 } as const;
 
 function sharedPrefixLength(a: string, b: string) {

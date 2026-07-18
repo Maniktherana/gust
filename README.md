@@ -53,8 +53,8 @@ The stylesheet contains Gust's structural layout. Import it when you use the npm
 | ---------------- | --------- | ------- | ------------------------------------------------------------------------------------- |
 | `value`          | `string`  | -       | Current string. Gust animates whenever it changes.                                    |
 | `className`      | `string`  | -       | Styles the root span. Standard span attributes are also supported.                    |
-| `duration`       | `number`  | `400`   | Incoming character duration in milliseconds.                                          |
-| `exitDuration`   | `number`  | `360`   | Outgoing character duration in milliseconds.                                          |
+| `duration`       | `number`  | `440`   | Incoming character duration in milliseconds.                                          |
+| `exitDuration`   | `number`  | `400`   | Outgoing character duration in milliseconds.                                          |
 | `stagger`        | `number`  | `20`    | Delay between neighboring characters in milliseconds.                                 |
 | `enterAngle`     | `number`  | `-90`   | Incoming travel angle in degrees. `-90` moves up; `90` moves down.                    |
 | `exitAngle`      | `number`  | `-90`   | Outgoing travel angle in degrees. `-90` moves up; `90` moves down.                    |
