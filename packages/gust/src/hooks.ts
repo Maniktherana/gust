@@ -9,7 +9,15 @@ import type { RenderedGustCharacter } from "./characters";
 import type { GustCharacterMeasure, GustRootSize } from "./measure";
 import { measureElementSize, measureGustCharacterSlots, widthsMatch } from "./measure";
 
-const layoutEaseCss = "cubic-bezier(0.4, 0, 0.2, 1)";
+const layoutEaseCss = "cubic-bezier(0.16, 1, 0.3, 1)";
+
+function setCharacterAnimating(element: HTMLSpanElement, animating: boolean) {
+  if (animating) {
+    element.dataset.gustAnimating = "true";
+  } else {
+    delete element.dataset.gustAnimating;
+  }
+}
 
 export type GustTransitionState = {
   current: string;
@@ -66,6 +74,8 @@ export function useEnterAnimations({
     if (element) {
       enterElements.current.set(index, element);
     } else {
+      const previousElement = enterElements.current.get(index);
+      if (previousElement) setCharacterAnimating(previousElement, false);
       enterElements.current.delete(index);
     }
   }, []);
@@ -73,6 +83,8 @@ export function useEnterAnimations({
   React.useLayoutEffect(() => {
     renderedCharacters.forEach((character) => {
       if (character.stable) {
+        const element = enterElements.current.get(character.index);
+        if (element) setCharacterAnimating(element, false);
         enterAnimations.current.get(character.index)?.cancel();
         enterAnimations.current.delete(character.index);
         enterFiredKeys.current.delete(character.index);
@@ -91,6 +103,7 @@ export function useEnterAnimations({
       if (sameEntry && sameKeyframes && existing && existing.playState !== "idle") return;
 
       existing?.cancel();
+      setCharacterAnimating(element, true);
 
       const animation = element.animate(enterKeyframes.keyframes, {
         delay: character.order * enterStagger,
@@ -102,12 +115,22 @@ export function useEnterAnimations({
       enterAnimations.current.set(character.index, animation);
       enterFiredKeys.current.set(character.index, character.entryKey);
       enterFiredKeyframes.current.set(character.index, enterKeyframes);
+      animation.onfinish = () => {
+        if (enterAnimations.current.get(character.index) !== animation) return;
+        setCharacterAnimating(element, false);
+      };
+      animation.oncancel = () => {
+        if (enterAnimations.current.get(character.index) !== animation) return;
+        setCharacterAnimating(element, false);
+      };
     });
 
     const activeIndexes = new Set(renderedCharacters.map(({ index }) => index));
 
     enterAnimations.current.forEach((animation, index) => {
       if (activeIndexes.has(index)) return;
+      const element = enterElements.current.get(index);
+      if (element) setCharacterAnimating(element, false);
       animation.cancel();
       enterAnimations.current.delete(index);
       enterFiredKeys.current.delete(index);
@@ -146,6 +169,8 @@ export function useExitAnimations({
       if (element) {
         exitElements.current.set(key, { element, measure, order });
       } else {
+        const previousElement = exitElements.current.get(key)?.element;
+        if (previousElement) setCharacterAnimating(previousElement, false);
         exitElements.current.delete(key);
       }
     },
@@ -161,6 +186,7 @@ export function useExitAnimations({
     }
 
     exitFiredVersion.current = version;
+    exitElements.current.forEach(({ element }) => setCharacterAnimating(element, false));
     exitAnimations.current.forEach((animation) => animation.cancel());
     exitAnimations.current.clear();
 
@@ -170,6 +196,7 @@ export function useExitAnimations({
         color: measure.color,
         translate: `${measure.x}px ${measure.y}px`,
       }));
+      setCharacterAnimating(element, true);
       const animation = element.animate(positionedKeyframes, {
         delay: order * exitStagger,
         duration: exitKeyframes.duration,
@@ -178,6 +205,14 @@ export function useExitAnimations({
       });
 
       exitAnimations.current.add(animation);
+      animation.onfinish = () => {
+        if (!exitAnimations.current.has(animation)) return;
+        setCharacterAnimating(element, false);
+      };
+      animation.oncancel = () => {
+        if (!exitAnimations.current.has(animation)) return;
+        setCharacterAnimating(element, false);
+      };
     });
   }, [exitStagger, exitKeyframes, version]);
 

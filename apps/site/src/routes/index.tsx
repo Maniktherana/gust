@@ -14,6 +14,7 @@ import {
   DEFAULT_ENTRANCE_SCALE,
   DEFAULT_EXIT_DURATION_MS,
   DEFAULT_EXIT_ANGLE,
+  DEFAULT_EXIT_BLUR_CAP,
   DEFAULT_EXIT_HEIGHT,
   DEFAULT_EXIT_SCALE,
   DEFAULT_STAGGER_MS,
@@ -145,7 +146,12 @@ const propRows: PropRow[] = [
     description: "Final scale for outgoing characters.",
     name: "exitScale",
   },
-  { defaultValue: "true", description: "Blur characters as they enter and exit.", name: "blur" },
+  {
+    defaultValue: String(DEFAULT_EXIT_BLUR_CAP),
+    description: "Maximum exit blur, in pixels.",
+    name: "exitBlurCap",
+  },
+  { defaultValue: "true", description: "Blur outgoing characters as they exit.", name: "blur" },
   {
     defaultValue: "true",
     description: "Scale characters as they enter and exit.",

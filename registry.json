@@ -92,6 +92,9 @@
 						"display": "inline-block",
 						"transform-origin": "center"
 					},
+					":where([data-gust-animating=\"true\"])": {
+						"will-change": "transform"
+					},
 					":where([data-gust-part=\"glyph\"])": {
 						"opacity": "0"
 					},
@@ -112,7 +115,7 @@
 				}
 			},
 			"meta": {
-				"version": "0.1.1"
+				"version": "0.1.2"
 			}
 		}
 	]

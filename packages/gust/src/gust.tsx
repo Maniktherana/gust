@@ -85,6 +85,7 @@ function GustCharacterSlot({
             {displayCharacter(character.character)}
           </span>
           <span
+            data-gust-animating="true"
             data-gust-character={character.character}
             data-gust-index={character.index}
             data-gust-part="glyph"
@@ -134,6 +135,7 @@ function GustExitingCharacters({
           <span
             key={`out-${elementKey}`}
             aria-hidden="true"
+            data-gust-animating="true"
             data-gust-part="exit"
             ref={(element) => setExitRef(elementKey, element, order, previousMeasure)}
           >

@@ -47,4 +47,6 @@ test("the structural stylesheet is framework-independent", async () => {
   expect(css).not.toContain("@import");
   expect(css).not.toContain("@tailwind");
   expect(css).toContain("white-space: pre");
+  expect(css).toContain('[data-gust-animating="true"]');
+  expect(css).toContain("will-change: transform");
 });

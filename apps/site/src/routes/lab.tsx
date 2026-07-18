@@ -11,6 +11,7 @@ import {
   DEFAULT_ENTRANCE_SCALE,
   DEFAULT_EXIT_DURATION_MS,
   DEFAULT_EXIT_ANGLE,
+  DEFAULT_EXIT_BLUR_CAP,
   DEFAULT_EXIT_HEIGHT,
   DEFAULT_EXIT_SCALE,
   DEFAULT_STAGGER_MS,
@@ -34,6 +35,7 @@ type MotionValues = {
   entranceScale: number;
   exitDuration: number;
   exitAngle: number;
+  exitBlurCap: number;
   exitHeight: number;
   exitScale: number;
   hold: number;
@@ -55,6 +57,7 @@ const defaultValues: MotionValues = {
   entranceScale: DEFAULT_ENTRANCE_SCALE,
   exitDuration: DEFAULT_EXIT_DURATION_MS,
   exitAngle: DEFAULT_EXIT_ANGLE,
+  exitBlurCap: DEFAULT_EXIT_BLUR_CAP,
   exitHeight: DEFAULT_EXIT_HEIGHT,
   exitScale: DEFAULT_EXIT_SCALE,
   hold: DEFAULT_CYCLE_HOLD_MS,
@@ -85,6 +88,7 @@ const sliderConfigs: SliderConfig[] = [
   { key: "entranceScale", label: "Entrance scale", max: 2, min: 1, step: 0.05, unit: "×" },
   { key: "exitHeight", label: "Exit travel", max: 200, min: 0, step: 5, unit: "%" },
   { key: "exitScale", label: "Exit scale", max: 1.5, min: 0, step: 0.05, unit: "×" },
+  { key: "exitBlurCap", label: "Exit blur cap", max: 12, min: 0, step: 0.25, unit: "px" },
 ];
 
 type Preset = {
@@ -235,6 +239,7 @@ function Lab() {
     entranceScale: values.entranceScale,
     exitDuration: values.exitDuration,
     exitAngle: values.exitAngle,
+    exitBlurCap: values.exitBlurCap,
     exitHeight: values.exitHeight,
     exitScale: values.exitScale,
     preservePrefix: toggles.preservePrefix,

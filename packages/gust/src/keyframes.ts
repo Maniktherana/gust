@@ -1,6 +1,6 @@
 // Bakes Motion-style per-property variant timing into Web Animations API
-// keyframes. Each property keeps its own duration and easing (opacity overruns
-// slightly, filter lands early, travel/scale share the base window). All tracks are
+// keyframes. Each property keeps its own duration and easing (opacity lands
+// early while travel/scale share the base window). All tracks are
 // sampled at a shared set of offsets so a single WAAPI animation reproduces the
 // exact per-property curve.
 
@@ -139,8 +139,9 @@ export function buildEnterKeyframes(config: GustConfig): GustKeyframes {
   const enter = config.enterDuration;
   const timing = entranceTiming(config.entranceHeight);
   const peakScale = config.scale ? config.entranceScale : 1;
+  const revealEndTime = Math.min(0.32, Math.max(0.18, timing.peakTime / 2));
   const opacityTrack: MotionTrack = {
-    duration: enter * 1.09,
+    duration: enter * revealEndTime,
     ease: easeOutStrongFn,
     times: [0, 1],
     values: [0, 1],
@@ -154,18 +155,10 @@ export function buildEnterKeyframes(config: GustConfig): GustKeyframes {
   const scaleTrack: MotionTrack = {
     duration: enter,
     ease: easeOutStrongFn,
-    times: [0, timing.peakTime, 1],
-    values: [1, peakScale, 1],
+    times: [0, revealEndTime, timing.peakTime, 1],
+    values: [1, 1, peakScale, 1],
   };
-  const filterTrack: MotionTrack | null = config.blur
-    ? {
-        duration: enter * 0.95,
-        ease: easeOutStrongFn,
-        times: [0, 0.5, 1],
-        values: [3, 0.5, 0],
-      }
-    : null;
-  const maxDuration = enter * 1.09;
+  const maxDuration = enter;
   const keyframes: Keyframe[] = [];
 
   for (let index = 0; index < ENTER_SAMPLE_COUNT; index += 1) {
@@ -174,7 +167,6 @@ export function buildEnterKeyframes(config: GustConfig): GustKeyframes {
 
     keyframes.push({
       easing: "linear",
-      filter: filterTrack ? `blur(${evalTrack(filterTrack, globalTime)}px)` : "blur(0px)",
       offset,
       opacity: evalTrack(opacityTrack, globalTime),
       transform: `${directionalTranslate(-evalTrack(distanceTrack, globalTime), config.enterAngle)} scale(${evalTrack(scaleTrack, globalTime)})`,
@@ -205,27 +197,31 @@ export function buildExitKeyframes(config: GustConfig): GustKeyframes {
     times: [0, 1],
     values: [1, exitScale],
   };
-  const filterTrack: MotionTrack | null = config.blur
-    ? {
-        duration: exit * 0.95,
-        ease: easeOutStrongFn,
-        times: [0, 1],
-        values: [0, 3],
-      }
-    : null;
+  const filterTrack: MotionTrack | null =
+    config.blur && config.exitBlurCap > 0
+      ? {
+          duration: exit * 0.95,
+          ease: easeOutStrongFn,
+          times: [0, 1],
+          values: [0, config.exitBlurCap],
+        }
+      : null;
   const keyframes: Keyframe[] = [];
 
   for (let index = 0; index < EXIT_SAMPLE_COUNT; index += 1) {
     const offset = index / (EXIT_SAMPLE_COUNT - 1);
     const globalTime = offset * exit;
 
-    keyframes.push({
+    const keyframe: Keyframe = {
       easing: "linear",
-      filter: filterTrack ? `blur(${evalTrack(filterTrack, globalTime)}px)` : "blur(0px)",
       offset,
       opacity: evalTrack(opacityTrack, globalTime),
       transform: `${directionalTranslate(evalTrack(distanceTrack, globalTime), config.exitAngle)} scale(${evalTrack(scaleTrack, globalTime)})`,
-    });
+    };
+
+    if (filterTrack) keyframe.filter = `blur(${evalTrack(filterTrack, globalTime)}px)`;
+
+    keyframes.push(keyframe);
   }
 
   return { duration: exit, keyframes };
