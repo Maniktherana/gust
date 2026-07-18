@@ -24,8 +24,8 @@ const otpTiming = {
   backspace: 150,
   firstDigit: 280,
   hold: 1250,
-  type: 200,
-  wipe: 200,
+  type: 100,
+  wipe: 100,
 } as const;
 
 function sharedPrefixLength(a: string, b: string) {
