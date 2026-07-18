@@ -21,7 +21,7 @@ type OtpState = {
 };
 
 const otpTiming = {
-  backspace: 150,
+  backspace: 100,
   firstDigit: 280,
   hold: 1250,
   type: 100,
