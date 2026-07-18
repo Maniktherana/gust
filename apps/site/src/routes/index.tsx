@@ -3,8 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { AnatomyFigure } from "@/components/anatomy";
 import { CodeBlock } from "@/components/code-block";
+import { CopyButton } from "@/components/copy-button";
 import { DemoGrid } from "@/components/demos";
-import { IconBadgeCheck, IconCloneFilled } from "@/components/icons";
 import { SiteShell } from "@/components/site-nav";
 import { Button } from "@/components/ui/button";
 import {
@@ -191,33 +191,7 @@ function InstallCommand({
   method: InstallMethod;
   onMethodChange: (method: InstallMethod) => void;
 }) {
-  const [copied, setCopied] = React.useState(false);
-  const resetTimer = React.useRef<number | null>(null);
   const selected = installOptions.find((option) => option.id === method) ?? installOptions[0];
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(selected.command);
-    } catch {
-      return;
-    }
-
-    setCopied(true);
-
-    if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
-
-    resetTimer.current = window.setTimeout(() => {
-      resetTimer.current = null;
-      setCopied(false);
-    }, 2000);
-  };
-
-  React.useEffect(
-    () => () => {
-      if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
-    },
-    [],
-  );
 
   return (
     <div className="flex flex-col gap-2">
@@ -227,10 +201,7 @@ function InstallCommand({
             key={option.id}
             type="button"
             aria-pressed={method === option.id}
-            onClick={() => {
-              onMethodChange(option.id);
-              setCopied(false);
-            }}
+            onClick={() => onMethodChange(option.id)}
             className={cn(
               "text-xs transition-colors duration-200",
               method === option.id
@@ -262,27 +233,14 @@ function InstallCommand({
             />
           </code>
         </div>
-        <button
-          type="button"
-          aria-label={copied ? "Copied" : "Copy install command"}
-          onClick={copy}
-          className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition-[color,scale] duration-200 hover:text-foreground active:scale-[0.96]"
-        >
-          <span className="grid place-items-center [&>svg]:col-start-1 [&>svg]:row-start-1 [&>svg]:size-4">
-            <IconCloneFilled
-              className={cn(
-                "transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
-                copied ? "scale-25 opacity-0 blur-[4px]" : "scale-100 opacity-100 blur-none",
-              )}
-            />
-            <IconBadgeCheck
-              className={cn(
-                "transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
-                copied ? "scale-100 opacity-100 blur-none" : "scale-25 opacity-0 blur-[4px]",
-              )}
-            />
-          </span>
-        </button>
+        <CopyButton
+          value={selected.command}
+          label="Copy install command"
+          showLabel={false}
+          variant="ghost"
+          size="icon"
+          className="shrink-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
+        />
       </div>
     </div>
   );
@@ -332,7 +290,7 @@ function Home() {
 
         <section id="about" className="flex scroll-mt-10 flex-col gap-6">
           <div className="flex flex-col gap-3">
-            <h1 className="text-sm font-medium">Text that moves like air.</h1>
+            <h1 className="text-sm font-medium">Text that moves like air</h1>
             <p className="text-sm text-pretty text-muted-foreground">
               Gust animates changing React text one character at a time. Shared prefixes stay put
               while old glyphs lift out and new ones settle in.
