@@ -5,7 +5,6 @@ import { ThemeToggle } from "@/components/theme-toggle";
 
 const sectionLinks = [
   { href: "/#about", label: "Overview" },
-  { href: "/#usage", label: "Usage" },
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#props", label: "Props" },
   { href: "/#best-practices", label: "Use cases" },

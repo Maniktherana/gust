@@ -56,12 +56,12 @@ export function TickerDemo() {
     {
       timing: {
         duration: [320, 0, 1200, 10],
-        exitDuration: [260, 0, 1200, 10],
-        stagger: [10, 0, 80, 1],
+        exitDuration: [320, 0, 1200, 10],
+        stagger: [20, 0, 80, 1],
       },
       entrance: {
         height: [8, 0, 120, 1],
-        offset: [90, 0, 200, 1],
+        offset: [100, 0, 200, 1],
         scale: [1.1, 1, 2, 0.01],
       },
       exit: {

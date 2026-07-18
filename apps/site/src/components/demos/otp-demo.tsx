@@ -42,7 +42,7 @@ export function OtpDemo() {
     {
       timing: {
         duration: [440, 0, 1200, 10],
-        exitDuration: [360, 0, 1200, 10],
+        exitDuration: [440, 0, 1200, 10],
         stagger: [12, 0, 80, 1],
       },
       entrance: {
