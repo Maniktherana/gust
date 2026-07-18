@@ -263,7 +263,7 @@ function Lab() {
           </p>
         </div>
 
-        <div className="grid h-56 place-items-center overflow-hidden rounded-xl bg-surface-raised px-8 shadow-[var(--shadow-card)] sm:h-64">
+        <div className="sticky top-0 z-50 grid h-56 place-items-center overflow-hidden rounded-xl bg-surface-raised px-8 sm:relative sm:z-auto sm:h-64">
           {mode === "cycle" ? (
             <Gust
               {...sharedGustProps}
@@ -287,7 +287,7 @@ function Lab() {
 
         <Tabs value={mode} onValueChange={(value) => setMode(String(value))} className="gap-4">
           <div className="flex flex-wrap items-center gap-4">
-            <TabsList>
+            <TabsList variant="ghost">
               <TabsTrigger value="cycle">Cycle words</TabsTrigger>
               <TabsTrigger value="type">Type freely</TabsTrigger>
             </TabsList>
@@ -295,7 +295,7 @@ function Lab() {
           <TabsContent value="cycle">
             <Textarea
               aria-label="Words to cycle, one per line"
-              className="h-28 resize-none font-mono text-xs"
+              className="h-28 resize-none"
               value={wordsInput}
               onChange={(event) => setWordsInput(event.target.value)}
             />
@@ -324,6 +324,43 @@ function Lab() {
           ))}
         </div>
 
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="toggle-both-down"
+              aria-label="Both directions down"
+              checked={values.enterAngle === 90 && values.exitAngle === 90}
+              onCheckedChange={(checked) =>
+                setValues((current) => ({
+                  ...current,
+                  enterAngle: checked ? 90 : DEFAULT_ENTER_ANGLE,
+                  exitAngle: checked ? 90 : DEFAULT_EXIT_ANGLE,
+                }))
+              }
+            />
+            <Label htmlFor="toggle-both-down">flip direction</Label>
+          </div>
+          {(
+            [
+              { key: "blur", label: "Exit blur" },
+              { key: "scale", label: "Scale" },
+              { key: "preservePrefix", label: "Preserve prefix" },
+            ] as const
+          ).map((toggle) => (
+            <div key={toggle.key} className="flex items-center gap-2">
+              <Switch
+                id={`toggle-${toggle.key}`}
+                aria-label={toggle.label}
+                checked={toggles[toggle.key]}
+                onCheckedChange={(checked) =>
+                  setToggles((current) => ({ ...current, [toggle.key]: checked }))
+                }
+              />
+              <Label htmlFor={`toggle-${toggle.key}`}>{toggle.label}</Label>
+            </div>
+          ))}
+        </div>
+
         <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
           <AngleControl
             label="Enter direction"
@@ -335,9 +372,6 @@ function Lab() {
             value={values.exitAngle}
             onValueChange={(exitAngle) => setValues((current) => ({ ...current, exitAngle }))}
           />
-        </div>
-
-        <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
           {sliderConfigs.map((config) => (
             <Slider
               key={config.key}
