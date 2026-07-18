@@ -1,7 +1,0 @@
-{
-  "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "types": ["bun", "node"]
-  },
-  "include": ["playwright.config.ts", "packages/gust/tests/browser/**/*.ts"]
-}

@@ -20,7 +20,6 @@
 		"format:check": "turbo run format:check",
 		"typecheck": "turbo run typecheck",
 		"test": "turbo run test",
-		"test:browser": "playwright test",
 		"release:major": "bash scripts/release.sh major",
 		"release:minor": "bash scripts/release.sh minor",
 		"release:patch": "bash scripts/release.sh patch",
@@ -28,7 +27,6 @@
 		"registry:check": "bun run --cwd apps/site registry:check"
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.58.2",
 		"@types/bun": "^1.3.11",
 		"@types/node": "^25.9.2",
 		"oxfmt": "^0.54.0",
