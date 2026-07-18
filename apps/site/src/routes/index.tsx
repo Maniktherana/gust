@@ -1,7 +1,6 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { AnatomyFigure } from "@/components/anatomy";
 import { CodeBlock } from "@/components/code-block";
 import { CopyButton } from "@/components/copy-button";
 import { DemoGrid } from "@/components/demos";
@@ -302,17 +301,15 @@ function Home() {
               while old glyphs lift out and new ones settle in.
             </p>
           </div>
-          <InstallCommand method={installMethod} onMethodChange={setInstallMethod} />
-        </section>
-
-        <section className="flex flex-col gap-4">
-          <SectionHeading id="usage">Usage</SectionHeading>
-          <CodeBlock key={installMethod} code={usageSnippets[installMethod]} />
-          <p className="text-xs text-muted-foreground">
-            {installMethod === "package"
-              ? "Import the stylesheet once in your app."
-              : "The shadcn CLI adds the required styles to globals.css automatically."}
-          </p>
+          <div className="flex flex-col gap-4">
+            <InstallCommand method={installMethod} onMethodChange={setInstallMethod} />
+            <CodeBlock key={installMethod} code={usageSnippets[installMethod]} />
+            <p className="text-xs text-muted-foreground">
+              {installMethod === "package"
+                ? "Import the stylesheet once in your app."
+                : "The shadcn CLI adds the required styles to globals.css automatically."}
+            </p>
+          </div>
         </section>
 
         <section className="flex flex-col gap-4">
@@ -383,10 +380,6 @@ function Home() {
               </ul>
             </div>
           </div>
-        </section>
-
-        <section id="anatomy" className="scroll-mt-10">
-          <AnatomyFigure />
         </section>
       </main>
     </SiteShell>
