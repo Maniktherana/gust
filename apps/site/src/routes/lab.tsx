@@ -8,6 +8,7 @@ import {
   DEFAULT_DURATION_MS,
   DEFAULT_ENTER_ANGLE,
   DEFAULT_ENTRANCE_HEIGHT,
+  DEFAULT_ENTRANCE_OFFSET,
   DEFAULT_ENTRANCE_SCALE,
   DEFAULT_EXIT_DURATION_MS,
   DEFAULT_EXIT_ANGLE,
@@ -32,6 +33,7 @@ type MotionValues = {
   duration: number;
   enterAngle: number;
   entranceHeight: number;
+  entranceOffset: number;
   entranceScale: number;
   exitDuration: number;
   exitAngle: number;
@@ -54,6 +56,7 @@ const defaultValues: MotionValues = {
   duration: DEFAULT_DURATION_MS,
   enterAngle: DEFAULT_ENTER_ANGLE,
   entranceHeight: DEFAULT_ENTRANCE_HEIGHT,
+  entranceOffset: DEFAULT_ENTRANCE_OFFSET,
   entranceScale: DEFAULT_ENTRANCE_SCALE,
   exitDuration: DEFAULT_EXIT_DURATION_MS,
   exitAngle: DEFAULT_EXIT_ANGLE,
@@ -84,6 +87,7 @@ const sliderConfigs: SliderConfig[] = [
   { key: "exitDuration", label: "Exit duration", max: 1200, min: 120, step: 20, unit: "ms" },
   { key: "stagger", label: "Stagger", max: 80, min: 0, step: 2, unit: "ms" },
   { key: "hold", label: "Hold", max: 5000, min: 800, step: 100, unit: "ms" },
+  { key: "entranceOffset", label: "Entrance travel", max: 200, min: 0, step: 5, unit: "%" },
   { key: "entranceHeight", label: "Entrance bounce", max: 120, min: 0, step: 2, unit: "" },
   { key: "entranceScale", label: "Entrance scale", max: 2, min: 1, step: 0.05, unit: "×" },
   { key: "exitHeight", label: "Exit travel", max: 200, min: 0, step: 5, unit: "%" },
@@ -241,6 +245,7 @@ function Lab() {
     duration: values.duration,
     enterAngle: values.enterAngle,
     entranceHeight: values.entranceHeight,
+    entranceOffset: values.entranceOffset,
     entranceScale: values.entranceScale,
     exitDuration: values.exitDuration,
     exitAngle: values.exitAngle,

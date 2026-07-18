@@ -11,6 +11,7 @@ import {
   DEFAULT_DURATION_MS,
   DEFAULT_ENTER_ANGLE,
   DEFAULT_ENTRANCE_HEIGHT,
+  DEFAULT_ENTRANCE_OFFSET,
   DEFAULT_ENTRANCE_SCALE,
   DEFAULT_EXIT_DURATION_MS,
   DEFAULT_EXIT_ANGLE,
@@ -130,6 +131,11 @@ const propRows: PropRow[] = [
     defaultValue: String(DEFAULT_ENTRANCE_HEIGHT),
     description: "Entrance overshoot distance.",
     name: "entranceHeight",
+  },
+  {
+    defaultValue: String(DEFAULT_ENTRANCE_OFFSET),
+    description: "Initial entry distance, where 100 equals 1em.",
+    name: "entranceOffset",
   },
   {
     defaultValue: String(DEFAULT_ENTRANCE_SCALE),

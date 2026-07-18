@@ -4,6 +4,7 @@ import {
   DEFAULT_DURATION_MS,
   DEFAULT_ENTER_ANGLE,
   DEFAULT_ENTRANCE_HEIGHT,
+  DEFAULT_ENTRANCE_OFFSET,
   DEFAULT_ENTRANCE_SCALE,
   DEFAULT_EXIT_DURATION_MS,
   DEFAULT_EXIT_ANGLE,
@@ -28,6 +29,7 @@ function resolve(overrides: Partial<Parameters<typeof resolveGustConfig>[0]> = {
     duration: DEFAULT_DURATION_MS,
     enterAngle: DEFAULT_ENTER_ANGLE,
     entranceHeight: DEFAULT_ENTRANCE_HEIGHT,
+    entranceOffset: DEFAULT_ENTRANCE_OFFSET,
     entranceScale: DEFAULT_ENTRANCE_SCALE,
     exitDuration: DEFAULT_EXIT_DURATION_MS,
     exitAngle: DEFAULT_EXIT_ANGLE,
@@ -45,6 +47,7 @@ describe("motion configuration", () => {
     expect(
       resolve({
         duration: -10,
+        entranceOffset: Number.NaN,
         entranceScale: 10,
         exitBlurCap: Number.NaN,
         exitScale: 10,
@@ -52,6 +55,7 @@ describe("motion configuration", () => {
       }),
     ).toMatchObject({
       duration: 0,
+      entranceOffset: DEFAULT_ENTRANCE_OFFSET,
       entranceScale: 2,
       exitBlurCap: DEFAULT_EXIT_BLUR_CAP,
       exitScale: 1.5,
@@ -87,6 +91,12 @@ describe("motion configuration", () => {
     expect(firstGrowingFrame).toBeDefined();
     expect(firstGrowingFrame?.opacity).toBe(1);
     expect(entrance.every((frame) => !("filter" in frame))).toBe(true);
+  });
+
+  test("uses the configured entrance offset as the starting travel distance", () => {
+    const entrance = buildEnterKeyframes(resolve({ entranceOffset: 120 })).keyframes;
+
+    expect(entrance[0]?.transform).toContain("translate(0em, 1.2em)");
   });
 
   test("caps exit blur at the configured pixel value", () => {

@@ -12,6 +12,7 @@ export function CopyDemo() {
       },
       entrance: {
         height: [0, 0, 120, 1],
+        offset: [90, 0, 200, 1],
         scale: [1, 1, 2, 0.01],
       },
       exit: {
@@ -37,6 +38,7 @@ export function CopyDemo() {
         blur: controls.effects.blur,
         duration: controls.timing.duration,
         entranceHeight: controls.entrance.height,
+        entranceOffset: controls.entrance.offset,
         entranceScale: controls.entrance.scale,
         exitDuration: controls.timing.exitDuration,
         exitBlurCap: controls.exit.blurCap,

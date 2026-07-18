@@ -43,6 +43,7 @@ export function StatusDemo() {
       },
       entrance: {
         height: [10, 0, 120, 1],
+        offset: [90, 0, 200, 1],
         scale: [1.15, 1, 2, 0.01],
       },
       exit: {
@@ -100,6 +101,7 @@ export function StatusDemo() {
         exitDuration={controls.timing.exitDuration}
         stagger={controls.timing.stagger}
         entranceHeight={controls.entrance.height}
+        entranceOffset={controls.entrance.offset}
         entranceScale={controls.entrance.scale}
         exitBlurCap={controls.exit.blurCap}
         exitHeight={controls.exit.height}

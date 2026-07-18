@@ -6,7 +6,7 @@ export const DEFAULT_EXIT_DURATION_MS = 360;
 export const DEFAULT_STAGGER_MS = 20;
 export const DEFAULT_ENTER_ANGLE = -90;
 export const DEFAULT_EXIT_ANGLE = -90;
-export const DEFAULT_ENTRANCE_OFFSET = 72;
+export const DEFAULT_ENTRANCE_OFFSET = 90;
 export const DEFAULT_ENTRANCE_HEIGHT = 12;
 export const DEFAULT_ENTRANCE_SCALE = 1.1;
 export const DEFAULT_EXIT_HEIGHT = 90;
@@ -19,6 +19,7 @@ export type GustConfig = {
   enterAngle: number;
   enterDuration: number;
   entranceHeight: number;
+  entranceOffset: number;
   entranceScale: number;
   enterStagger: number;
   exitDuration: number;
@@ -59,6 +60,7 @@ export function resolveGustConfig(input: {
   duration: number;
   enterAngle: number;
   entranceHeight: number;
+  entranceOffset: number;
   entranceScale: number;
   exitDuration: number;
   exitAngle: number;
@@ -77,6 +79,7 @@ export function resolveGustConfig(input: {
     enterAngle: normalizeAngle(input.enterAngle, DEFAULT_ENTER_ANGLE),
     enterDuration: resolvedDuration,
     entranceHeight: clampMotionNumber(input.entranceHeight, DEFAULT_ENTRANCE_HEIGHT),
+    entranceOffset: clampMotionNumber(input.entranceOffset, DEFAULT_ENTRANCE_OFFSET),
     entranceScale: clampPeakScale(input.entranceScale, DEFAULT_ENTRANCE_SCALE),
     enterStagger: resolvedStagger,
     exitDuration: clampMotionNumber(input.exitDuration, DEFAULT_EXIT_DURATION_MS),

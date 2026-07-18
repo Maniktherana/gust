@@ -61,6 +61,7 @@ export function TickerDemo() {
       },
       entrance: {
         height: [8, 0, 120, 1],
+        offset: [90, 0, 200, 1],
         scale: [1.1, 1, 2, 0.01],
       },
       exit: {
@@ -175,6 +176,7 @@ export function TickerDemo() {
             exitDuration={controls.timing.exitDuration}
             stagger={controls.timing.stagger}
             entranceHeight={controls.entrance.height}
+            entranceOffset={controls.entrance.offset}
             entranceScale={controls.entrance.scale}
             exitBlurCap={controls.exit.blurCap}
             exitHeight={controls.exit.height}

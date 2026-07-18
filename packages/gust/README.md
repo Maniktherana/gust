@@ -44,6 +44,7 @@ The stylesheet contains Gust's structural layout and is imported explicitly by y
 | `enterAngle`     | `number`  | `-90`   | Incoming travel angle in degrees. `-90` moves up; `90` moves down.                    |
 | `exitAngle`      | `number`  | `-90`   | Outgoing travel angle in degrees. `-90` moves up; `90` moves down.                    |
 | `entranceHeight` | `number`  | `12`    | Entrance overshoot distance.                                                          |
+| `entranceOffset` | `number`  | `90`    | Initial entry distance, where `100` equals `1em`.                                     |
 | `entranceScale`  | `number`  | `1.1`   | Peak scale during entrance.                                                           |
 | `exitHeight`     | `number`  | `90`    | Exit distance as a percentage of line height.                                         |
 | `exitScale`      | `number`  | `0.4`   | Final scale of outgoing characters.                                                   |

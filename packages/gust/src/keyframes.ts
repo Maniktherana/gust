@@ -5,7 +5,7 @@
 // exact per-property curve.
 
 import { clamp01, cubicBezier, easeOutStrongFn, lerp } from "./easing";
-import { DEFAULT_ENTRANCE_OFFSET, type GustConfig } from "./config";
+import type { GustConfig } from "./config";
 import { isWhitespaceCharacter, splitGraphemes } from "./characters";
 
 const ENTER_SAMPLE_COUNT = 40;
@@ -61,8 +61,10 @@ function overshootForControlPoint(controlY1: number) {
   return cubicBezierCoordinate(peakT, controlY1, 1) - 1;
 }
 
-function entranceControlY1(height: number) {
-  const targetOvershoot = Math.max(0, height / DEFAULT_ENTRANCE_OFFSET);
+function entranceControlY1(height: number, offset: number) {
+  if (offset <= 0) return 1;
+
+  const targetOvershoot = Math.max(0, height / offset);
 
   if (targetOvershoot <= 0) return 1;
 
@@ -94,8 +96,8 @@ function entrancePeakTime(controlY1: number) {
   return cubicBezierCoordinate(peakT, entranceEaseX1, entranceEaseX2);
 }
 
-function entranceTiming(height: number) {
-  const controlY1 = entranceControlY1(height);
+function entranceTiming(height: number, offset: number) {
+  const controlY1 = entranceControlY1(height, offset);
 
   return {
     ease: height > 0 ? cubicBezier(entranceEaseX1, controlY1, entranceEaseX2, 1) : easeOutStrongFn,
@@ -137,7 +139,7 @@ export function lastCharacterStartDelay(text: string, stagger: number, firstAnim
 
 export function buildEnterKeyframes(config: GustConfig): GustKeyframes {
   const enter = config.enterDuration;
-  const timing = entranceTiming(config.entranceHeight);
+  const timing = entranceTiming(config.entranceHeight, config.entranceOffset);
   const peakScale = config.scale ? config.entranceScale : 1;
   const revealEndTime = Math.min(0.32, Math.max(0.18, timing.peakTime / 2));
   const opacityTrack: MotionTrack = {
@@ -150,7 +152,7 @@ export function buildEnterKeyframes(config: GustConfig): GustKeyframes {
     duration: enter,
     ease: timing.ease,
     times: [0, 1],
-    values: [DEFAULT_ENTRANCE_OFFSET, 0],
+    values: [config.entranceOffset, 0],
   };
   const scaleTrack: MotionTrack = {
     duration: enter,

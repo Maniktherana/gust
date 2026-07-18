@@ -16,6 +16,7 @@ const config = resolveGustConfig({
   duration: 440,
   enterAngle: -90,
   entranceHeight: 8,
+  entranceOffset: 90,
   entranceScale: 1.1,
   exitDuration: 360,
   exitAngle: -90,

@@ -25,6 +25,7 @@ import {
   DEFAULT_DURATION_MS,
   DEFAULT_ENTER_ANGLE,
   DEFAULT_ENTRANCE_HEIGHT,
+  DEFAULT_ENTRANCE_OFFSET,
   DEFAULT_ENTRANCE_SCALE,
   DEFAULT_EXIT_DURATION_MS,
   DEFAULT_EXIT_ANGLE,
@@ -50,6 +51,7 @@ type GustProps = Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> & {
   duration?: number;
   enterAngle?: number;
   entranceHeight?: number;
+  entranceOffset?: number;
   entranceScale?: number;
   exitDuration?: number;
   exitAngle?: number;
@@ -154,6 +156,7 @@ function Gust({
   duration = DEFAULT_DURATION_MS,
   enterAngle,
   entranceHeight = DEFAULT_ENTRANCE_HEIGHT,
+  entranceOffset = DEFAULT_ENTRANCE_OFFSET,
   entranceScale = DEFAULT_ENTRANCE_SCALE,
   exitDuration = DEFAULT_EXIT_DURATION_MS,
   exitAngle,
@@ -182,6 +185,7 @@ function Gust({
         duration,
         enterAngle: enterAngle ?? (down ? 90 : DEFAULT_ENTER_ANGLE),
         entranceHeight,
+        entranceOffset,
         entranceScale,
         exitDuration,
         exitAngle: exitAngle ?? (down ? 90 : DEFAULT_EXIT_ANGLE),
@@ -197,6 +201,7 @@ function Gust({
       duration,
       enterAngle,
       entranceHeight,
+      entranceOffset,
       entranceScale,
       exitDuration,
       exitAngle,
