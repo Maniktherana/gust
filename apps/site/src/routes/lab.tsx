@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { IconBadgeCheck, IconCloneFilled } from "@/components/icons";
+import { CopyButton } from "@/components/copy-button";
 import { SiteShell } from "@/components/site-nav";
 import { AngleControl } from "@/components/ui/angle-control";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,6 @@ import {
   DEFAULT_EXIT_SCALE,
   DEFAULT_STAGGER_MS,
   Gust,
-  WORD_HOLD_MS,
 } from "@maniktherana/gust";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,9 +36,11 @@ type MotionValues = {
   exitAngle: number;
   exitHeight: number;
   exitScale: number;
-  interval: number;
+  hold: number;
   stagger: number;
 };
+
+const DEFAULT_CYCLE_HOLD_MS = 1600;
 
 type MotionToggles = {
   blur: boolean;
@@ -56,7 +57,7 @@ const defaultValues: MotionValues = {
   exitAngle: DEFAULT_EXIT_ANGLE,
   exitHeight: DEFAULT_EXIT_HEIGHT,
   exitScale: DEFAULT_EXIT_SCALE,
-  interval: WORD_HOLD_MS,
+  hold: DEFAULT_CYCLE_HOLD_MS,
   stagger: DEFAULT_STAGGER_MS,
 };
 
@@ -79,7 +80,7 @@ const sliderConfigs: SliderConfig[] = [
   { key: "duration", label: "Enter duration", max: 1200, min: 120, step: 20, unit: "ms" },
   { key: "exitDuration", label: "Exit duration", max: 1200, min: 120, step: 20, unit: "ms" },
   { key: "stagger", label: "Stagger", max: 80, min: 0, step: 2, unit: "ms" },
-  { key: "interval", label: "Hold", max: 5000, min: 800, step: 100, unit: "ms" },
+  { key: "hold", label: "Hold", max: 5000, min: 800, step: 100, unit: "ms" },
   { key: "entranceHeight", label: "Entrance bounce", max: 120, min: 0, step: 2, unit: "" },
   { key: "entranceScale", label: "Entrance scale", max: 2, min: 1, step: 0.05, unit: "×" },
   { key: "exitHeight", label: "Exit travel", max: 200, min: 0, step: 5, unit: "%" },
@@ -155,22 +156,18 @@ function buildJsx({
   toggles,
   typed,
   values,
-  words,
 }: {
   mode: string;
   toggles: MotionToggles;
   typed: string;
   values: MotionValues;
-  words: string[];
 }) {
   const parts: string[] = [];
 
   if (mode === "type") {
-    parts.push(`text={${JSON.stringify(typed)}}`);
+    parts.push(`value={${JSON.stringify(typed)}}`);
   } else {
-    parts.push(`words={${JSON.stringify(words)}}`);
-
-    if (values.interval !== defaultValues.interval) parts.push(`interval={${values.interval}}`);
+    parts.push("value={currentValue}");
   }
 
   if (values.enterAngle === 90 && values.exitAngle === 90) {
@@ -186,7 +183,7 @@ function buildJsx({
   }
 
   (Object.keys(defaultValues) as (keyof MotionValues)[]).forEach((key) => {
-    if (key === "interval" || key === "enterAngle" || key === "exitAngle") return;
+    if (key === "hold" || key === "enterAngle" || key === "exitAngle") return;
     if (values[key] !== defaultValues[key]) parts.push(`${key}={${values[key]}}`);
   });
 
@@ -203,8 +200,7 @@ function Lab() {
   const [mode, setMode] = React.useState("cycle");
   const [wordsInput, setWordsInput] = React.useState(defaultWordsInput);
   const [typed, setTyped] = React.useState("hello, world");
-  const [copied, setCopied] = React.useState(false);
-  const copyTimer = React.useRef<number | null>(null);
+  const [cycleIndex, setCycleIndex] = React.useState(0);
 
   const words = React.useMemo(
     () =>
@@ -214,37 +210,22 @@ function Lab() {
         .filter(Boolean),
     [wordsInput],
   );
+  const currentWord = words[cycleIndex % Math.max(words.length, 1)] ?? "";
+
+  React.useEffect(() => {
+    if (mode !== "cycle" || words.length <= 1) return undefined;
+
+    const timer = window.setInterval(() => {
+      setCycleIndex((current) => (current + 1) % words.length);
+    }, values.hold);
+
+    return () => window.clearInterval(timer);
+  }, [mode, values.hold, words.length]);
 
   const applyPreset = (preset: Preset) => {
     setValues({ ...defaultValues, ...preset.values });
     setToggles({ ...defaultToggles, ...preset.toggles });
   };
-
-  const copyJsx = async () => {
-    const jsx = buildJsx({ mode, toggles, typed, values, words });
-
-    try {
-      await navigator.clipboard.writeText(jsx);
-    } catch {
-      return;
-    }
-
-    setCopied(true);
-
-    if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
-
-    copyTimer.current = window.setTimeout(() => {
-      copyTimer.current = null;
-      setCopied(false);
-    }, 2000);
-  };
-
-  React.useEffect(
-    () => () => {
-      if (copyTimer.current !== null) window.clearTimeout(copyTimer.current);
-    },
-    [],
-  );
 
   const sharedGustProps = {
     blur: toggles.blur,
@@ -276,17 +257,22 @@ function Lab() {
           {mode === "cycle" ? (
             <Gust
               {...sharedGustProps}
-              words={words}
-              interval={values.interval}
+              value={currentWord}
               className="max-w-full text-3xl font-medium tracking-tight sm:text-4xl"
             />
           ) : (
             <Gust
               {...sharedGustProps}
-              text={typed}
+              value={typed}
               className="max-w-full text-3xl font-medium tracking-tight sm:text-4xl"
             />
           )}
+          <CopyButton
+            value={() => buildJsx({ mode, toggles, typed, values })}
+            label="Copy JSX"
+            variant="ghost"
+            className="absolute right-3 bottom-3"
+          />
         </div>
 
         <Tabs value={mode} onValueChange={(value) => setMode(String(value))} className="gap-4">
@@ -356,53 +342,6 @@ function Lab() {
               }
             />
           ))}
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
-          <div className="flex flex-wrap items-center gap-6">
-            <div className="flex items-center gap-2">
-              <Switch
-                id="toggle-both-down"
-                aria-label="Both directions down"
-                checked={values.enterAngle === 90 && values.exitAngle === 90}
-                onCheckedChange={(checked) =>
-                  setValues((current) => ({
-                    ...current,
-                    enterAngle: checked ? 90 : DEFAULT_ENTER_ANGLE,
-                    exitAngle: checked ? 90 : DEFAULT_EXIT_ANGLE,
-                  }))
-                }
-              />
-              <Label htmlFor="toggle-both-down">Both down</Label>
-            </div>
-            {(
-              [
-                { key: "blur", label: "Blur" },
-                { key: "scale", label: "Scale" },
-                { key: "preservePrefix", label: "Preserve prefix" },
-              ] as const
-            ).map((toggle) => (
-              <div key={toggle.key} className="flex items-center gap-2">
-                <Switch
-                  id={`toggle-${toggle.key}`}
-                  aria-label={toggle.label}
-                  checked={toggles[toggle.key]}
-                  onCheckedChange={(checked) =>
-                    setToggles((current) => ({ ...current, [toggle.key]: checked }))
-                  }
-                />
-                <Label htmlFor={`toggle-${toggle.key}`}>{toggle.label}</Label>
-              </div>
-            ))}
-          </div>
-          <Button onClick={copyJsx}>
-            {copied ? (
-              <IconBadgeCheck data-icon="inline-start" />
-            ) : (
-              <IconCloneFilled data-icon="inline-start" />
-            )}
-            <Gust text={copied ? "Copied" : "Copy JSX"} />
-          </Button>
         </div>
       </main>
     </SiteShell>

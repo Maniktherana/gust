@@ -4,7 +4,7 @@ import {
   commonPrefixLength,
   displayCharacter,
   isForwardAppend,
-  normalizeWords,
+  normalizeText,
   resolveGustCharacterRenderState,
   splitCharacters,
   splitGraphemes,
@@ -19,6 +19,7 @@ const config = resolveGustConfig({
   entranceScale: 1.1,
   exitDuration: 360,
   exitAngle: -90,
+  exitBlurCap: 4,
   exitHeight: 90,
   exitScale: 0.4,
   scale: true,
@@ -27,7 +28,7 @@ const config = resolveGustConfig({
 
 describe("text bookkeeping", () => {
   test("normalizes outer whitespace but preserves internal character slots", () => {
-    expect(normalizeWords(["", "  ", " word "])).toEqual(["", "", "word"]);
+    expect(normalizeText(" word ")).toBe("word");
     expect(splitCharacters(" a ").map(({ character }) => character)).toEqual([" ", "a", " "]);
     expect(displayCharacter(" ")).toBe("\u00a0");
   });

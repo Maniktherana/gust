@@ -46,10 +46,6 @@ const graphemeSegmenter =
     ? new Intl.Segmenter(undefined, { granularity: "grapheme" })
     : null;
 
-export function normalizeWords(words: readonly string[]) {
-  return Array.from(words, normalizeText);
-}
-
 export function splitGraphemes(text: string) {
   if (!graphemeSegmenter) return Array.from(text);
 

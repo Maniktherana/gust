@@ -1,16 +1,17 @@
 // Motion defaults and the resolved, clamped config the animation runs on.
 
-export const WORD_HOLD_MS = 1600;
-export const DEFAULT_DURATION_MS = 440;
+export const DEFAULT_DURATION_MS = 400;
+export const MAX_LAYOUT_DURATION_MS = 240;
 export const DEFAULT_EXIT_DURATION_MS = 360;
-export const DEFAULT_STAGGER_MS = 12;
+export const DEFAULT_STAGGER_MS = 20;
 export const DEFAULT_ENTER_ANGLE = -90;
 export const DEFAULT_EXIT_ANGLE = -90;
 export const DEFAULT_ENTRANCE_OFFSET = 72;
-export const DEFAULT_ENTRANCE_HEIGHT = 8;
+export const DEFAULT_ENTRANCE_HEIGHT = 12;
 export const DEFAULT_ENTRANCE_SCALE = 1.1;
 export const DEFAULT_EXIT_HEIGHT = 90;
 export const DEFAULT_EXIT_SCALE = 0.4;
+export const DEFAULT_EXIT_BLUR_CAP = 4;
 
 export type GustConfig = {
   blur: boolean;
@@ -22,6 +23,7 @@ export type GustConfig = {
   enterStagger: number;
   exitDuration: number;
   exitAngle: number;
+  exitBlurCap: number;
   exitHeight: number;
   exitScale: number;
   exitStagger: number;
@@ -30,6 +32,10 @@ export type GustConfig = {
 
 function clampMotionNumber(value: number, fallback: number) {
   return Number.isFinite(value) ? Math.max(0, value) : fallback;
+}
+
+export function resolveLayoutDuration(duration: number) {
+  return Math.min(clampMotionNumber(duration, DEFAULT_DURATION_MS), MAX_LAYOUT_DURATION_MS);
 }
 
 function clampScale(value: number, fallback: number) {
@@ -56,6 +62,7 @@ export function resolveGustConfig(input: {
   entranceScale: number;
   exitDuration: number;
   exitAngle: number;
+  exitBlurCap: number;
   exitHeight: number;
   exitScale: number;
   scale: boolean;
@@ -74,6 +81,7 @@ export function resolveGustConfig(input: {
     enterStagger: resolvedStagger,
     exitDuration: clampMotionNumber(input.exitDuration, DEFAULT_EXIT_DURATION_MS),
     exitAngle: normalizeAngle(input.exitAngle, DEFAULT_EXIT_ANGLE),
+    exitBlurCap: clampMotionNumber(input.exitBlurCap, DEFAULT_EXIT_BLUR_CAP),
     exitHeight: clampMotionNumber(input.exitHeight, DEFAULT_EXIT_HEIGHT),
     exitScale: clampScale(input.exitScale, DEFAULT_EXIT_SCALE),
     exitStagger: resolvedStagger,

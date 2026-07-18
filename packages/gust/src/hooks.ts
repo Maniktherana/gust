@@ -185,18 +185,18 @@ export function useExitAnimations({
 }
 
 // Morph the root's width from the outgoing word to the incoming one. Layout
-// starts immediately and uses a gentler curve than the character motion so a
-// large width delta never sits still and then appears to snap.
+// starts immediately and settles on a short, steep curve independently of the
+// longer per-character timeline, preventing late centered-layout drift.
 export function useRootWidthMorph({
   activeWord,
   rootElement,
-  rootTransitionDuration,
+  rootWidthDuration,
   sizingElement,
   version,
 }: {
   activeWord: string;
   rootElement: React.RefObject<HTMLSpanElement | null>;
-  rootTransitionDuration: number;
+  rootWidthDuration: number;
   sizingElement: React.RefObject<HTMLSpanElement | null>;
   version: number;
 }) {
@@ -232,7 +232,7 @@ export function useRootWidthMorph({
     const animation = root.animate(
       [{ width: `${fromSize.width}px` }, { width: `${nextSize.width}px` }],
       {
-        duration: rootTransitionDuration,
+        duration: rootWidthDuration,
         easing: layoutEaseCss,
         fill: "both",
       },
@@ -244,7 +244,7 @@ export function useRootWidthMorph({
       rootSizeAnimation.current = null;
       animation.cancel();
     };
-  }, [activeWord, rootElement, rootTransitionDuration, sizingElement, version]);
+  }, [activeWord, rootElement, rootWidthDuration, sizingElement, version]);
 
   React.useEffect(
     () => () => {

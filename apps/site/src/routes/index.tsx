@@ -18,7 +18,6 @@ import {
   DEFAULT_EXIT_SCALE,
   DEFAULT_STAGGER_MS,
   Gust,
-  WORD_HOLD_MS,
 } from "@maniktherana/gust";
 import { cn } from "@/lib/utils";
 
@@ -40,24 +39,42 @@ type InstallMethod = (typeof installOptions)[number]["id"];
 const heroWords = ["a gust of wind.", "a gust of words.", "a gust of motion."];
 
 const usageSnippets: Record<InstallMethod, string> = {
-  package: `import { Gust } from "@maniktherana/gust";
+  package: `import { useEffect, useState } from "react";
+import { Gust } from "@maniktherana/gust";
 import "@maniktherana/gust/styles.css";
 
-export function GustExample() {
-  return (
-    <div>
-      <Gust words={["a gust of wind", "a gust of words"]} />
-    </div>
-  );
-}`,
-  source: `import { Gust } from "@/components/ui/gust";
+const messages = ["Queued", "Building", "Live"];
 
 export function GustExample() {
-  return (
-    <div>
-      <Gust words={["a gust of wind", "a gust of words"]} />
-    </div>
-  );
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % messages.length);
+    }, 2000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return <Gust value={messages[index] ?? ""} />;
+}`,
+  source: `import { useEffect, useState } from "react";
+import { Gust } from "@/components/ui/gust";
+
+const messages = ["Queued", "Building", "Live"];
+
+export function GustExample() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % messages.length);
+    }, 2000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return <Gust value={messages[index] ?? ""} />;
 }`,
 };
 
@@ -70,28 +87,13 @@ type PropRow = {
 const propRows: PropRow[] = [
   {
     defaultValue: "-",
-    description: "Controlled mode. Animates whenever this string changes.",
-    name: "text",
-  },
-  {
-    defaultValue: "-",
-    description: "Cycle mode. Rotates through this list automatically.",
-    name: "words",
+    description: "The controlled string. Animates whenever its value changes.",
+    name: "value",
   },
   {
     defaultValue: "-",
     description: "Style the rendered text with CSS or utility classes.",
     name: "className",
-  },
-  {
-    defaultValue: "-",
-    description: "Control the active word and disable the internal timer.",
-    name: "index",
-  },
-  {
-    defaultValue: String(WORD_HOLD_MS),
-    description: "Time between automatic transitions, in milliseconds.",
-    name: "interval",
   },
   {
     defaultValue: String(DEFAULT_DURATION_MS),
@@ -243,7 +245,7 @@ function InstallCommand({
             <span className="text-muted-foreground select-none">$ </span>
             <Gust
               data-testid="install-command"
-              text={selected.command}
+              value={selected.command}
               duration={320}
               exitDuration={220}
               stagger={3}
@@ -301,8 +303,7 @@ function HeroPreview() {
     <div className="relative grid h-48 place-items-center overflow-hidden rounded-xl bg-surface-raised px-6 sm:h-56">
       <Gust
         data-testid="hero-gust"
-        index={index}
-        words={heroWords}
+        value={heroWords[index % heroWords.length] ?? ""}
         className="max-w-full text-3xl font-medium tracking-tight sm:text-4xl"
       />
       <Button variant="secondary" size="xs" className="absolute right-3 bottom-3" onClick={next}>

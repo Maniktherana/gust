@@ -2,12 +2,11 @@
 
 // Gust animates text changes character by character: outgoing characters travel
 // away while incoming ones ride in on a slight overshoot,
-// with optional blur, per-character stagger, shared-prefix preservation and a
+// with optional exit blur, per-character stagger, shared-prefix preservation and a
 // width morph on the container. React only, no animation libraries.
 //
-// Two ways to drive it: pass `words` to cycle on an interval (or control the
-// cycle with `index`), or pass `text` and Gust animates every change: button
-// labels, statuses, prices, timestamps.
+// Pass `value` as a normal controlled prop. Gust animates whenever the parent
+// changes the string; scheduling and cycling stay in the parent component.
 
 import * as React from "react";
 
@@ -15,10 +14,8 @@ import {
   displayCharacter,
   isWhitespaceCharacter,
   normalizeText,
-  normalizeWords,
   resolveGustCharacterRenderState,
   splitCharacters,
-  splitGraphemes,
   type GustCharacterEntry,
   type GustCharacterRenderState,
   type RenderedGustCharacter,
@@ -31,13 +28,14 @@ import {
   DEFAULT_ENTRANCE_SCALE,
   DEFAULT_EXIT_DURATION_MS,
   DEFAULT_EXIT_ANGLE,
+  DEFAULT_EXIT_BLUR_CAP,
   DEFAULT_EXIT_HEIGHT,
   DEFAULT_EXIT_SCALE,
   DEFAULT_STAGGER_MS,
-  WORD_HOLD_MS,
   resolveGustConfig,
+  resolveLayoutDuration,
 } from "./config";
-import { buildEnterKeyframes, buildExitKeyframes, characterTransitionWindow } from "./keyframes";
+import { buildEnterKeyframes, buildExitKeyframes } from "./keyframes";
 import {
   useCharacterMeasurements,
   useEnterAnimations,
@@ -45,8 +43,6 @@ import {
   useGustTransitionState,
   useRootWidthMorph,
 } from "./hooks";
-
-const fallbackWords = [""] as const;
 
 type GustProps = Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> & {
   blur?: boolean;
@@ -57,15 +53,13 @@ type GustProps = Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> & {
   entranceScale?: number;
   exitDuration?: number;
   exitAngle?: number;
+  exitBlurCap?: number;
   exitHeight?: number;
   exitScale?: number;
-  index?: number;
-  interval?: number;
   preservePrefix?: boolean;
   scale?: boolean;
   stagger?: number;
-  text?: string;
-  words?: readonly string[];
+  value: string;
 };
 
 function GustCharacterSlot({
@@ -161,27 +155,20 @@ function Gust({
   entranceScale = DEFAULT_ENTRANCE_SCALE,
   exitDuration = DEFAULT_EXIT_DURATION_MS,
   exitAngle,
+  exitBlurCap = DEFAULT_EXIT_BLUR_CAP,
   exitHeight = DEFAULT_EXIT_HEIGHT,
   exitScale = DEFAULT_EXIT_SCALE,
-  index: controlledIndex,
-  interval = WORD_HOLD_MS,
   preservePrefix = true,
   scale = true,
   stagger = DEFAULT_STAGGER_MS,
-  text,
-  words,
+  value,
   ...props
 }: GustProps) {
-  const normalizedWords = React.useMemo(() => normalizeWords(words ?? fallbackWords), [words]);
-  const safeWords = normalizedWords.length > 0 ? normalizedWords : fallbackWords;
-  const [index, setIndex] = React.useState(0);
-  const activeIndex = controlledIndex ?? index;
-  const safeIndex = ((activeIndex % safeWords.length) + safeWords.length) % safeWords.length;
-  const word = normalizeText(text ?? safeWords[safeIndex] ?? "");
+  const word = normalizeText(value);
   const transitionState = useGustTransitionState(word);
   const activeWord = transitionState.current;
   const previousText = transitionState.previous;
-  const transitionKey = `${transitionState.version}-${safeIndex}-${activeWord}`;
+  const transitionKey = `${transitionState.version}-${activeWord}`;
   const characters = React.useMemo(() => splitCharacters(activeWord), [activeWord]);
   const rootElement = React.useRef<HTMLSpanElement>(null);
   const sizingElement = React.useRef<HTMLSpanElement>(null);
@@ -196,6 +183,7 @@ function Gust({
         entranceScale,
         exitDuration,
         exitAngle: exitAngle ?? (down ? 90 : DEFAULT_EXIT_ANGLE),
+        exitBlurCap,
         exitHeight,
         exitScale,
         scale,
@@ -210,6 +198,7 @@ function Gust({
       entranceScale,
       exitDuration,
       exitAngle,
+      exitBlurCap,
       exitHeight,
       exitScale,
       scale,
@@ -251,33 +240,7 @@ function Gust({
 
   const renderedCharacters = characterRenderState.current.characters;
   const preservedPrefixLength = characterRenderState.current.preservedPrefixLength;
-  const longestWordLength = React.useMemo(
-    () =>
-      safeWords.reduce(
-        (longest, next) =>
-          Math.max(
-            longest,
-            splitGraphemes(next).filter((character) => !isWhitespaceCharacter(character)).length,
-          ),
-        0,
-      ),
-    [safeWords],
-  );
-  const rootTransitionDuration = Math.max(
-    config.duration,
-    characterTransitionWindow(
-      activeWord,
-      config.enterDuration,
-      config.enterStagger,
-      preservedPrefixLength,
-    ),
-    characterTransitionWindow(
-      previousText,
-      config.exitDuration,
-      config.exitStagger,
-      preservedPrefixLength,
-    ),
-  );
+  const rootWidthDuration = resolveLayoutDuration(config.duration);
 
   // Hook call order preserves effect order: enter, exit, width, measurement.
   const setEnterRef = useEnterAnimations({
@@ -293,7 +256,7 @@ function Gust({
   useRootWidthMorph({
     activeWord,
     rootElement,
-    rootTransitionDuration,
+    rootWidthDuration,
     sizingElement,
     version: transitionState.version,
   });
@@ -315,36 +278,6 @@ function Gust({
       version: transitionState.version,
     };
   }
-
-  React.useEffect(() => {
-    setIndex((current) => current % safeWords.length);
-  }, [safeWords.length]);
-
-  React.useEffect(() => {
-    if (controlledIndex !== undefined || text !== undefined) return undefined;
-    if (safeWords.length <= 1) return undefined;
-
-    const enterWindowMs = config.enterDuration + longestWordLength * config.enterStagger;
-    const exitWindowMs = config.exitDuration + longestWordLength * config.exitStagger;
-    const transitionWindowMs = Math.max(config.duration, enterWindowMs, exitWindowMs);
-    const resolvedInterval = Math.max(interval, transitionWindowMs + 700);
-    const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % safeWords.length);
-    }, resolvedInterval);
-
-    return () => window.clearInterval(timer);
-  }, [
-    config.duration,
-    config.enterDuration,
-    config.enterStagger,
-    config.exitDuration,
-    config.exitStagger,
-    controlledIndex,
-    interval,
-    longestWordLength,
-    safeWords.length,
-    text,
-  ]);
 
   return (
     <span {...props} className={className} data-slot="gust" ref={rootElement}>
