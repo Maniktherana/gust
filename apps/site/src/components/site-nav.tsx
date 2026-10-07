@@ -1,33 +1,34 @@
 import { Link } from "@tanstack/react-router";
 
 import { IconGithub } from "@/components/icons";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const navLinkClassName =
-  "grid h-9 place-items-center rounded-lg px-3 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground [&.active]:text-foreground";
+  "grid h-11 place-items-center rounded-lg px-3 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground [&.active]:text-foreground";
 
 function TopNav() {
   return (
-    <header data-intro-after className="flex h-16 items-center justify-between">
-      <Link to="/" className="text-base font-semibold tracking-tight">
-        gust
-      </Link>
-      <nav className="-mr-2 flex items-center">
+    <header
+      data-intro-after
+      className="flex h-16 shrink-0 items-center justify-between px-3 sm:px-6"
+    >
+      <nav aria-label="Main navigation" className="flex items-center">
+        <Link to="/" activeOptions={{ exact: true }} className={navLinkClassName}>
+          Home
+        </Link>
         <Link to="/agent" className={navLinkClassName}>
           Agent
         </Link>
-        <a
-          href="https://github.com/Maniktherana/gust"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="GitHub"
-          className="grid size-9 place-items-center text-muted-foreground transition-colors duration-200 hover:text-foreground"
-        >
-          <IconGithub size="16px" />
-        </a>
-        <ThemeToggle className="size-9" />
       </nav>
+      <a
+        href="https://github.com/Maniktherana/gust"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="GitHub"
+        className="grid size-11 place-items-center rounded-lg text-muted-foreground transition-colors duration-200 hover:text-foreground"
+      >
+        <IconGithub size="16px" />
+      </a>
     </header>
   );
 }
@@ -68,10 +69,12 @@ export function SiteShell({
   width?: keyof typeof shellWidths;
 }) {
   return (
-    <div className={cn("mx-auto flex min-h-dvh w-full flex-col px-6", shellWidths[width])}>
+    <div className="flex min-h-dvh flex-col">
       <TopNav />
-      <div className="flex-1">{children}</div>
-      <Footer />
+      <div className={cn("mx-auto flex w-full flex-1 flex-col px-6", shellWidths[width])}>
+        <div className="flex-1">{children}</div>
+        <Footer />
+      </div>
     </div>
   );
 }

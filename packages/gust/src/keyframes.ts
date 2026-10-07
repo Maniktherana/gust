@@ -29,6 +29,27 @@ export type GustKeyframes = {
 };
 
 const leadIns = new WeakMap<GustKeyframes, Map<number, GustKeyframes>>();
+const styleMotions = new WeakMap<GustKeyframes, GustKeyframes>();
+
+// The curves stay independent of their DOM representation. Registered, non-inheriting
+// properties let the browser sample every visual track on the style timeline: iOS can
+// otherwise advance accelerated transforms before a new glyph's first raster is ready.
+// WAAPI still owns interpolation, time, stagger and cancellation; there is no JS frame loop.
+export function onStyleTimeline(motion: GustKeyframes): GustKeyframes {
+  const cached = styleMotions.get(motion);
+  if (cached) return cached;
+  const result = {
+    duration: motion.duration,
+    keyframes: motion.keyframes.map(({ transform, opacity, filter, ...frame }) => ({
+      ...frame,
+      "--gust-transform": transform,
+      "--gust-opacity": opacity,
+      ...(filter ? { "--gust-blur": String(filter).slice(5, -1) } : {}),
+    })),
+  };
+  styleMotions.set(motion, result);
+  return result;
+}
 
 // The same motion held on its first frame for `delay` ms. A character's stagger goes into its
 // keyframes instead of the animation's delay, so every animation is running from its first

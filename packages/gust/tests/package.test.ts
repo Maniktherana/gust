@@ -87,6 +87,6 @@ test("completed character animations release their effects", async () => {
   // each, which grows memory usage in counters and other continuously changing text.
   const characterStyles = css.slice(css.indexOf(':where([data-gust-part="sizer"]'));
   expect(characterStyles).not.toContain("will-change");
-  expect(css).toContain(':where([data-gust-part="glyph"]) {\n    opacity: 1;');
-  expect(css).toContain(':where([data-gust-part="exit"]) {\n    opacity: 0;');
+  expect(css).toContain(':where([data-gust-part="glyph"]) {\n    --gust-opacity: 1;');
+  expect(css).toContain(':where([data-gust-part="exit"]) {\n    --gust-opacity: 0;');
 });

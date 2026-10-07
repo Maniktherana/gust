@@ -880,6 +880,12 @@ export function DemoCarousel({
       resume();
     };
 
+    const lostPointerCapture = (event: PointerEvent) => {
+      // Touch starts with implicit capture on the card's button. Taking capture for the
+      // viewport releases that button and bubbles here; the drag is still active.
+      if (event.target === viewport && event.pointerId === drag?.id) cancelDrag();
+    };
+
     const click = (event: MouseEvent) => {
       if (ignoreClick) {
         ignoreClick = false;
@@ -1042,7 +1048,7 @@ export function DemoCarousel({
     window.addEventListener("pointermove", pointerMove, { passive: false });
     window.addEventListener("pointerup", pointerUp);
     window.addEventListener("pointercancel", pointerUp);
-    viewport.addEventListener("lostpointercapture", cancelDrag);
+    viewport.addEventListener("lostpointercapture", lostPointerCapture);
     window.addEventListener("blur", cancelDrag);
     window.addEventListener("focus", updateActivity);
     viewport.addEventListener("click", click, true);
@@ -1088,7 +1094,7 @@ export function DemoCarousel({
       window.removeEventListener("pointermove", pointerMove);
       window.removeEventListener("pointerup", pointerUp);
       window.removeEventListener("pointercancel", pointerUp);
-      viewport.removeEventListener("lostpointercapture", cancelDrag);
+      viewport.removeEventListener("lostpointercapture", lostPointerCapture);
       window.removeEventListener("blur", cancelDrag);
       window.removeEventListener("focus", updateActivity);
       viewport.removeEventListener("click", click, true);

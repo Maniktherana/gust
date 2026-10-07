@@ -1,3 +1,24 @@
+/* Native WAAPI interpolates these on the style timeline. Keeping the glyph's visual
+   properties together prevents iOS from advancing its transform before its first paint.
+   They never inherit, so an update invalidates only the animated glyph. */
+@property --gust-transform {
+  syntax: "<transform-list>";
+  inherits: false;
+  initial-value: translate(0px, 0px) scale(1);
+}
+
+@property --gust-opacity {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@property --gust-blur {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
 @layer components {
   :where([data-slot="gust"]) {
     position: relative;
@@ -47,14 +68,17 @@
     left: 0;
     display: inline-block;
     transform-origin: center;
+    transform: var(--gust-transform);
+    opacity: var(--gust-opacity);
+    filter: blur(var(--gust-blur));
   }
 
   :where([data-gust-part="glyph"]) {
-    opacity: 1;
+    --gust-opacity: 1;
   }
 
   :where([data-gust-part="exit"]) {
-    opacity: 0;
+    --gust-opacity: 0;
     pointer-events: none;
   }
 

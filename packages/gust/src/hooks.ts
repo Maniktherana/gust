@@ -5,7 +5,7 @@
 import * as React from "react";
 
 import type { GustKeyframes } from "./keyframes";
-import { withLeadIn } from "./keyframes";
+import { onStyleTimeline, withLeadIn } from "./keyframes";
 import type { RenderedGustCharacter } from "./characters";
 import type { GustCharacterMeasure, GustRootRect } from "./measure";
 import { measureElementRect, measureGustCharacterSlots, widthsMatch } from "./measure";
@@ -106,7 +106,7 @@ export function useEnterAnimations({
 
       existing?.cancel();
 
-      const entrance = withLeadIn(enterKeyframes, character.order * enterStagger);
+      const entrance = withLeadIn(onStyleTimeline(enterKeyframes), character.order * enterStagger);
       const animation = element.animate(entrance.keyframes, {
         duration: entrance.duration,
         easing: "linear",
@@ -207,11 +207,10 @@ export function useExitAnimations({
     if (ownerDocument?.hidden) return;
 
     exitElements.current.forEach(({ element, measure, order }) => {
-      // Where the character stood and its color never change while it leaves, so they sit on
-      // the element itself. The animation then holds only properties the compositor can play.
+      // The character's anchor and color stay fixed while its visual properties animate.
       element.style.color = measure.color;
       element.style.translate = `${measure.x}px ${measure.y}px`;
-      const exit = withLeadIn(exitKeyframes, order * exitStagger);
+      const exit = withLeadIn(onStyleTimeline(exitKeyframes), order * exitStagger);
       const animation = element.animate(exit.keyframes, {
         duration: exit.duration,
         easing: "linear",
@@ -287,8 +286,8 @@ export function useRootWidthMorph({
     glyphs.forEach((glyph) => {
       const slot = glyph.parentElement;
       if (!slot || !knownGlyphs.current.has(glyph)) return;
-      const translate = Number.parseFloat(window.getComputedStyle(glyph).translate) || 0;
-      carried.set(glyph, slot.getBoundingClientRect().left / scale + translate);
+      const left = Number.parseFloat(window.getComputedStyle(glyph).left) || 0;
+      carried.set(glyph, slot.getBoundingClientRect().left / scale + left);
     });
     knownGlyphs.current = new WeakSet(glyphs);
 
@@ -300,7 +299,7 @@ export function useRootWidthMorph({
     if (exitAnchor.current?.version !== version) {
       exitAnchor.current = { left: from?.left ?? to.left, version };
     }
-    outgoing.style.translate = `${exitAnchor.current.left - to.left}px 0px`;
+    outgoing.style.left = `${exitAnchor.current.left - to.left}px`;
 
     if (!from) return;
 
@@ -384,8 +383,10 @@ export function animateGustRootWidth({
   // width. Counter only the movement that the root actually starts with.
   const initial = measureElementRect(root);
 
-  // Width changes move centered/end-aligned roots. Cancel that movement on
-  // incoming glyphs, independently of their directional transform keyframes.
+  // Width changes move centered/end-aligned roots. Keep their counter-motion in layout too:
+  // Safari samples composited transforms separately from width, so a translate animation can
+  // drift sideways even when its computed geometry is correct. The glyph's transform stays
+  // free to animate the requested direction.
   // Glyphs carried over from an earlier value start where they are on screen
   // and glide to their new spot with the root instead.
   root.querySelectorAll<HTMLSpanElement>('[data-gust-part="glyph"]').forEach((glyph) => {
@@ -395,18 +396,13 @@ export function animateGustRootWidth({
         ? to.left - initial.left
         : shown - glyph.parentElement.getBoundingClientRect().left / initial.scale;
     if (Math.abs(offset) <= 0.001) return;
-    effects.push(
-      glyph.animate([{ translate: `${offset}px 0px` }, { translate: "0px 0px" }], timing),
-    );
+    effects.push(glyph.animate([{ left: `${offset}px` }, { left: "0px" }], timing));
   });
   if (outgoing) {
-    outgoing.style.translate = `${exitAnchor - to.left}px 0px`;
+    outgoing.style.left = `${exitAnchor - to.left}px`;
     effects.push(
       outgoing.animate(
-        [
-          { translate: `${exitAnchor - initial.left}px 0px` },
-          { translate: `${exitAnchor - to.left}px 0px` },
-        ],
+        [{ left: `${exitAnchor - initial.left}px` }, { left: `${exitAnchor - to.left}px` }],
         timing,
       ),
     );

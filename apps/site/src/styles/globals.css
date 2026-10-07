@@ -6,6 +6,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  color-scheme: dark;
+
   /* Primitives: neutral ramp (hue 0) */
   --white: oklch(1 0 0);
   --gray-50: oklch(0.985 0 0);

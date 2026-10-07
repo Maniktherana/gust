@@ -13,7 +13,7 @@ const layoutEase = cubicBezier(0.16, 1, 0.3, 1);
 // inline element according to its parent alignment. WAAPI effects are sampled
 // at the same clock so assertions include both layout and glyph translation.
 class LayoutElement {
-  style = { translate: "0px 0px" };
+  style = { left: "0px", translate: "0px 0px" };
   effects: LayoutAnimation[] = [];
   ownerDocument = { hidden: false };
   isConnected = true;
@@ -27,7 +27,7 @@ class LayoutElement {
     this.effects.push(effect);
     return effect as unknown as Animation;
   }
-  value(property: "width" | "translate" | "transform", fallback: number) {
+  value(property: "width" | "left" | "translate" | "transform", fallback: number) {
     if (property === "width" && this.scene.widthOverride) return fallback;
     const effect = [...this.effects]
       .reverse()
@@ -47,6 +47,7 @@ class LayoutElement {
         ? this.scene.left(width)
         : this.scene.root.getBoundingClientRect().left +
           (this.part === "glyph" || this.part === "slot" ? this.index * 10 : 0) +
+          this.value("left", Number.parseFloat(this.style.left)) +
           this.value("translate", Number.parseFloat(this.style.translate)) +
           this.value("transform", 0);
     return { left, top: 0, width, height: 20 };
@@ -63,9 +64,16 @@ class LayoutAnimation {
   has(property: string) {
     return this.frames[0][property] !== undefined;
   }
-  sample(property: "width" | "translate" | "transform") {
+  sample(property: "width" | "left" | "translate" | "transform") {
     const duration = Number(this.options.duration);
-    const progress = Math.min(1, Math.max(0, (this.element.scene.time - this.start) / duration));
+    const advance =
+      property === "translate" || property === "transform"
+        ? this.element.scene.compositorAdvance
+        : 0;
+    const progress = Math.min(
+      1,
+      Math.max(0, (this.element.scene.time + advance - this.start) / duration),
+    );
     const eased = this.options.easing === "linear" ? progress : layoutEase(progress);
     const sample =
       property === "transform"
@@ -90,6 +98,7 @@ class LayoutAnimation {
 }
 class LayoutScene {
   time = 0;
+  compositorAdvance = 0;
   width = 10;
   widthOverride = false;
   root = new LayoutElement(this, "root");
@@ -114,6 +123,34 @@ class LayoutScene {
     );
   }
 }
+
+test("width compensation stays in layout when the compositor samples ahead", () => {
+  for (const alignment of ["center", "right"] as const) {
+    const scene = new LayoutScene(alignment);
+    scene.commit(10);
+    const from = scene.root.getBoundingClientRect();
+    scene.commit(20);
+    const to = scene.root.getBoundingClientRect();
+    const morph = animateGustRootWidth({
+      root: scene.root as unknown as HTMLSpanElement,
+      from,
+      to,
+      duration: 200,
+      outgoing: scene.exit as unknown as HTMLSpanElement,
+    });
+    // Safari's rendered transform can advance independently of main-thread width layout.
+    // The horizontal anchor must not depend on the compositor sampling the same instant.
+    scene.compositorAdvance = 32;
+    for (let time = 0; time <= 200; time += 10) {
+      scene.time = time;
+      scene.glyphs.forEach((glyph, index) =>
+        expect(glyph.getBoundingClientRect().left).toBeCloseTo(to.left + index * 10, 6),
+      );
+      expect(scene.exit.getBoundingClientRect().left).toBeCloseTo(from.left, 6);
+    }
+    morph.cancel();
+  }
+});
 
 test("a CSS width override does not introduce compensating horizontal movement", () => {
   const scene = new LayoutScene("right");
@@ -232,6 +269,7 @@ test("interrupting a width morph preserves live width and outgoing glyph coordin
     value: {
       getComputedStyle: (element: LayoutElement) => ({
         color: "rgb(12, 34, 56)",
+        left: `${element.value("left", 0)}px`,
         translate: `${element.value("translate", 0)}px 0px`,
       }),
     },

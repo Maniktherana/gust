@@ -2,20 +2,7 @@ import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-r
 import { DialRoot } from "dialkit";
 import "dialkit/styles.css";
 
-import { ThemeProvider } from "@/components/theme-provider";
-
 import appCss from "@/styles/globals.css?url";
-
-const themeScript = `
-(() => {
-  try {
-    const stored = localStorage.getItem("gust-theme");
-    const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const theme = stored || "system";
-    document.documentElement.classList.toggle("dark", theme === "dark" || (theme === "system" && systemDark));
-  } catch (_) {}
-})();
-`;
 
 export const Route = createRootRoute({
   head: () => ({
@@ -79,18 +66,15 @@ export const Route = createRootRoute({
 
 function RootDocument() {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <ThemeProvider defaultTheme="system">
-          <div className="relative isolate min-h-dvh overflow-x-clip">
-            <Outlet />
-          </div>
-        </ThemeProvider>
-        <DialRoot position="bottom-right" theme="system" />
+        <div className="relative isolate min-h-dvh overflow-x-clip">
+          <Outlet />
+        </div>
+        <DialRoot position="bottom-right" theme="dark" />
         <Scripts />
       </body>
     </html>

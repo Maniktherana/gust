@@ -1,7 +1,6 @@
 "use client";
 
 import { TickerDemo } from "@/components/demos/ticker-demo";
-import { useTheme } from "@/components/theme-provider";
 import type { GustProps } from "@maniktherana/gust";
 
 export const livePriceMotion: Omit<GustProps, "value"> = {
@@ -24,11 +23,9 @@ export function LivePriceExample({
   paused?: boolean;
   motion?: Omit<GustProps, "value">;
 }) {
-  const { resolvedTheme } = useTheme();
-
   return (
     <div className="relative h-full w-full">
-      <TickerDemo motion={motion} paused={paused} theme={resolvedTheme} />
+      <TickerDemo motion={motion} paused={paused} />
     </div>
   );
 }

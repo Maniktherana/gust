@@ -15,16 +15,13 @@ import livePriceSource from "./live-price.tsx?raw";
 import { ColorSwatchesExample, colorSwatchesMotion } from "./color-swatches";
 import colorSwatchesSource from "./color-swatches.tsx?raw";
 
-// Inline the ticker implementation and replace app-specific theme wiring, so
-// the copied graph works as one file in another project.
+// Inline the ticker implementation so the copied graph works as one file in another project.
 const standaloneLivePrice = [
   tickerSource,
   livePriceSource
     .replace('"use client";', "")
     .replace('import type { GustProps } from "@maniktherana/gust";', "")
     .replace('import { TickerDemo } from "@/components/demos/ticker-demo";', "")
-    .replace('import { useTheme } from "@/components/theme-provider";', "")
-    .replace("const { resolvedTheme } = useTheme();", 'const resolvedTheme = "dark" as const;')
     .trim(),
 ].join("\n\n");
 
