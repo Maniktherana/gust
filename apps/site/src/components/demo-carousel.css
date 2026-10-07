@@ -128,6 +128,8 @@
 
 .demo-carousel[data-staged] .demo-carousel__backdrop {
   visibility: visible;
+  /* Its own layer, so fading it never repaints the page behind. */
+  will-change: opacity;
 }
 
 .demo-carousel[data-staged] .demo-carousel__track {

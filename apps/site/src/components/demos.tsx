@@ -13,6 +13,7 @@ import statusSource from "@/components/demos/status-demo.tsx?raw";
 import { examples } from "@/components/examples";
 import { ExampleCard } from "@/components/examples/example-card";
 import { useInView } from "@/hooks/use-element";
+import { useStageMoving } from "@/hooks/use-stage-motion";
 import { useDemoMotion } from "@/hooks/use-demo-motion";
 import { componentPrompt } from "@/lib/prompts";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,8 @@ export const headlinePrompt = componentPrompt({
 
 export function HeadlineBox({ className }: { className?: string }) {
   const [ref, inView] = useInView<HTMLDivElement>();
+  const moving = useStageMoving();
+  const paused = !inView || moving;
 
   return (
     <div
@@ -37,7 +40,7 @@ export function HeadlineBox({ className }: { className?: string }) {
       )}
     >
       <DemoCopyButton prompt={headlinePrompt} title="Headline" />
-      <HeadlineDemo paused={!inView} />
+      <HeadlineDemo paused={paused} />
     </div>
   );
 }
@@ -77,6 +80,8 @@ const demos = [
 
 function DemoBox({ demo, className }: { demo: (typeof demos)[number]; className?: string }) {
   const [ref, inView] = useInView<HTMLDivElement>();
+  const moving = useStageMoving();
+  const paused = !inView || moving;
   const motion = useDemoMotion(demo.title, demo.id, demo.motion);
 
   return (
@@ -89,7 +94,7 @@ function DemoBox({ demo, className }: { demo: (typeof demos)[number]; className?
       )}
     >
       <DemoCopyButton prompt={demo.prompt} title={demo.title} />
-      {demo.render(motion, !inView)}
+      {demo.render(motion, paused)}
     </div>
   );
 }
