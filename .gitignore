@@ -8,3 +8,4 @@ coverage
 apps/site/public/r
 playwright-report
 test-results
+.plans
