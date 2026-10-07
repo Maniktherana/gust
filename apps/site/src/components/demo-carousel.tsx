@@ -151,7 +151,13 @@ export function DemoCarousel({
       (slot) => slot.querySelector<HTMLButtonElement>(".demo-carousel__open")!,
     );
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const blurMotion = window.matchMedia("(hover: hover) and (pointer: fine)");
+    // A mouse or trackpad. Touch screens wake the lens at swipe speeds and skip motion blur.
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    // Only Chromium draws an SVG filter over live HTML on the GPU. Safari, every iOS browser
+    // and Firefox filter it in software, which cannot keep up while the row moves, so they get
+    // the lens drawn with transforms instead, and no motion blur. Only Chromium has
+    // navigator.userAgentData.
+    const filterLens = "userAgentData" in navigator;
     let centers: number[] = [];
     let sizes: Size[] = [];
     let slotTop = 0;
@@ -167,6 +173,7 @@ export function DemoCarousel({
     let lensFade = 0;
     let pull = 0;
     let reach = 0;
+    let stripWidth = 0;
     let disposed = false;
     let frame = 0;
     let previousTime = 0;
@@ -230,7 +237,41 @@ export function DemoCarousel({
     // The lens's raised-cosine profile across the frame, from its middle.
     const bump = (x: number) => (Math.abs(x) < radius ? lensBump(x / radius) : 0);
 
+    // Without the filter, the lens moves and stretches whole cards instead of bending pixels,
+    // which the compositor can do every frame. Its map magnifies the middle of the row and pushes the
+    // rest outward, so the cards swell through the middle without overlapping.
+    const paintWarp = () => {
+      if (pull) {
+        track.style.removeProperty("filter");
+        pull = 0;
+      }
+      const strength = lens * lens * (3 - 2 * lens);
+      const widen = SWELL * WIDEN * strength;
+      const spread = (x: number) =>
+        Math.abs(x) >= radius
+          ? x + (Math.sign(x) * widen * radius) / 2
+          : x + widen * (x / 2 + (radius / (2 * Math.PI)) * Math.sin((Math.PI * x) / radius));
+      centers.forEach((center, index) => {
+        const position = wrap(center - offset, cycle);
+        if (!widen) {
+          slots[index]!.style.transform = `translateX(${position}px)`;
+          return;
+        }
+        const half = sizes[index]!.width / 2;
+        const left = spread(position - half);
+        const right = spread(position + half);
+        const scaleX = (right - left) / (2 * half);
+        const scaleY = 1 + SWELL * strength * bump(position);
+        slots[index]!.style.transform =
+          `translateX(${(left + right) / 2}px) scale(${scaleX.toFixed(4)}, ${scaleY.toFixed(4)})`;
+      });
+    };
+
     const paintStrip = () => {
+      if (!filterLens) {
+        paintWarp();
+        return;
+      }
       centers.forEach((center, index) => {
         slots[index]!.style.transform = `translateX(${wrap(center - offset, cycle)}px)`;
       });
@@ -359,7 +400,7 @@ export function DemoCarousel({
       const zoomRate = zoom * view.vLogZoom;
       const pixel = window.devicePixelRatio || 1;
       const snap = (value: number) => (resting ? Math.round(value * pixel) / pixel : value);
-      const blurring = blurMotion.matches && !resting;
+      const blurring = filterLens && finePointer.matches && !resting;
       return {
         cards: state.bodies.map((body, index) => {
           const { width, height } = sizes[index]!;
@@ -659,7 +700,12 @@ export function DemoCarousel({
         }
 
         speed = ease(speed, (offset - lastOffset) / dt, 0.05, dt);
-        const swell = Math.min(1, Math.max(0, (Math.abs(speed) - 240) / 1800));
+        // A phone swipe is far slower in px/s than a desktop flick, so on touch screens the lens
+        // wakes and fills by the screen's width per second instead.
+        const [wake, fill] = finePointer.matches
+          ? [240, 1800]
+          : [Math.max(80, 0.2 * stripWidth), Math.max(400, 1.2 * stripWidth)];
+        const swell = Math.min(1, Math.max(0, (Math.abs(speed) - wake) / fill));
         lens = ease(lens, swell, swell > lens ? 0.08 : 0.3, dt);
         if (lens < 0.001) lens = 0;
         lensFade = ease(lensFade, lensReady ? 1 : 0, 0.1, dt);
@@ -719,6 +765,7 @@ export function DemoCarousel({
       radius = (2 * (cycle - GAP * slots.length)) / slots.length;
       // The filter covers the row plus room above and below for slides to swell into.
       const frameWidth = viewport.clientWidth;
+      stripWidth = frameWidth;
       const frameHeight = viewport.clientHeight;
       reach = frameHeight * 0.75;
       pull = -1;
@@ -922,6 +969,7 @@ export function DemoCarousel({
         .catch(() => undefined);
     }
 
+    section.dataset.warp = filterLens ? "filter" : "transform";
     measure();
     setMode("strip");
     viewport.dataset.ready = "true";
@@ -961,6 +1009,7 @@ export function DemoCarousel({
       setStageMoving(false);
       delete section.dataset.staged;
       delete section.dataset.stage;
+      delete section.dataset.warp;
       delete viewport.dataset.ready;
       delete viewport.dataset.intro;
       backdrop.style.removeProperty("opacity");
