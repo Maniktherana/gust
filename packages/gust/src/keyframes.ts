@@ -47,7 +47,7 @@ function evalTrack(track: MotionTrack, globalTime: number) {
 }
 
 // The entrance gets its bounce from an overshooting bezier; solve that curve so
-// entranceHeight maps to the actual above-baseline peak instead of a held keyframe.
+// entranceOvershoot maps to the actual above-baseline peak instead of a held keyframe.
 function cubicBezierCoordinate(t: number, point1: number, point2: number) {
   const invertedT = 1 - t;
 
@@ -139,7 +139,7 @@ export function lastCharacterStartDelay(text: string, stagger: number, firstAnim
 
 export function buildEnterKeyframes(config: GustConfig): GustKeyframes {
   const enter = config.enterDuration;
-  const timing = entranceTiming(config.entranceHeight, config.entranceOffset);
+  const timing = entranceTiming(config.entranceOvershoot, config.entranceHeight);
   const peakScale = config.scale ? config.entranceScale : 1;
   const revealEndTime = Math.min(0.32, Math.max(0.18, timing.peakTime / 2));
   const opacityTrack: MotionTrack = {
@@ -152,7 +152,7 @@ export function buildEnterKeyframes(config: GustConfig): GustKeyframes {
     duration: enter,
     ease: timing.ease,
     times: [0, 1],
-    values: [config.entranceOffset, 0],
+    values: [config.entranceHeight, 0],
   };
   const scaleTrack: MotionTrack = {
     duration: enter,
@@ -160,6 +160,15 @@ export function buildEnterKeyframes(config: GustConfig): GustKeyframes {
     times: [0, revealEndTime, timing.peakTime, 1],
     values: [1, 1, peakScale, 1],
   };
+  const filterTrack: MotionTrack | null =
+    config.blur && config.entranceBlur > 0
+      ? {
+          duration: enter * 0.95,
+          ease: easeOutStrongFn,
+          times: [0, 1],
+          values: [config.entranceBlur, 0],
+        }
+      : null;
   const maxDuration = enter;
   const keyframes: Keyframe[] = [];
 
@@ -167,12 +176,16 @@ export function buildEnterKeyframes(config: GustConfig): GustKeyframes {
     const offset = index / (ENTER_SAMPLE_COUNT - 1);
     const globalTime = offset * maxDuration;
 
-    keyframes.push({
+    const keyframe: Keyframe = {
       easing: "linear",
       offset,
       opacity: evalTrack(opacityTrack, globalTime),
       transform: `${directionalTranslate(-evalTrack(distanceTrack, globalTime), config.enterAngle)} scale(${evalTrack(scaleTrack, globalTime)})`,
-    });
+    };
+
+    if (filterTrack) keyframe.filter = `blur(${evalTrack(filterTrack, globalTime)}px)`;
+
+    keyframes.push(keyframe);
   }
 
   return { duration: maxDuration, keyframes };
@@ -200,12 +213,12 @@ export function buildExitKeyframes(config: GustConfig): GustKeyframes {
     values: [1, exitScale],
   };
   const filterTrack: MotionTrack | null =
-    config.blur && config.exitBlurCap > 0
+    config.blur && config.exitBlur > 0
       ? {
           duration: exit * 0.95,
           ease: easeOutStrongFn,
           times: [0, 1],
-          values: [0, config.exitBlurCap],
+          values: [0, config.exitBlur],
         }
       : null;
   const keyframes: Keyframe[] = [];

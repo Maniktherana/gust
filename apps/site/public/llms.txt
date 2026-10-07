@@ -1,0 +1,17 @@
+# Gust
+
+> Animated text transitions for React. Pass a string as `value`; when it changes, Gust animates the characters that changed. Package: @maniktherana/gust.
+
+## Docs
+
+- [Agent guide](https://gust.manikrana.dev/gust.md): install, usage, every prop with its default, recipes and common mistakes. Read this before writing code.
+- [README](https://github.com/Maniktherana/gust#readme): install and props on GitHub.
+
+## Install
+
+- [npm package](https://www.npmjs.com/package/@maniktherana/gust): `npm i @maniktherana/gust`, then import `@maniktherana/gust/styles.css` once.
+- [shadcn registry item](https://gust.manikrana.dev/r/gust.json): `npx shadcn@latest add https://gust.manikrana.dev/r/gust.json`.
+
+## Optional
+
+- [Live demos](https://gust.manikrana.dev): interactive examples of Gust in product UI, on the landing page.

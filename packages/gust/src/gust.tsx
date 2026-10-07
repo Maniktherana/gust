@@ -24,12 +24,10 @@ import type { GustCharacterMeasure } from "./measure";
 import {
   DEFAULT_DURATION_MS,
   DEFAULT_ENTER_ANGLE,
-  DEFAULT_ENTRANCE_HEIGHT,
-  DEFAULT_ENTRANCE_OFFSET,
+  DEFAULT_ENTRANCE_OVERSHOOT,
   DEFAULT_ENTRANCE_SCALE,
   DEFAULT_EXIT_DURATION_MS,
   DEFAULT_EXIT_ANGLE,
-  DEFAULT_EXIT_BLUR_CAP,
   DEFAULT_EXIT_HEIGHT,
   DEFAULT_EXIT_SCALE,
   DEFAULT_STAGGER_MS,
@@ -46,21 +44,48 @@ import {
 } from "./hooks";
 
 type GustProps = Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> & {
+  /** Enables configured entrance and exit blur. @default true */
   blur?: boolean;
+  /** Sends both directions down, for falling values. Explicit angles win. @default false */
   down?: boolean;
+  /** How long each arriving character animates, in milliseconds. @default 440 */
   duration?: number;
+  /** Travel angle of arriving characters in screen degrees: 0 right, 90 down, -90 up. @default -90 */
   enterAngle?: number;
+  /** Starting entrance blur in pixels, easing to sharp text. @default 0 */
+  entranceBlur?: number;
+  /** How far arriving characters travel from their starting position. 100 = 1em. @default 90 */
   entranceHeight?: number;
+  /** How far arriving characters pass their resting position before settling. 100 = 1em; 0 removes the bounce. @default 12 */
+  entranceOvershoot?: number;
+  /** @deprecated Use entranceBlur. Canonical entranceBlur takes precedence. */
+  entranceBlurCap?: number;
+  /** @deprecated Use entranceHeight. Canonical entranceHeight takes precedence. */
   entranceOffset?: number;
+  /** Scale of arriving characters during the overshoot, from 0 to 2. @default 1.1 */
   entranceScale?: number;
+  /** How long each leaving character animates, in milliseconds. @default 400 */
   exitDuration?: number;
+  /** Travel angle of leaving characters in screen degrees: 0 right, 90 down, -90 up. @default -90 */
   exitAngle?: number;
+  /** Maximum exit blur in pixels. It does not scale with font size; use about 1 for small UI text. @default 4 */
+  exitBlur?: number;
+  /** @deprecated Use exitBlur. Canonical exitBlur takes precedence. */
   exitBlurCap?: number;
+  /** How far leaving characters travel. 100 = 1em. @default 90 */
   exitHeight?: number;
+  /** Final scale of leaving characters, from 0 to 1.5. @default 0.4 */
   exitScale?: number;
+  /** Keeps matching leading characters still between values. @default true */
   preservePrefix?: boolean;
+  /** Enables scaling during both entrance and exit. @default true */
   scale?: boolean;
+  /** Extra delay for each next animated character, in milliseconds. @default 20 */
   stagger?: number;
+  /**
+   * The text to show. Gust animates whenever it changes; the first render does
+   * not animate. Format numbers and dates into strings first. Trimmed.
+   */
   value: string;
 };
 
@@ -87,7 +112,6 @@ function GustCharacterSlot({
             {displayCharacter(character.character)}
           </span>
           <span
-            data-gust-animating="true"
             data-gust-character={character.character}
             data-gust-index={character.index}
             data-gust-part="glyph"
@@ -137,7 +161,6 @@ function GustExitingCharacters({
           <span
             key={`out-${elementKey}`}
             aria-hidden="true"
-            data-gust-animating="true"
             data-gust-part="exit"
             ref={(element) => setExitRef(elementKey, element, order, previousMeasure)}
           >
@@ -155,12 +178,16 @@ function Gust({
   down = false,
   duration = DEFAULT_DURATION_MS,
   enterAngle,
-  entranceHeight = DEFAULT_ENTRANCE_HEIGHT,
-  entranceOffset = DEFAULT_ENTRANCE_OFFSET,
+  entranceBlur,
+  entranceHeight,
+  entranceOvershoot = DEFAULT_ENTRANCE_OVERSHOOT,
+  entranceBlurCap,
+  entranceOffset,
   entranceScale = DEFAULT_ENTRANCE_SCALE,
   exitDuration = DEFAULT_EXIT_DURATION_MS,
   exitAngle,
-  exitBlurCap = DEFAULT_EXIT_BLUR_CAP,
+  exitBlur,
+  exitBlurCap,
   exitHeight = DEFAULT_EXIT_HEIGHT,
   exitScale = DEFAULT_EXIT_SCALE,
   preservePrefix = true,
@@ -177,6 +204,7 @@ function Gust({
   const characters = React.useMemo(() => splitCharacters(activeWord), [activeWord]);
   const rootElement = React.useRef<HTMLSpanElement>(null);
   const sizingElement = React.useRef<HTMLSpanElement>(null);
+  const outgoingElement = React.useRef<HTMLSpanElement>(null);
 
   const config = React.useMemo(
     () =>
@@ -184,11 +212,15 @@ function Gust({
         blur,
         duration,
         enterAngle: enterAngle ?? (down ? 90 : DEFAULT_ENTER_ANGLE),
+        entranceBlur,
         entranceHeight,
+        entranceOvershoot,
+        entranceBlurCap,
         entranceOffset,
         entranceScale,
         exitDuration,
         exitAngle: exitAngle ?? (down ? 90 : DEFAULT_EXIT_ANGLE),
+        exitBlur,
         exitBlurCap,
         exitHeight,
         exitScale,
@@ -200,11 +232,15 @@ function Gust({
       down,
       duration,
       enterAngle,
+      entranceBlur,
       entranceHeight,
+      entranceOvershoot,
+      entranceBlurCap,
       entranceOffset,
       entranceScale,
       exitDuration,
       exitAngle,
+      exitBlur,
       exitBlurCap,
       exitHeight,
       exitScale,
@@ -262,6 +298,8 @@ function Gust({
   });
   useRootWidthMorph({
     activeWord,
+    outgoingElement,
+    renderedCharacters,
     rootElement,
     rootWidthDuration,
     sizingElement,
@@ -292,13 +330,20 @@ function Gust({
       <span aria-hidden="true" data-gust-part="sizer" ref={sizingElement}>
         {activeWord || "\u200B"}
       </span>
-      <GustExitingCharacters
-        previousMeasures={transitionExitMeasureSnapshot.current.measures}
-        previousText={previousText}
-        preservedPrefixLength={preservedPrefixLength}
-        setExitRef={setExitRef}
-        transitionKey={transitionKey}
-      />
+      <span
+        aria-hidden="true"
+        data-gust-part="exit-layer"
+        ref={outgoingElement}
+        style={{ position: "absolute", top: 0, left: 0 }}
+      >
+        <GustExitingCharacters
+          previousMeasures={transitionExitMeasureSnapshot.current.measures}
+          previousText={previousText}
+          preservedPrefixLength={preservedPrefixLength}
+          setExitRef={setExitRef}
+          transitionKey={transitionKey}
+        />
+      </span>
       <span aria-hidden="true" data-gust-part="text">
         {renderedCharacters.map((character) => (
           <GustCharacterSlot

@@ -47,6 +47,44 @@ test("the structural stylesheet is framework-independent", async () => {
   expect(css).not.toContain("@import");
   expect(css).not.toContain("@tailwind");
   expect(css).toContain("white-space: pre");
-  expect(css).toContain('[data-gust-animating="true"]');
-  expect(css).toContain("will-change: transform");
+  expect(css).not.toContain("will-change");
+});
+
+test("looping character animations do not accumulate lifecycle listeners", async () => {
+  const hooks = await readFile(new URL("src/hooks.ts", packageRoot), "utf8");
+  const enterStart = hooks.indexOf("export function useEnterAnimations");
+  const exitStart = hooks.indexOf("export function useExitAnimations");
+  const rootStart = hooks.indexOf("export function useRootWidthMorph");
+  const enterHook = hooks.slice(enterStart, exitStart);
+  const exitHook = hooks.slice(exitStart, rootStart);
+
+  expect(enterStart).toBeGreaterThan(-1);
+  expect(exitStart).toBeGreaterThan(enterStart);
+  expect(rootStart).toBeGreaterThan(exitStart);
+  expect(enterHook).not.toContain(".onfinish");
+  expect(enterHook).not.toContain(".oncancel");
+  expect(exitHook).not.toContain(".onfinish");
+  expect(exitHook).not.toContain(".oncancel");
+});
+
+test("completed character animations release their effects", async () => {
+  const hooks = await readFile(new URL("src/hooks.ts", packageRoot), "utf8");
+  const component = await readFile(new URL("src/gust.tsx", packageRoot), "utf8");
+  const css = await readFile(new URL("src/gust.css", packageRoot), "utf8");
+  const enterStart = hooks.indexOf("export function useEnterAnimations");
+  const exitStart = hooks.indexOf("export function useExitAnimations");
+  const rootStart = hooks.indexOf("export function useRootWidthMorph");
+  const enterHook = hooks.slice(enterStart, exitStart);
+  const exitHook = hooks.slice(exitStart, rootStart);
+
+  expect(enterHook).toContain('fill: "backwards"');
+  expect(exitHook).toContain('fill: "backwards"');
+  expect(enterHook).not.toContain('fill: "both"');
+  expect(exitHook).not.toContain('fill: "both"');
+  expect(enterHook).toContain("ownerDocument.hidden");
+  expect(exitHook).toContain("ownerDocument.hidden");
+  expect(component).not.toContain('data-gust-animating="true"');
+  expect(css).not.toContain("will-change");
+  expect(css).toContain(':where([data-gust-part="glyph"]) {\n    opacity: 1;');
+  expect(css).toContain(':where([data-gust-part="exit"]) {\n    opacity: 0;');
 });

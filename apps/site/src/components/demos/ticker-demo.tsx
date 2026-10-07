@@ -1,12 +1,15 @@
-import * as React from "react";
-import { useDialKit } from "dialkit";
+"use client";
 
-import { IconTriangleFilled } from "@/components/icons";
-import { useTheme } from "@/components/theme-provider";
-import { cn } from "@/lib/utils";
-import { Gust } from "@maniktherana/gust";
-import { Liveline } from "liveline";
-import type { LivelinePoint } from "liveline";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { Gust, type GustProps } from "@maniktherana/gust";
+import { Liveline, type LivelinePoint } from "liveline";
+
+export const tickerMotion = {
+  duration: 320,
+  entranceOvershoot: 8,
+  entranceHeight: 100,
+  exitDuration: 320,
+} satisfies Omit<GustProps, "value">;
 
 const tickerPrices = [
   // Original phrase. Keep this order intact for the digit/direction demo.
@@ -38,64 +41,41 @@ function subscribeToReducedMotion(onChange: () => void) {
   return () => media.removeEventListener("change", onChange);
 }
 
-function getReducedMotionPreference() {
-  return window.matchMedia(reducedMotionQuery).matches;
-}
-
 function usePrefersReducedMotion() {
-  return React.useSyncExternalStore(
+  return useSyncExternalStore(
     subscribeToReducedMotion,
-    getReducedMotionPreference,
+    () => window.matchMedia(reducedMotionQuery).matches,
     () => false,
   );
 }
 
-export function TickerDemo() {
-  const controls = useDialKit(
-    "Ticker demo",
-    {
-      timing: {
-        duration: [320, 0, 1200, 10],
-        exitDuration: [320, 0, 1200, 10],
-        stagger: [20, 0, 80, 1],
-      },
-      entrance: {
-        height: [8, 0, 120, 1],
-        offset: [100, 0, 200, 1],
-        scale: [1.1, 1, 2, 0.01],
-      },
-      exit: {
-        blurCap: [4, 0, 12, 0.25],
-        height: [90, 0, 200, 1],
-        scale: [0.4, 0, 1.5, 0.01],
-      },
-      effects: {
-        blur: true,
-        scale: true,
-        preservePrefix: true,
-      },
-    },
-    { id: "gust-demo:ticker" },
-  );
-  const { resolvedTheme } = useTheme();
+// Falling prices move down and rising ones up. The unchanged dollars are a
+// shared prefix, so only the digits that change move.
+export function TickerDemo({
+  motion = tickerMotion,
+  paused = false,
+  theme = "dark",
+}: {
+  motion?: Omit<GustProps, "value">;
+  paused?: boolean;
+  theme?: "dark" | "light";
+}) {
   const prefersReducedMotion = usePrefersReducedMotion();
-  const [data, setData] = React.useState<LivelinePoint[]>([]);
-  const [priceIndex, setPriceIndex] = React.useState(0);
+  const stopped = paused || prefersReducedMotion;
+  const [data, setData] = useState<LivelinePoint[]>([]);
+  const [priceIndex, setPriceIndex] = useState(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const now = Date.now() / 1000;
     const history = [...tickerPrices.slice(1), tickerPrices[0]];
 
     setData(
-      history.map((value, index) => ({
-        time: now - (history.length - 1 - index) * 0.65,
-        value,
-      })),
+      history.map((value, index) => ({ time: now - (history.length - 1 - index) * 0.65, value })),
     );
   }, []);
 
-  React.useEffect(() => {
-    if (prefersReducedMotion) return;
+  useEffect(() => {
+    if (stopped) return undefined;
 
     const timer = window.setTimeout(
       () => {
@@ -110,7 +90,7 @@ export function TickerDemo() {
     );
 
     return () => window.clearTimeout(timer);
-  }, [prefersReducedMotion, priceIndex]);
+  }, [stopped, priceIndex]);
 
   const price = tickerPrices[priceIndex];
   const previous = tickerPrices[(priceIndex + tickerPrices.length - 1) % tickerPrices.length];
@@ -122,8 +102,6 @@ export function TickerDemo() {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 opacity-35"
         aria-hidden="true"
         style={{
-          WebkitMaskImage:
-            "linear-gradient(to right, black 0, black calc(100% - 40px), transparent 100%)",
           maskImage:
             "linear-gradient(to right, black 0, black calc(100% - 40px), transparent 100%)",
         }}
@@ -131,7 +109,7 @@ export function TickerDemo() {
         <Liveline
           data={data}
           value={price}
-          theme={resolvedTheme}
+          theme={theme}
           color={up ? "#2c9d62" : "#d84a4a"}
           window={74}
           grid={false}
@@ -141,7 +119,7 @@ export function TickerDemo() {
           guides={false}
           scrub={false}
           pulse={false}
-          paused={prefersReducedMotion}
+          paused={stopped}
           lineWidth={1.5}
           lerpSpeed={0.12}
           padding={{ top: 0, right: 0, bottom: 0, left: 0 }}
@@ -150,40 +128,29 @@ export function TickerDemo() {
       </div>
 
       <div className="absolute inset-0 z-10 flex items-center justify-center">
+        {/* The badge tints itself from its own text color. */}
         <span
-          className={cn(
-            "flex items-center gap-2.5 rounded-xl px-4 py-3 transition-colors duration-300 motion-reduce:transition-none",
-            up ? "text-(--ok)" : "text-(--bad)",
-          )}
+          className={`flex items-center gap-2.5 rounded-xl px-4 py-3 transition-colors duration-300 motion-reduce:transition-none ${up ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}
           style={{
-            backgroundColor: up
-              ? "color-mix(in oklab, var(--ok) 12%, var(--surface-raised))"
-              : "color-mix(in oklab, var(--bad) 12%, var(--surface-raised))",
+            backgroundColor:
+              "color-mix(in oklab, currentColor 12%, var(--surface-raised, var(--card, #111)))",
           }}
           aria-label={`Simulated stock price, $${price.toFixed(2)}`}
         >
-          <IconTriangleFilled
+          <svg
+            viewBox="0 0 20 20"
             aria-hidden="true"
-            className={cn(
-              "size-4 transition-transform duration-300 motion-reduce:transition-none",
-              !up && "rotate-180",
-            )}
-          />
+            className={`size-4 transition-transform duration-300 motion-reduce:transition-none ${up ? "" : "rotate-180"}`}
+          >
+            <path
+              d="m17.794,12.5L12.598,3.5c-.542-.939-1.514-1.5-2.598-1.5s-2.056.561-2.598,1.5L2.206,12.5c-.542.938-.543,2.061,0,3,.542.939,1.514,1.5,2.598,1.5h10.393c1.084,0,2.056-.561,2.598-1.5.542-.939.542-2.062,0-3Z"
+              fill="currentColor"
+            />
+          </svg>
           <Gust
             value={`$${price.toFixed(2)}`}
-            down={!up}
-            duration={controls.timing.duration}
-            exitDuration={controls.timing.exitDuration}
-            stagger={controls.timing.stagger}
-            entranceHeight={controls.entrance.height}
-            entranceOffset={controls.entrance.offset}
-            entranceScale={controls.entrance.scale}
-            exitBlurCap={controls.exit.blurCap}
-            exitHeight={controls.exit.height}
-            exitScale={controls.exit.scale}
-            blur={controls.effects.blur}
-            scale={controls.effects.scale}
-            preservePrefix={controls.effects.preservePrefix}
+            {...motion}
+            down={motion.down ?? !up}
             className="text-xl font-semibold tabular-nums"
           />
         </span>

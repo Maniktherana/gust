@@ -45,15 +45,12 @@
     transform-origin: center;
   }
 
-  :where([data-gust-animating="true"]) {
-    will-change: transform;
-  }
-
   :where([data-gust-part="glyph"]) {
-    opacity: 0;
+    opacity: 1;
   }
 
   :where([data-gust-part="exit"]) {
+    opacity: 0;
     pointer-events: none;
   }
 

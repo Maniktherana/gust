@@ -2,105 +2,76 @@ import { Link } from "@tanstack/react-router";
 
 import { IconGithub } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { cn } from "@/lib/utils";
 
-const sectionLinks = [
-  { href: "/#about", label: "Overview" },
-  { href: "/#how-it-works", label: "How it works" },
-  { href: "/#props", label: "Props" },
-  { href: "/#best-practices", label: "Use cases" },
-];
+const navLinkClassName =
+  "grid h-9 place-items-center rounded-lg px-3 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground [&.active]:text-foreground";
 
-function Sidebar() {
+function TopNav() {
   return (
-    <aside className="fixed inset-y-0 left-0 hidden w-44 flex-col justify-between px-8 py-10 lg:flex">
-      <div className="flex flex-col gap-8">
-        <Link to="/" className="text-sm font-semibold tracking-tight">
-          gust
-        </Link>
-        <nav className="flex flex-col gap-2">
-          {sectionLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-xs text-muted-foreground transition-colors duration-200 hover:text-foreground"
-            >
-              {link.label}
-            </a>
-          ))}
-          <Link
-            to="/lab"
-            className="text-xs text-muted-foreground transition-colors duration-200 hover:text-foreground [&.active]:text-foreground"
-          >
-            Lab
-          </Link>
-        </nav>
-      </div>
-      <div className="flex flex-col gap-3">
-        <p className="text-xs text-muted-foreground">MIT licensed</p>
-        <p className="text-xs text-muted-foreground">
-          By{" "}
-          <a
-            href="https://manikrana.dev"
-            target="_blank"
-            rel="noreferrer"
-            className="text-foreground"
-          >
-            Manik
-          </a>
-        </p>
-        <div className="-ml-2 flex items-center">
-          <a
-            href="https://github.com/Maniktherana/gust"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="GitHub"
-            className="grid size-8 place-items-center text-muted-foreground transition-colors duration-200 hover:text-foreground"
-          >
-            <IconGithub size="16px" />
-          </a>
-          <ThemeToggle className="size-8" />
-        </div>
-      </div>
-    </aside>
-  );
-}
-
-function MobileHeader() {
-  return (
-    <header className="flex items-center justify-between py-6 lg:hidden">
-      <Link to="/" className="text-sm font-semibold tracking-tight">
+    <header data-intro-after className="flex h-16 items-center justify-between">
+      <Link to="/" className="text-base font-semibold tracking-tight">
         gust
       </Link>
-      <div className="flex items-center gap-1">
-        <Link
-          to="/lab"
-          className="grid h-10 place-items-center px-3 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground [&.active]:text-foreground"
-        >
-          Lab
+      <nav className="-mr-2 flex items-center">
+        <Link to="/agent" className={navLinkClassName}>
+          Agent
         </Link>
         <a
           href="https://github.com/Maniktherana/gust"
           target="_blank"
           rel="noreferrer"
           aria-label="GitHub"
-          className="grid size-10 place-items-center text-muted-foreground transition-colors duration-200 hover:text-foreground"
+          className="grid size-9 place-items-center text-muted-foreground transition-colors duration-200 hover:text-foreground"
         >
           <IconGithub size="16px" />
         </a>
-        <ThemeToggle />
-      </div>
+        <ThemeToggle className="size-9" />
+      </nav>
     </header>
   );
 }
 
-export function SiteShell({ children }: { children: React.ReactNode }) {
+function Footer() {
   return (
-    <>
-      <Sidebar />
-      <div className="mx-auto flex w-full max-w-xl flex-col px-6 lg:px-0">
-        <MobileHeader />
-        {children}
-      </div>
-    </>
+    <footer
+      data-intro-after
+      className="flex items-center justify-between border-t border-border py-8 text-sm text-muted-foreground"
+    >
+      <span>MIT licensed</span>
+      <span>
+        By{" "}
+        <a
+          href="https://manikrana.dev"
+          target="_blank"
+          rel="noreferrer"
+          className="text-foreground"
+        >
+          Manik
+        </a>
+      </span>
+    </footer>
+  );
+}
+
+const shellWidths = {
+  default: "max-w-2xl md:px-0",
+  document: "max-w-4xl",
+  wide: "max-w-5xl",
+};
+
+export function SiteShell({
+  children,
+  width = "default",
+}: {
+  children: React.ReactNode;
+  width?: keyof typeof shellWidths;
+}) {
+  return (
+    <div className={cn("mx-auto flex min-h-dvh w-full flex-col px-6", shellWidths[width])}>
+      <TopNav />
+      <div className="flex-1">{children}</div>
+      <Footer />
+    </div>
   );
 }

@@ -1,52 +1,63 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { AnimatePresence, motion } from "motion/react";
 
 import { CodeBlock } from "@/components/code-block";
 import { CopyButton } from "@/components/copy-button";
-import { DemoGrid } from "@/components/demos";
+import { HeroCarousel } from "@/components/demos";
+import { PropReference } from "@/components/reference/props";
 import { SiteShell } from "@/components/site-nav";
-import { Button } from "@/components/ui/button";
-import {
-  DEFAULT_DURATION_MS,
-  DEFAULT_ENTER_ANGLE,
-  DEFAULT_ENTRANCE_HEIGHT,
-  DEFAULT_ENTRANCE_OFFSET,
-  DEFAULT_ENTRANCE_SCALE,
-  DEFAULT_EXIT_DURATION_MS,
-  DEFAULT_EXIT_ANGLE,
-  DEFAULT_EXIT_BLUR_CAP,
-  DEFAULT_EXIT_HEIGHT,
-  DEFAULT_EXIT_SCALE,
-  DEFAULT_STAGGER_MS,
-  Gust,
-} from "@maniktherana/gust";
+import { useElementSize } from "@/hooks/use-element";
+import { Gust, type GustProps } from "@maniktherana/gust";
+import { agentInstallPrompt } from "@/lib/prompts";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   component: Home,
 });
 
+const packageName = "@maniktherana/gust";
+
 const installOptions = [
-  { command: "bun add @maniktherana/gust", id: "package", label: "npm" },
+  { id: "npm", runner: "npm i", target: packageName },
+  { id: "pnpm", runner: "pnpm add", target: packageName },
+  { id: "yarn", runner: "yarn add", target: packageName },
+  { id: "bun", runner: "bun add", target: packageName },
   {
-    command: "bunx shadcn@latest add https://gust.manikrana.dev/r/gust.json",
-    id: "source",
-    label: "shadcn cli",
+    id: "shadcn",
+    runner: "npx shadcn@latest add",
+    target: "https://gust.manikrana.dev/r/gust.json",
   },
+  { id: "agent", runner: "", target: "" },
 ] as const;
 
-type InstallMethod = (typeof installOptions)[number]["id"];
+type InstallOption = (typeof installOptions)[number];
 
-const heroWords = ["a gust of wind.", "a gust of words.", "a gust of motion."];
+// Tuned for 14px monospace. The default 4px blur cap is sized for display
+// text and smears small glyphs, so it scales down here with the travel.
+const commandMotion = {
+  duration: 340,
+  entranceOvershoot: 6,
+  entranceHeight: 60,
+  entranceScale: 1.04,
+  exitBlur: 1,
+  exitDuration: 260,
+  exitHeight: 60,
+  exitScale: 0.7,
+  stagger: 6,
+} satisfies Omit<GustProps, "value">;
 
-const usageSnippets: Record<InstallMethod, string> = {
-  package: `import { useEffect, useState } from "react";
-import { Gust } from "@maniktherana/gust";
-import "@maniktherana/gust/styles.css";
+const heightTransition = { duration: 0.35, ease: [0.16, 1, 0.3, 1] } as const;
+
+const usageSnippet = (
+  importPath: string,
+  stylesheet: boolean,
+) => `import { useEffect, useState } from "react";
+import { Gust } from "${importPath}";${stylesheet ? `\nimport "${packageName}/styles.css";` : ""}
 
 const messages = ["Queued", "Building", "Live"];
 
-export function GustExample() {
+export function Status() {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -58,329 +69,175 @@ export function GustExample() {
   }, []);
 
   return <Gust value={messages[index] ?? ""} />;
-}`,
-  source: `import { useEffect, useState } from "react";
-import { Gust } from "@/components/ui/gust";
+}`;
 
-const messages = ["Queued", "Building", "Live"];
-
-export function GustExample() {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % messages.length);
-    }, 2000);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  return <Gust value={messages[index] ?? ""} />;
-}`,
-};
-
-type PropRow = {
-  defaultValue: string;
-  description: string;
-  name: string;
-};
-
-const propRows: PropRow[] = [
-  {
-    defaultValue: "-",
-    description: "The controlled string. Animates whenever its value changes.",
-    name: "value",
-  },
-  {
-    defaultValue: "-",
-    description: "Style the rendered text with CSS or utility classes.",
-    name: "className",
-  },
-  {
-    defaultValue: String(DEFAULT_DURATION_MS),
-    description: "Incoming character duration, in milliseconds.",
-    name: "duration",
-  },
-  {
-    defaultValue: String(DEFAULT_EXIT_DURATION_MS),
-    description: "Outgoing character duration, in milliseconds.",
-    name: "exitDuration",
-  },
-  {
-    defaultValue: `${DEFAULT_ENTER_ANGLE}°`,
-    description: "Incoming travel direction. -90° moves up.",
-    name: "enterAngle",
-  },
-  {
-    defaultValue: `${DEFAULT_EXIT_ANGLE}°`,
-    description: "Outgoing travel direction. -90° moves up.",
-    name: "exitAngle",
-  },
-  {
-    defaultValue: "false",
-    description: "Send both directions down unless an angle overrides it.",
-    name: "down",
-  },
-  {
-    defaultValue: String(DEFAULT_STAGGER_MS),
-    description: "Delay between neighboring characters, in milliseconds.",
-    name: "stagger",
-  },
-  {
-    defaultValue: String(DEFAULT_ENTRANCE_HEIGHT),
-    description: "Entrance overshoot distance.",
-    name: "entranceHeight",
-  },
-  {
-    defaultValue: String(DEFAULT_ENTRANCE_OFFSET),
-    description: "Initial entry distance, where 100 equals 1em.",
-    name: "entranceOffset",
-  },
-  {
-    defaultValue: String(DEFAULT_ENTRANCE_SCALE),
-    description: "Peak scale during entrance.",
-    name: "entranceScale",
-  },
-  {
-    defaultValue: String(DEFAULT_EXIT_HEIGHT),
-    description: "Exit distance as a percentage of line height.",
-    name: "exitHeight",
-  },
-  {
-    defaultValue: String(DEFAULT_EXIT_SCALE),
-    description: "Final scale for outgoing characters.",
-    name: "exitScale",
-  },
-  {
-    defaultValue: String(DEFAULT_EXIT_BLUR_CAP),
-    description: "Maximum exit blur, in pixels.",
-    name: "exitBlurCap",
-  },
-  { defaultValue: "true", description: "Blur outgoing characters as they exit.", name: "blur" },
-  {
-    defaultValue: "true",
-    description: "Scale characters as they enter and exit.",
-    name: "scale",
-  },
-  {
-    defaultValue: "true",
-    description: "Keep matching leading characters still.",
-    name: "preservePrefix",
-  },
-];
-
-const useFor = [
-  "Action labels that move through states: Save, Saving…, Saved.",
-  "Prices and counters where only a few digits change.",
-  "Status changes such as deploys, uploads, presence, and build steps.",
-  "Compact headlines cycling through a few phrases.",
-];
-
-const avoidFor = [
-  "Paragraphs and long sentences. Gust animates characters, not reading flow.",
-  "Telemetry that updates before the current transition can finish.",
-];
-
-function SectionHeading({ id, children }: { id: string; children: React.ReactNode }) {
+function Section({
+  children,
+  id,
+  intro,
+  title,
+}: {
+  children?: React.ReactNode;
+  id: string;
+  intro?: React.ReactNode;
+  title: string;
+}) {
   return (
-    <h2 id={id} className="scroll-mt-10 text-sm font-medium">
+    <section data-intro-after className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
+        <h2 id={id} className="scroll-mt-10 text-2xl font-medium tracking-tight">
+          {title}
+        </h2>
+        {intro ? <p className="text-base text-pretty text-muted-foreground">{intro}</p> : null}
+      </div>
       {children}
-    </h2>
+    </section>
   );
 }
 
-function InstallCommand({
-  method,
-  onMethodChange,
-}: {
-  method: InstallMethod;
-  onMethodChange: (method: InstallMethod) => void;
-}) {
-  const selected = installOptions.find((option) => option.id === method) ?? installOptions[0];
-
+function Snippet({ children, copy }: { children: React.ReactNode; copy: string }) {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex gap-4 px-1">
-        {installOptions.map((option) => (
-          <button
-            key={option.id}
-            type="button"
-            aria-pressed={method === option.id}
-            onClick={() => onMethodChange(option.id)}
-            className={cn(
-              "text-xs transition-colors duration-200",
-              method === option.id
-                ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-      <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-raised py-2 pr-2 pl-5">
-        <div
-          className="-my-3 min-w-0 flex-1 overflow-x-auto py-3"
-          data-testid="install-command-viewport"
-        >
-          <code className="block w-max font-mono text-[11px] leading-5 whitespace-nowrap sm:text-xs">
-            <span className="text-muted-foreground select-none">$ </span>
-            <Gust
-              data-testid="install-command"
-              value={selected.command}
-              duration={320}
-              exitDuration={220}
-              stagger={3}
-              entranceHeight={4}
-              entranceScale={1.04}
-              exitHeight={48}
-              exitScale={0.72}
-            />
-          </code>
-        </div>
-        <CopyButton
-          value={selected.command}
-          label="Copy install command"
-          showLabel={false}
-          variant="ghost"
-          size="icon"
-          className="shrink-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
-        />
-      </div>
+    <div className="relative rounded-xl bg-surface-raised">
+      {children}
+      <CopyButton
+        value={copy}
+        label="Copy"
+        showLabel={false}
+        variant="ghost"
+        size="icon"
+        className="absolute top-2.5 right-2.5 text-muted-foreground hover:bg-transparent hover:text-foreground"
+      />
     </div>
   );
 }
 
-function HeroPreview() {
-  const [index, setIndex] = React.useState(0);
-  const [cycleEpoch, setCycleEpoch] = React.useState(0);
-
-  React.useEffect(() => {
-    const timer = window.setInterval(() => {
-      setIndex((current) => current + 1);
-    }, 2400);
-
-    return () => window.clearInterval(timer);
-  }, [cycleEpoch]);
-
-  const next = () => {
-    setIndex((current) => current + 1);
-    setCycleEpoch((current) => current + 1);
-  };
+// Grows and shrinks with its content instead of jumping between heights.
+function AnimatedHeight({ children }: { children: React.ReactNode }) {
+  const [ref, size] = useElementSize<HTMLDivElement>();
 
   return (
-    <div className="relative grid h-48 place-items-center overflow-hidden rounded-xl bg-surface-raised px-6 sm:h-56">
-      <Gust
-        data-testid="hero-gust"
-        value={heroWords[index % heroWords.length] ?? ""}
-        className="max-w-full text-3xl font-medium tracking-tight sm:text-4xl"
-      />
-      <Button variant="secondary" size="xs" className="absolute right-3 bottom-3" onClick={next}>
-        Next
-      </Button>
+    <motion.div
+      initial={false}
+      animate={{ height: size.height || "auto" }}
+      transition={heightTransition}
+      className="overflow-hidden"
+    >
+      <div ref={ref}>{children}</div>
+    </motion.div>
+  );
+}
+
+function Install({
+  onSelect,
+  selected,
+}: {
+  onSelect: (option: InstallOption) => void;
+  selected: InstallOption;
+}) {
+  const isAgent = selected.id === "agent";
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div role="group" aria-label="Install method" className="flex flex-wrap gap-x-5 gap-y-1">
+        {installOptions.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            aria-pressed={selected.id === option.id}
+            onClick={() => onSelect(option)}
+            className={cn(
+              "text-sm transition-colors duration-200",
+              selected.id === option.id
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {option.id}
+          </button>
+        ))}
+      </div>
+      <Snippet copy={isAgent ? agentInstallPrompt : `${selected.runner} ${selected.target}`}>
+        <AnimatedHeight>
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.div
+              key={isAgent ? "agent" : "command"}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {isAgent ? (
+                <p className="py-4 pr-14 pl-5 font-mono text-code text-pretty text-secondary-foreground">
+                  {agentInstallPrompt}
+                </p>
+              ) : (
+                <div className="overflow-x-auto py-4 pr-14 pl-5">
+                  <code className="block w-max font-mono text-code whitespace-pre">
+                    <Gust
+                      value={selected.runner}
+                      {...commandMotion}
+                      className="text-muted-foreground"
+                    />{" "}
+                    <Gust value={selected.target} {...commandMotion} />
+                  </code>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </AnimatedHeight>
+      </Snippet>
     </div>
   );
 }
 
 function Home() {
-  const [installMethod, setInstallMethod] = React.useState<InstallMethod>("package");
+  const [install, setInstall] = React.useState<InstallOption>(installOptions[0]);
+  const fromSource = install.id === "shadcn";
 
   return (
     <SiteShell>
-      <main className="flex flex-col gap-14 pt-2 pb-24 lg:pt-10">
-        <section id="demos" className="flex scroll-mt-10 flex-col gap-3">
-          <HeroPreview />
-          <DemoGrid />
-        </section>
+      <main className="flex flex-col gap-20 pt-4 pb-24">
+        <HeroCarousel />
 
-        <section id="about" className="flex scroll-mt-10 flex-col gap-6">
-          <div className="flex flex-col gap-3">
-            <h1 className="text-sm font-medium">Text that moves like air</h1>
-            <p className="text-sm text-pretty text-muted-foreground">
-              Gust animates changing React text one character at a time. Shared prefixes stay put
-              while old glyphs lift out and new ones settle in.
-            </p>
-          </div>
-          <div className="flex flex-col gap-4">
-            <InstallCommand method={installMethod} onMethodChange={setInstallMethod} />
-            <CodeBlock key={installMethod} code={usageSnippets[installMethod]} />
-            <p className="text-xs text-muted-foreground">
-              {installMethod === "package"
-                ? "Import the stylesheet once in your app."
-                : "The shadcn CLI adds the required styles to globals.css automatically."}
-            </p>
-          </div>
-        </section>
-
-        <section className="flex flex-col gap-4">
-          <SectionHeading id="how-it-works">How it works</SectionHeading>
-          <p className="text-sm text-pretty text-muted-foreground">
-            Gust leaves the shared prefix untouched and staggers only the characters that changed.
-            New glyphs rise from below, fade and sharpen into view, overshoot slightly, then settle;
-            outgoing glyphs lift away, blur, shrink, and disappear while the word eases to its new
-            width.
+        <section data-intro-after className="flex flex-col gap-3">
+          <h1 className="text-2xl font-medium tracking-tight">Text that moves like air</h1>
+          <p className="text-base text-pretty text-muted-foreground">
+            Gust animates changing React text one character at a time. Shared prefixes stay put
+            while old glyphs lift out and new ones settle in, and the width eases to fit. It runs on
+            the Web Animations API, with no animation library.
           </p>
         </section>
 
-        <section className="flex flex-col gap-4">
-          <SectionHeading id="props">Props</SectionHeading>
-          <table className="w-full border-collapse text-left">
-            <thead>
-              <tr className="border-b border-border text-xs text-muted-foreground">
-                <th className="py-2 pr-4 font-normal">Prop</th>
-                <th className="py-2 pr-4 font-normal">Default</th>
-                <th className="py-2 font-normal">Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {propRows.map((row) => (
-                <tr key={row.name} className="border-b border-border last:border-b-0">
-                  <td className="py-2.5 pr-4 font-mono text-xs">{row.name}</td>
-                  <td className="py-2.5 pr-4 font-mono text-xs text-muted-foreground">
-                    {row.defaultValue}
-                  </td>
-                  <td className="py-2.5 text-xs text-muted-foreground sm:text-sm">
-                    {row.description}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
+        <Section id="install" title="Install">
+          <Install selected={install} onSelect={setInstall} />
+        </Section>
 
-        <section className="flex flex-col gap-4">
-          <SectionHeading id="best-practices">When Gust fits</SectionHeading>
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2">
-              <h3 className="text-sm text-muted-foreground">Good for</h3>
-              <ul className="flex flex-col gap-1.5">
-                {useFor.map((item) => (
-                  <li key={item} className="flex gap-3 text-sm text-pretty text-muted-foreground">
-                    <span
-                      aria-hidden="true"
-                      className="mt-2 size-1 shrink-0 rounded-full bg-border-strong"
-                    />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex flex-col gap-2">
-              <h3 className="text-sm text-muted-foreground">Skip it for</h3>
-              <ul className="flex flex-col gap-1.5">
-                {avoidFor.map((item) => (
-                  <li key={item} className="flex gap-3 text-sm text-pretty text-muted-foreground">
-                    <span
-                      aria-hidden="true"
-                      className="mt-2 size-1 shrink-0 rounded-full bg-border-strong"
-                    />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
+        <Section
+          id="usage"
+          title="Usage"
+          intro="Your component owns the value and decides when it changes. Gust animates from the previous string to the next one."
+        >
+          <CodeBlock
+            code={
+              fromSource
+                ? usageSnippet("@/components/ui/gust", false)
+                : usageSnippet(packageName, true)
+            }
+          />
+          <p className="text-base text-pretty text-muted-foreground">
+            {fromSource
+              ? "The shadcn CLI copies the source into components/ui/gust and adds its styles to your global CSS."
+              : "Import the stylesheet once. It holds Gust's structural layout and nothing else."}
+          </p>
+        </Section>
+
+        <Section
+          id="props"
+          title="Props"
+          intro="The defaults suit display text. Each panel runs the real component, and its graph is drawn from the same keyframes Gust plays."
+        >
+          <PropReference />
+        </Section>
       </main>
     </SiteShell>
   );

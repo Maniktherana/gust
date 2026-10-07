@@ -92,13 +92,11 @@
 						"display": "inline-block",
 						"transform-origin": "center"
 					},
-					":where([data-gust-animating=\"true\"])": {
-						"will-change": "transform"
-					},
 					":where([data-gust-part=\"glyph\"])": {
-						"opacity": "0"
+						"opacity": "1"
 					},
 					":where([data-gust-part=\"exit\"])": {
+						"opacity": "0",
 						"pointer-events": "none"
 					},
 					":where([data-gust-part=\"sr-only\"])": {
@@ -115,7 +113,7 @@
 				}
 			},
 			"meta": {
-				"version": "0.1.2"
+				"version": "0.5.0"
 			}
 		}
 	]

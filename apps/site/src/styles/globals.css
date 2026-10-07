@@ -1,24 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@maniktherana/gust/styles.css";
-@import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/geist-mono";
 @custom-variant dark (&:is(.dark *));
-
-/* Matches Liveline's live-dot pulse: 900ms expansion, then a 600ms rest. */
-@keyframes liveline-pulse {
-  0% {
-    opacity: 0.35;
-    transform: scale(1);
-  }
-
-  60%,
-  100% {
-    opacity: 0;
-    transform: scale(1.933333);
-  }
-}
 
 :root {
   /* Primitives: neutral ramp (hue 0) */
@@ -52,6 +37,8 @@
   --surface-control: var(--white);
   --surface-control-hover: var(--gray-100);
   --field: var(--background);
+  /* Solid twin of --field, for chart marks that need a ring in the surface color. */
+  --well: var(--white);
   --field-hover: var(--surface-control-hover);
   --outline: oklch(0.21 0 0 / 8%);
   --outline-subtle: oklch(0.21 0 0 / 6%);
@@ -99,12 +86,6 @@
   --radius: 8px;
   --control-height: 32px;
 
-  /* Status hues (inherited through Gust's standard `className` prop) */
-  --ok: oklch(0.55 0.13 155);
-  --info: oklch(0.55 0.15 250);
-  --warn: oklch(0.6 0.13 70);
-  --bad: oklch(0.55 0.19 25);
-
   --shadow-card:
     0 0 0 1px var(--outline), 0 1px 2px -1px rgb(0 0 0 / 8%), 0 2px 4px 0 rgb(0 0 0 / 4%);
   --shadow-surface: var(--shadow-card);
@@ -140,6 +121,7 @@
   --surface-control: var(--gray-950);
   --surface-control-hover: var(--gray-800);
   --field: oklch(1 0 0 / 5.35%);
+  --well: color-mix(in oklab, var(--gray-950), var(--white) 5.35%);
   --field-hover: oklch(1 0 0 / 8%);
   --outline: oklch(1 0 0 / 8%);
   --outline-subtle: oklch(1 0 0 / 5%);
@@ -175,11 +157,6 @@
   --input: oklch(1 0 0 / 10%);
   --ring: oklch(1 0 0 / 48%);
 
-  --ok: oklch(0.78 0.13 155);
-  --info: oklch(0.75 0.12 250);
-  --warn: oklch(0.82 0.13 80);
-  --bad: oklch(0.72 0.16 25);
-
   --shadow-card:
     0 0 0 1px rgb(255 255 255 / 7%), 0 -1px 0 0 rgb(255 255 255 / 6%), 0 0 0 1px #27272a,
     0 1px 2px 0 rgb(0 0 0 / 42%), 0 3px 6px -1px rgb(0 0 0 / 44%);
@@ -211,6 +188,13 @@
 }
 
 @theme inline {
+  /* Geist Mono has a smaller x-height than Inter, so code sits one step above
+     the 13px caption size, with room between lines. */
+  --text-code: 0.875rem;
+  --text-code--line-height: 1.7;
+  /* Smallest size on the site: chart labels, axis ticks and readouts. */
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.4;
   --font-heading: var(--font-sans);
   --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", "Geist Mono", "SFMono-Regular", ui-monospace, monospace;
@@ -232,6 +216,7 @@
   --color-surface-raised: var(--surface-raised);
   --color-surface-control: var(--surface-control);
   --color-field: var(--field);
+  --color-well: var(--well);
   --color-outline: var(--outline);
   --color-outline-subtle: var(--outline-subtle);
   --color-outline-strong: var(--outline-strong);
@@ -255,10 +240,6 @@
   --color-page-background: var(--page-background);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
-  --color-ok: var(--ok);
-  --color-info: var(--info);
-  --color-warn: var(--warn);
-  --color-bad: var(--bad);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -273,14 +254,62 @@
   --radius-2xl-inner: calc(var(--radius-2xl) - 1px);
 }
 
-/* Subtle blueprint box grid for diagram surfaces. Vertical offset via
-   --grid-offset-y lets a horizontal line be pinned to a text baseline. */
-@utility box-grid {
-  background-image:
-    linear-gradient(var(--outline-subtle) 1px, transparent 1px),
-    linear-gradient(90deg, var(--outline-subtle) 1px, transparent 1px);
-  background-position: 0 var(--grid-offset-y, 0);
-  background-size: 32px 32px;
+/* Prefix x-ray: boxes each character by its role in the current transition,
+   using Gust's own parts so the boxes move with the real animation. The
+   letter-spacing makes room between boxes; the insets center each box on its
+   glyph and the translate re-centers the word. */
+.gust-xray {
+  --xray-spacing: 0.4em;
+  --xray-gap: 0.06em;
+  letter-spacing: var(--xray-spacing);
+  translate: calc(var(--xray-spacing) / 2) 0;
+}
+
+.gust-xray [data-gust-part="slot"] {
+  position: relative;
+}
+
+.gust-xray
+  :is(
+    [data-gust-part="slot"]:not([data-animated]),
+    [data-gust-part="glyph"],
+    [data-gust-part="exit"]
+  )::before {
+  content: "";
+  position: absolute;
+  inset: 0.08em calc(var(--xray-spacing) / 2 + var(--xray-gap)) 0.08em
+    calc(var(--xray-gap) - var(--xray-spacing) / 2);
+  z-index: -1;
+  border-radius: 0.18em;
+}
+
+.gust-xray [data-gust-part="slot"]:not([data-animated])::before {
+  background: color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+
+.gust-xray [data-gust-part="glyph"] {
+  color: var(--background);
+}
+
+.gust-xray [data-gust-part="glyph"]::before {
+  background: var(--foreground);
+}
+
+.gust-xray [data-gust-part="exit"]::before {
+  box-shadow: inset 0 0 0 1.5px var(--outline-strong);
+}
+
+/* Manual Gust previews keep their fades without travel, blur, or width motion. */
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="gust"] {
+    width: max-content !important;
+  }
+
+  [data-gust-part="glyph"],
+  [data-gust-part="exit"] {
+    transform: none !important;
+    filter: none !important;
+  }
 }
 
 /* Shiki dual-theme support: light colors are inline, dark colors ride along as

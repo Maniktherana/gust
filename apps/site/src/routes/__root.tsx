@@ -33,7 +33,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Animate changing React text one character at a time. No animation runtime, stable shared prefixes, and built-in reduced-motion support.",
+          "Animate changing React text one character at a time. No animation library, and shared prefixes stay still.",
       },
       {
         property: "og:title",
@@ -65,6 +65,12 @@ export const Route = createRootRoute({
       {
         rel: "canonical",
         href: "https://gust.manikrana.dev",
+      },
+      {
+        rel: "alternate",
+        type: "text/markdown",
+        href: "/gust.md",
+        title: "Gust agent guide",
       },
     ],
   }),

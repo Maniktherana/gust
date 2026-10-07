@@ -1,32 +1,23 @@
-import * as React from "react";
-import { useDialKit } from "dialkit";
+"use client";
 
-import { Gust } from "@maniktherana/gust";
+import { useEffect, useState } from "react";
+import { Gust, type GustProps } from "@maniktherana/gust";
+
+export const otpMotion = { entranceOvershoot: 8, stagger: 12 } satisfies Omit<GustProps, "value">;
 
 // Each step also says how it leaves: "wipe" clears the whole code in one
-// staggered exit, "backspace" deletes digit by digit down to the shared prefix
-// with the next code (7402 → 74 → 7482).
-const otpSteps = [
+// staggered exit, "backspace" deletes digit by digit down to the prefix it
+// shares with the next code (4589 → 45 → 4567).
+const steps = [
   { code: "1234", exit: "backspace" },
   { code: "4589", exit: "backspace" },
   { code: "4567", exit: "wipe" },
 ] as const;
 
-type OtpPhase = "backspacing" | "holding" | "typing" | "wiping";
+const timing = { backspace: 100, firstDigit: 280, hold: 1250, type: 100, wipe: 1000 };
 
-type OtpState = {
-  code: string;
-  phase: OtpPhase;
-  stepIndex: number;
-};
-
-const otpTiming = {
-  backspace: 100,
-  firstDigit: 280,
-  hold: 1250,
-  type: 100,
-  wipe: 100,
-} as const;
+type Phase = "backspacing" | "holding" | "typing" | "wiping";
+type State = { code: string; phase: Phase; step: number };
 
 function sharedPrefixLength(a: string, b: string) {
   let index = 0;
@@ -36,119 +27,86 @@ function sharedPrefixLength(a: string, b: string) {
   return index;
 }
 
-export function OtpDemo() {
-  const controls = useDialKit(
-    "OTP demo",
-    {
-      timing: {
-        duration: [440, 0, 1200, 10],
-        exitDuration: [440, 0, 1200, 10],
-        stagger: [12, 0, 80, 1],
-      },
-      entrance: {
-        height: [8, 0, 120, 1],
-        offset: [90, 0, 200, 1],
-        scale: [1.1, 1, 2, 0.01],
-      },
-      exit: {
-        blurCap: [4, 0, 12, 0.25],
-        height: [90, 0, 200, 1],
-        scale: [0.4, 0, 1.5, 0.01],
-      },
-      effects: {
-        blur: true,
-        scale: true,
-        preservePrefix: true,
-      },
-    },
-    { id: "gust-demo:otp" },
-  );
-  const [{ code, phase, stepIndex }, setOtp] = React.useState<OtpState>({
-    code: "",
-    phase: "typing",
-    stepIndex: 0,
-  });
+function delayFor({ code, phase }: State, motion: Omit<GustProps, "value">) {
+  if (phase === "holding") return timing.hold;
+  if (phase === "backspacing") return timing.backspace;
+  if (phase === "wiping") {
+    const digits = steps.find((step) => step.exit === "wipe")?.code.length ?? 0;
+    return (
+      (motion.exitDuration ?? 400) + Math.max(0, digits - 1) * (motion.stagger ?? 20) + timing.wipe
+    );
+  }
 
-  React.useEffect(() => {
-    const delay =
-      phase === "holding"
-        ? otpTiming.hold
-        : phase === "backspacing"
-          ? otpTiming.backspace
-          : phase === "wiping"
-            ? otpTiming.wipe
-            : code.length === 0
-              ? otpTiming.firstDigit
-              : otpTiming.type;
+  return code.length === 0 ? timing.firstDigit : timing.type;
+}
 
-    const timer = window.setTimeout(() => {
-      setOtp((current) => {
-        const currentStep = otpSteps[current.stepIndex % otpSteps.length];
-        const currentTarget = currentStep.code;
-        const followingStepIndex = (current.stepIndex + 1) % otpSteps.length;
-        const followingTarget = otpSteps[followingStepIndex].code;
+function advance(current: State): State {
+  const step = steps[current.step % steps.length] ?? steps[0];
+  const nextStep = (current.step + 1) % steps.length;
+  const nextCode = steps[nextStep]?.code ?? "";
 
-        if (current.phase === "holding") {
-          return currentStep.exit === "wipe"
-            ? { code: "", phase: "wiping", stepIndex: followingStepIndex }
-            : { ...current, phase: "backspacing" };
-        }
+  if (current.phase === "holding") {
+    return step.exit === "wipe"
+      ? { code: "", phase: "wiping", step: nextStep }
+      : { ...current, phase: "backspacing" };
+  }
 
-        if (current.phase === "wiping") {
-          return {
-            code: currentTarget.slice(0, 1),
-            phase: currentTarget.length === 1 ? "holding" : "typing",
-            stepIndex: current.stepIndex,
-          };
-        }
+  if (current.phase === "wiping") {
+    return { code: step.code.slice(0, 1), phase: "typing", step: current.step };
+  }
 
-        if (current.phase === "backspacing") {
-          const shared = sharedPrefixLength(currentTarget, followingTarget);
-          const nextCode = current.code.slice(0, -1);
+  if (current.phase === "backspacing") {
+    const code = current.code.slice(0, -1);
 
-          return nextCode.length === shared
-            ? { code: nextCode, phase: "typing", stepIndex: followingStepIndex }
-            : { ...current, code: nextCode };
-        }
+    return code.length === sharedPrefixLength(step.code, nextCode)
+      ? { code, phase: "typing", step: nextStep }
+      : { ...current, code };
+  }
 
-        const nextCode = currentTarget.slice(0, current.code.length + 1);
+  const code = step.code.slice(0, current.code.length + 1);
 
-        return {
-          ...current,
-          code: nextCode,
-          phase: nextCode === currentTarget ? "holding" : "typing",
-        };
-      });
-    }, delay);
+  return { ...current, code, phase: code === step.code ? "holding" : "typing" };
+}
+
+// Typed digits rise in one by one; deleted ones lift away.
+export function OtpDemo({
+  motion = otpMotion,
+  paused = false,
+}: {
+  motion?: Omit<GustProps, "value">;
+  paused?: boolean;
+}) {
+  const [state, setState] = useState<State>({ code: "", phase: "typing", step: 0 });
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (paused || reducedMotion) return undefined;
+    const timer = window.setTimeout(() => setState(advance), delayFor(state, motion));
 
     return () => window.clearTimeout(timer);
-  }, [code, phase, stepIndex]);
+  }, [motion.exitDuration, motion.stagger, paused, reducedMotion, state]);
 
   return (
     // A tall phone bleeding past the box bottom; the digits land at the box's
-    // vertical center with the microcopy visible beneath them.
+    // vertical center with the caption visible beneath them.
     <div className="absolute top-6 left-1/2 h-72 w-52 -translate-x-1/2 rounded-t-[2.5rem] border border-b-0 border-border">
       <div className="flex flex-col items-center pt-14">
-        {/* items-start keeps the Gust root's top edge fixed while its height
-            collapses on an empty code, so exiting digits don't dip mid-wipe. */}
+        {/* items-start keeps Gust's top edge fixed while its height collapses
+            on an empty code, so leaving digits don't dip mid-wipe. */}
         <div className="flex h-10 items-start font-mono text-3xl font-semibold tracking-widest tabular-nums">
+          {/* -mr cancels the letter-spacing after the last digit, so a full
+              code sits optically centered. */}
           <Gust
-            data-testid="otp-code"
-            value={code}
-            duration={controls.timing.duration}
-            exitDuration={controls.timing.exitDuration}
-            stagger={controls.timing.stagger}
-            entranceHeight={controls.entrance.height}
-            entranceOffset={controls.entrance.offset}
-            entranceScale={controls.entrance.scale}
-            exitBlurCap={controls.exit.blurCap}
-            exitHeight={controls.exit.height}
-            exitScale={controls.exit.scale}
-            blur={controls.effects.blur}
-            scale={controls.effects.scale}
-            preservePrefix={controls.effects.preservePrefix}
-            // -mr compensates the trailing letter-spacing after the last digit
-            // so a full code sits optically centered in the phone.
+            value={reducedMotion ? steps[0].code : state.code}
+            {...motion}
             className="-mr-[0.1em]"
           />
         </div>

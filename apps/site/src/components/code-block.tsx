@@ -4,11 +4,22 @@ import { codeToHtml } from "shiki";
 import { CopyButton } from "@/components/copy-button";
 import { cn } from "@/lib/utils";
 
-const blockClassName =
-  "overflow-x-auto rounded-xl bg-surface-raised p-5 font-mono text-xs leading-relaxed";
+const variantClassNames = {
+  bare: "",
+  default: "rounded-xl bg-surface-raised px-5 py-4",
+};
 
-export function CodeBlock({ code, lang = "tsx" }: { code: string; lang?: string }) {
+export function CodeBlock({
+  code,
+  lang = "tsx",
+  variant = "default",
+}: {
+  code: string;
+  lang?: string;
+  variant?: keyof typeof variantClassNames;
+}) {
   const [html, setHtml] = React.useState<string | null>(null);
+  const blockClassName = cn("overflow-x-auto font-mono text-code", variantClassNames[variant]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -26,14 +37,19 @@ export function CodeBlock({ code, lang = "tsx" }: { code: string; lang?: string 
   }, [code, lang]);
 
   return (
-    <div className="relative">
+    <div className="group/code relative">
       <CopyButton
         value={code}
         label="Copy code"
         showLabel={false}
         variant="ghost"
         size="icon"
-        className="absolute top-2 right-2 text-muted-foreground hover:bg-transparent hover:text-foreground"
+        className={cn(
+          "absolute text-muted-foreground hover:bg-transparent hover:text-foreground",
+          variant === "bare"
+            ? "-top-1.5 right-0 opacity-0 transition-opacity duration-150 group-hover/code:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
+            : "top-2.5 right-2.5",
+        )}
       />
       {html ? (
         // oxlint-disable-next-line react/no-danger -- shiki output generated from our own static snippet

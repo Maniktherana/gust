@@ -6,18 +6,10 @@ import * as React from "react";
 
 import type { GustKeyframes } from "./keyframes";
 import type { RenderedGustCharacter } from "./characters";
-import type { GustCharacterMeasure, GustRootSize } from "./measure";
-import { measureElementSize, measureGustCharacterSlots, widthsMatch } from "./measure";
+import type { GustCharacterMeasure, GustRootRect } from "./measure";
+import { measureElementRect, measureGustCharacterSlots, widthsMatch } from "./measure";
 
 const layoutEaseCss = "cubic-bezier(0.16, 1, 0.3, 1)";
-
-function setCharacterAnimating(element: HTMLSpanElement, animating: boolean) {
-  if (animating) {
-    element.dataset.gustAnimating = "true";
-  } else {
-    delete element.dataset.gustAnimating;
-  }
-}
 
 export type GustTransitionState = {
   current: string;
@@ -50,12 +42,8 @@ export function useGustTransitionState(word: string) {
 // so each character reuses the same baked set and varies only its delay. The
 // guard keys on entryKey *and* the live animation state: a preserved prefix
 // character whose entrance is still running is left alone (no replay), but if
-// its animation was cancelled, such as when a dev StrictMode/HMR remount tore it down
-// between mount passes, we refire so it can't get stuck at its opacity:0
-// initial frame. Entrance/exit animations are intentionally never cancelled on
-// unmount: a StrictMode/HMR remount runs cleanup between two mount passes while
-// keeping the same DOM, and cancelling would strand characters at opacity:0. On
-// a real unmount the nodes are detached and GC collects their animations.
+// its animation was cancelled, we refire it. CSS owns the settled state while
+// WAAPI owns only the active transition.
 export function useEnterAnimations({
   enterKeyframes,
   enterStagger,
@@ -70,12 +58,17 @@ export function useEnterAnimations({
   const enterFiredKeys = React.useRef(new Map<number, string>());
   const enterFiredKeyframes = React.useRef(new Map<number, GustKeyframes>());
 
+  const stopEnterAnimations = React.useCallback(() => {
+    enterAnimations.current.forEach((animation) => animation.cancel());
+    enterAnimations.current.clear();
+    enterFiredKeys.current.clear();
+    enterFiredKeyframes.current.clear();
+  }, []);
+
   const setEnterRef = React.useCallback((index: number, element: HTMLSpanElement | null) => {
     if (element) {
       enterElements.current.set(index, element);
     } else {
-      const previousElement = enterElements.current.get(index);
-      if (previousElement) setCharacterAnimating(previousElement, false);
       enterElements.current.delete(index);
     }
   }, []);
@@ -83,8 +76,6 @@ export function useEnterAnimations({
   React.useLayoutEffect(() => {
     renderedCharacters.forEach((character) => {
       if (character.stable) {
-        const element = enterElements.current.get(character.index);
-        if (element) setCharacterAnimating(element, false);
         enterAnimations.current.get(character.index)?.cancel();
         enterAnimations.current.delete(character.index);
         enterFiredKeys.current.delete(character.index);
@@ -97,46 +88,64 @@ export function useEnterAnimations({
       if (!element) return;
 
       const existing = enterAnimations.current.get(character.index);
+
+      // A hidden document cannot show the transition, so settle immediately.
+      if (element.ownerDocument.hidden) {
+        existing?.cancel();
+        enterAnimations.current.delete(character.index);
+        enterFiredKeys.current.delete(character.index);
+        enterFiredKeyframes.current.delete(character.index);
+        return;
+      }
+
       const sameEntry = enterFiredKeys.current.get(character.index) === character.entryKey;
       const sameKeyframes = enterFiredKeyframes.current.get(character.index) === enterKeyframes;
 
       if (sameEntry && sameKeyframes && existing && existing.playState !== "idle") return;
 
       existing?.cancel();
-      setCharacterAnimating(element, true);
 
       const animation = element.animate(enterKeyframes.keyframes, {
         delay: character.order * enterStagger,
         duration: enterKeyframes.duration,
         easing: "linear",
-        fill: "both",
+        fill: "backwards",
       });
 
       enterAnimations.current.set(character.index, animation);
       enterFiredKeys.current.set(character.index, character.entryKey);
       enterFiredKeyframes.current.set(character.index, enterKeyframes);
-      animation.onfinish = () => {
-        if (enterAnimations.current.get(character.index) !== animation) return;
-        setCharacterAnimating(element, false);
-      };
-      animation.oncancel = () => {
-        if (enterAnimations.current.get(character.index) !== animation) return;
-        setCharacterAnimating(element, false);
-      };
+      // Backwards fill covers the stagger delay; CSS owns the settled state.
     });
 
     const activeIndexes = new Set(renderedCharacters.map(({ index }) => index));
 
     enterAnimations.current.forEach((animation, index) => {
       if (activeIndexes.has(index)) return;
-      const element = enterElements.current.get(index);
-      if (element) setCharacterAnimating(element, false);
       animation.cancel();
       enterAnimations.current.delete(index);
       enterFiredKeys.current.delete(index);
       enterFiredKeyframes.current.delete(index);
     });
   }, [enterStagger, enterKeyframes, renderedCharacters]);
+
+  React.useEffect(() => {
+    const ownerDocument =
+      enterElements.current.values().next().value?.ownerDocument ??
+      (typeof document === "undefined" ? null : document);
+
+    if (!ownerDocument) return;
+
+    const settleWhenHidden = () => {
+      if (ownerDocument.hidden) stopEnterAnimations();
+    };
+
+    ownerDocument.addEventListener("visibilitychange", settleWhenHidden);
+    return () => {
+      ownerDocument.removeEventListener("visibilitychange", settleWhenHidden);
+      stopEnterAnimations();
+    };
+  }, [stopEnterAnimations]);
 
   return setEnterRef;
 }
@@ -159,6 +168,11 @@ export function useExitAnimations({
   const exitAnimations = React.useRef(new Set<Animation>());
   const exitFiredVersion = React.useRef(-1);
 
+  const stopExitAnimations = React.useCallback(() => {
+    exitAnimations.current.forEach((animation) => animation.cancel());
+    exitAnimations.current.clear();
+  }, []);
+
   const setExitRef = React.useCallback(
     (
       key: string,
@@ -169,8 +183,6 @@ export function useExitAnimations({
       if (element) {
         exitElements.current.set(key, { element, measure, order });
       } else {
-        const previousElement = exitElements.current.get(key)?.element;
-        if (previousElement) setCharacterAnimating(previousElement, false);
         exitElements.current.delete(key);
       }
     },
@@ -186,9 +198,12 @@ export function useExitAnimations({
     }
 
     exitFiredVersion.current = version;
-    exitElements.current.forEach(({ element }) => setCharacterAnimating(element, false));
-    exitAnimations.current.forEach((animation) => animation.cancel());
-    exitAnimations.current.clear();
+    stopExitAnimations();
+
+    const ownerDocument = exitElements.current.values().next().value?.element.ownerDocument;
+
+    // A hidden document cannot show the transition, so settle immediately.
+    if (ownerDocument?.hidden) return;
 
     exitElements.current.forEach(({ element, measure, order }) => {
       const positionedKeyframes = exitKeyframes.keyframes.map((keyframe) => ({
@@ -196,25 +211,36 @@ export function useExitAnimations({
         color: measure.color,
         translate: `${measure.x}px ${measure.y}px`,
       }));
-      setCharacterAnimating(element, true);
       const animation = element.animate(positionedKeyframes, {
         delay: order * exitStagger,
         duration: exitKeyframes.duration,
         easing: "linear",
-        fill: "both",
+        fill: "backwards",
       });
 
       exitAnimations.current.add(animation);
-      animation.onfinish = () => {
-        if (!exitAnimations.current.has(animation)) return;
-        setCharacterAnimating(element, false);
-      };
-      animation.oncancel = () => {
-        if (!exitAnimations.current.has(animation)) return;
-        setCharacterAnimating(element, false);
-      };
+      // As with entrances, CSS owns the final state; no lifecycle listener or
+      // forwards fill is needed.
     });
-  }, [exitStagger, exitKeyframes, version]);
+  }, [exitStagger, exitKeyframes, stopExitAnimations, version]);
+
+  React.useEffect(() => {
+    const ownerDocument =
+      exitElements.current.values().next().value?.element.ownerDocument ??
+      (typeof document === "undefined" ? null : document);
+
+    if (!ownerDocument) return;
+
+    const settleWhenHidden = () => {
+      if (ownerDocument.hidden) stopExitAnimations();
+    };
+
+    ownerDocument.addEventListener("visibilitychange", settleWhenHidden);
+    return () => {
+      ownerDocument.removeEventListener("visibilitychange", settleWhenHidden);
+      stopExitAnimations();
+    };
+  }, [stopExitAnimations]);
 
   return setExitRef;
 }
@@ -224,75 +250,173 @@ export function useExitAnimations({
 // longer per-character timeline, preventing late centered-layout drift.
 export function useRootWidthMorph({
   activeWord,
+  outgoingElement,
+  renderedCharacters,
   rootElement,
   rootWidthDuration,
   sizingElement,
   version,
 }: {
   activeWord: string;
+  outgoingElement: React.RefObject<HTMLSpanElement | null>;
+  renderedCharacters: RenderedGustCharacter[];
   rootElement: React.RefObject<HTMLSpanElement | null>;
   rootWidthDuration: number;
   sizingElement: React.RefObject<HTMLSpanElement | null>;
   version: number;
 }) {
-  const previousRootSize = React.useRef<GustRootSize | null>(null);
-  const rootSizeAnimation = React.useRef<Animation | null>(null);
+  // Read before React commits the new string, while the old layout is intact.
+  const beforeCommitRect = rootElement.current ? measureElementRect(rootElement.current) : null;
+  const widthMorph = React.useRef<ReturnType<typeof animateGustRootWidth> | null>(null);
+  const exitAnchor = React.useRef<{ left: number; version: number } | null>(null);
+  const knownGlyphs = React.useRef(new WeakSet<Element>());
 
   React.useLayoutEffect(() => {
     const root = rootElement.current;
     const sizing = sizingElement.current;
+    const outgoing = outgoingElement.current;
 
-    if (!root || !sizing) return;
+    if (!root || !sizing || !outgoing) return;
 
-    const previousSize = previousRootSize.current;
-    const visualSize = measureElementSize(root);
-    const hadActiveWidthAnimation = rootSizeAnimation.current !== null;
+    const glyphs = root.querySelectorAll<HTMLSpanElement>('[data-gust-part="glyph"]');
+    // Glyphs still entering from an earlier value keep their element. Note where each one is on
+    // screen before the in-flight morph is cancelled, so it glides on from there instead of
+    // jumping to its new spot.
+    const carried = new Map<Element, number>();
+    glyphs.forEach((glyph) => {
+      const slot = glyph.parentElement;
+      if (!slot || !knownGlyphs.current.has(glyph)) return;
+      const translate = Number.parseFloat(window.getComputedStyle(glyph).translate) || 0;
+      carried.set(glyph, slot.getBoundingClientRect().left + translate);
+    });
+    knownGlyphs.current = new WeakSet(glyphs);
 
-    rootSizeAnimation.current?.cancel();
-    rootSizeAnimation.current = null;
+    const from = widthMorph.current ? measureElementRect(root) : beforeCommitRect;
+    widthMorph.current?.cancel();
+    widthMorph.current = null;
+    const to = measureElementRect(root);
 
-    const nextSize = measureElementSize(sizing);
+    if (exitAnchor.current?.version !== version) {
+      exitAnchor.current = { left: from?.left ?? to.left, version };
+    }
+    outgoing.style.translate = `${exitAnchor.current.left - to.left}px 0px`;
 
-    previousRootSize.current = nextSize;
+    if (!from) return;
 
-    if (!previousSize) return;
+    // Natural layout already has the target size when no transition is visible.
+    if (root.ownerDocument.hidden) return;
 
-    // An interrupted morph must resume from the width currently on screen.
-    // Starting from the prior animation's target creates a one-frame snap,
-    // especially while typing or deleting quickly.
-    const fromSize = hadActiveWidthAnimation ? visualSize : previousSize;
+    if (widthsMatch(from, to)) return;
 
-    if (widthsMatch(fromSize, nextSize)) return;
+    const morph = animateGustRootWidth({
+      root,
+      from,
+      to,
+      duration: rootWidthDuration,
+      outgoing,
+      exitAnchor: exitAnchor.current.left,
+      carried,
+    });
 
-    const animation = root.animate(
-      [{ width: `${fromSize.width}px` }, { width: `${nextSize.width}px` }],
-      {
-        duration: rootWidthDuration,
-        easing: layoutEaseCss,
-        fill: "both",
-      },
-    );
-
-    rootSizeAnimation.current = animation;
-    animation.onfinish = () => {
-      if (rootSizeAnimation.current !== animation) return;
-      rootSizeAnimation.current = null;
-      animation.cancel();
+    widthMorph.current = morph;
+    morph.animation.onfinish = () => {
+      if (widthMorph.current !== morph) return;
+      widthMorph.current = null;
+      morph.cancel();
     };
-  }, [activeWord, rootElement, rootWidthDuration, sizingElement, version]);
+  }, [
+    activeWord,
+    outgoingElement,
+    renderedCharacters,
+    rootElement,
+    rootWidthDuration,
+    sizingElement,
+    version,
+  ]);
 
-  React.useEffect(
-    () => () => {
-      rootSizeAnimation.current?.cancel();
-      rootSizeAnimation.current = null;
-    },
-    [],
+  React.useEffect(() => {
+    const root = rootElement.current;
+    const ownerDocument = root?.ownerDocument;
+    const settleWhenHidden = () => {
+      if (!ownerDocument?.hidden) return;
+      widthMorph.current?.cancel();
+      widthMorph.current = null;
+    };
+
+    ownerDocument?.addEventListener("visibilitychange", settleWhenHidden);
+    return () => {
+      ownerDocument?.removeEventListener("visibilitychange", settleWhenHidden);
+      widthMorph.current?.cancel();
+      widthMorph.current = null;
+    };
+  }, [rootElement]);
+}
+
+// Kept imperative so the width/glyph geometry can be exercised without a
+// browser or React scheduler in the regression harness.
+export function animateGustRootWidth({
+  root,
+  from,
+  to,
+  duration,
+  outgoing,
+  exitAnchor = from.left,
+  carried,
+}: {
+  root: HTMLSpanElement;
+  from: Pick<GustRootRect, "left" | "width">;
+  to: Pick<GustRootRect, "left" | "width">;
+  duration: number;
+  outgoing?: HTMLSpanElement;
+  exitAnchor?: number;
+  /** Viewport x of glyphs already on screen before this morph, by glyph element. */
+  carried?: ReadonlyMap<Element, number>;
+}) {
+  const timing = { duration, easing: layoutEaseCss, fill: "both" as const };
+  const effects: Animation[] = [];
+  const animation = root.animate(
+    [{ width: `${from.width}px` }, { width: `${to.width}px` }],
+    timing,
   );
+  effects.push(animation);
+  // User CSS (including reduced-motion !important rules) can override WAAPI
+  // width. Counter only the movement that the root actually starts with.
+  const initial = measureElementRect(root);
+
+  // Width changes move centered/end-aligned roots. Cancel that movement on
+  // incoming glyphs, independently of their directional transform keyframes.
+  // Glyphs carried over from an earlier value start where they are on screen
+  // and glide to their new spot with the root instead.
+  root.querySelectorAll<HTMLSpanElement>('[data-gust-part="glyph"]').forEach((glyph) => {
+    const shown = carried?.get(glyph);
+    const offset =
+      shown === undefined || !glyph.parentElement
+        ? to.left - initial.left
+        : shown - glyph.parentElement.getBoundingClientRect().left;
+    if (Math.abs(offset) <= 0.001) return;
+    effects.push(
+      glyph.animate([{ translate: `${offset}px 0px` }, { translate: "0px 0px" }], timing),
+    );
+  });
+  if (outgoing) {
+    outgoing.style.translate = `${exitAnchor - to.left}px 0px`;
+    effects.push(
+      outgoing.animate(
+        [
+          { translate: `${exitAnchor - initial.left}px 0px` },
+          { translate: `${exitAnchor - to.left}px 0px` },
+        ],
+        timing,
+      ),
+    );
+  }
+
+  return { animation, cancel: () => effects.forEach((effect) => effect.cancel()) };
 }
 
 // Keep the per-character measurements that the next transition's exit layer
-// needs. Horizontal movement belongs exclusively to the root width morph; the
-// text row stays start-anchored so centering and FLIP cannot fight each other.
+// needs. Snapshot before a new string commits so exits start at the previous
+// glyph positions, including an in-flight width compensation.
 export function useCharacterMeasurements({
   activeWord,
   rootElement,
@@ -302,6 +426,15 @@ export function useCharacterMeasurements({
 }) {
   const slotElements = React.useRef(new Map<number, HTMLSpanElement>());
   const previousSlotMeasures = React.useRef(new Map<number, GustCharacterMeasure>());
+  const measuredWord = React.useRef(activeWord);
+
+  if (measuredWord.current !== activeWord && rootElement.current) {
+    previousSlotMeasures.current = measureGustCharacterSlots(
+      rootElement.current,
+      slotElements.current,
+    );
+    measuredWord.current = activeWord;
+  }
 
   const setSlotRef = React.useCallback((index: number, element: HTMLSpanElement | null) => {
     if (element) {
@@ -310,14 +443,6 @@ export function useCharacterMeasurements({
       slotElements.current.delete(index);
     }
   }, []);
-
-  React.useLayoutEffect(() => {
-    const root = rootElement.current;
-
-    if (!root) return;
-
-    previousSlotMeasures.current = measureGustCharacterSlots(root, slotElements.current);
-  }, [activeWord, rootElement]);
 
   return { previousSlotMeasures, setSlotRef };
 }
