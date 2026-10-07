@@ -10,7 +10,6 @@ import {
   type Placement,
   type Size,
 } from "./demo-carousel-stage";
-import { setStageMoving } from "@/hooks/use-stage-motion";
 import "./demo-carousel.css";
 
 export type CarouselSlide = {
@@ -43,14 +42,6 @@ const SOFTEN = 0.5;
 const WIDEN = 0.5;
 // Clicks the lens moves away from what they land on in the layout.
 const INTERACTIVE = "a[href], button, input, label, select, summary, textarea, [role='button']";
-// How long, in seconds, the stage's motion blur exposes each frame. A card blurs by how fast its
-// fastest edge moves, so it softens most while it zooms or flies.
-const EXPOSURE = 1 / 1200;
-// The most motion blur, in screen px, a card gets. Only devices with a fine pointer draw it;
-// blurring several layers every frame is too much for most phone GPUs.
-const MAX_BLUR = 8;
-// Blur below this, in a card's own px, is not worth drawing.
-const BLUR_FLOOR = 0.25;
 // The most a focused card is enlarged from its natural size, so its canvases stay fairly sharp
 // on very large screens.
 const MAX_FOCUS = 3;
@@ -99,8 +90,11 @@ type Body = { logScale: number; vLogScale: number; vx: number; vy: number; x: nu
 // The camera's springs, with its zoom in log space too.
 type View = { logZoom: number; vLogZoom: number; vx: number; vy: number; x: number; y: number };
 type StageState = { bodies: Body[]; camera: View; fade: number; vFade: number };
-// One frame of the stage: each card's transform and motion blur, and the backdrop's opacity.
-type StageFrame = { cards: { blur: number; transform: string }[]; fade: number };
+// One frame of the stage: each card's place on screen, and the backdrop's opacity.
+type StageFrame = {
+  cards: { scale: number; x: number; y: number }[];
+  fade: number;
+};
 
 // Every demo stays mounted once while the row loops past the viewport. A lens fixed in the
 // middle of the frame bends whatever passes through it while the row moves fast, then flattens
@@ -151,11 +145,11 @@ export function DemoCarousel({
       (slot) => slot.querySelector<HTMLButtonElement>(".demo-carousel__open")!,
     );
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    // A mouse or trackpad. Touch screens skip the lens and the motion blur altogether.
+    // A mouse or trackpad. Touch screens skip the lens altogether.
     const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
     // Only Chromium draws an SVG filter over live HTML on the GPU. Safari and Firefox filter it
     // in software, which cannot keep up while the row moves, so they get the lens drawn with
-    // transforms instead, and no motion blur. Only Chromium has navigator.userAgentData.
+    // transforms instead. Only Chromium has navigator.userAgentData.
     const chromium = "userAgentData" in navigator;
     const filterLens = () => chromium && finePointer.matches;
     let centers: number[] = [];
@@ -236,33 +230,74 @@ export function DemoCarousel({
     // The lens's raised-cosine profile across the frame, from its middle.
     const bump = (x: number) => (Math.abs(x) < radius ? lensBump(x / radius) : 0);
 
-    // Without the filter, the lens moves and stretches whole cards instead of bending pixels,
-    // which the compositor can do every frame. Its map magnifies the middle of the row and pushes the
-    // rest outward, so the cards swell through the middle without overlapping.
+    // Without the filter, the lens reshapes whole cards instead of bending pixels, which the
+    // compositor can do every frame, with the filter's own geometry. Each card's edges land
+    // where the filter's map would draw them: the middle of the row spreads apart, the rim of the
+    // lens squeezes, and nothing beyond it moves. Each edge is as tall as the filter makes that
+    // column, so a card between the middle and the rim becomes a trapezoid leaning outward, as
+    // the bent card did, drawn with one perspective transform.
     const paintWarp = () => {
       if (pull) {
         track.style.removeProperty("filter");
         pull = 0;
       }
       const strength = lens * lens * (3 - 2 * lens);
-      const widen = SWELL * WIDEN * strength;
-      const spread = (x: number) =>
-        Math.abs(x) >= radius
-          ? x + (Math.sign(x) * widen * radius) / 2
-          : x + widen * (x / 2 + (radius / (2 * Math.PI)) * Math.sin((Math.PI * x) / radius));
+      const amount = SWELL * strength;
+      // The filter's pull: how far the middle column is magnified, as 1 / (1 - bend).
+      const bend = amount / (1 + amount);
+      const across = WIDEN * bend;
+      // The source column a screen column shows, both as offsets from the middle, and its slope.
+      const source = (x: number) => x - across * x * bump(x);
+      const slope = (x: number) => {
+        if (Math.abs(x) >= radius) return 1;
+        const u = x / radius;
+        return 1 - across * (lensBump(u) - (Math.PI / 2) * u * Math.sin(Math.PI * u));
+      };
+      // The screen column that shows a source column: the map's inverse, by Newton's method.
+      const shown = (x: number) => {
+        let y = x;
+        for (let step = 0; step < 6; step += 1) y -= (source(y) - x) / slope(y);
+        return y;
+      };
+      const tall = (x: number) => 1 / (1 - bend * bump(x));
       centers.forEach((center, index) => {
         const position = wrap(center - offset, cycle);
-        if (!widen) {
-          slots[index]!.style.transform = `translateX(${position}px)`;
+        const slot = slots[index]!;
+        if (bend < 1e-3) {
+          slot.style.transform = `translateX(${position}px)`;
           return;
         }
-        const half = sizes[index]!.width / 2;
-        const left = spread(position - half);
-        const right = spread(position + half);
-        const scaleX = (right - left) / (2 * half);
-        const scaleY = 1 + SWELL * strength * bump(position);
-        slots[index]!.style.transform =
-          `translateX(${(left + right) / 2}px) scale(${scaleX.toFixed(4)}, ${scaleY.toFixed(4)})`;
+        const { height, width } = sizes[index]!;
+        const left = shown(position - width / 2);
+        const right = shown(position + width / 2);
+        const leftTall = tall(left);
+        const rightTall = tall(right);
+        // A projective map from the card onto the trapezoid, about the card's top left corner,
+        // which sits half a card left of the middle: x' = (a u + b) / (c u + 1), with each
+        // column scaled about the card's middle row by leftTall / (c u + 1).
+        const c = (leftTall / rightTall - 1) / width;
+        const b = left + width / 2;
+        const a = ((right + width / 2) * (c * width + 1) - b) / width;
+        const middle = height / 2;
+        const matrix = [
+          a,
+          middle * c,
+          0,
+          c,
+          0,
+          leftTall,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          b,
+          middle - leftTall * middle,
+          0,
+          1,
+        ];
+        slot.style.transform = `matrix3d(${matrix.map((value) => Number(value.toFixed(6))).join(", ")})`;
       });
     };
 
@@ -391,54 +426,35 @@ export function DemoCarousel({
       );
     };
 
-    // How every card looks for one state of the springs, through the camera. A resting frame
+    // Where every card is for one state of the springs, through the camera. A resting frame
     // lands the corners on device pixels so the demos' text stays sharp.
     const drawState = (state: StageState, resting: boolean): StageFrame => {
       const view = state.camera;
       const zoom = Math.exp(view.logZoom);
-      const zoomRate = zoom * view.vLogZoom;
       const pixel = window.devicePixelRatio || 1;
       const snap = (value: number) => (resting ? Math.round(value * pixel) / pixel : value);
-      const blurring = filterLens() && !resting;
       return {
-        cards: state.bodies.map((body, index) => {
-          const { width, height } = sizes[index]!;
+        cards: state.bodies.map((body) => {
           const scale = Math.exp(body.logScale) * zoom;
-          const x = (body.x - view.x) * zoom + stageSize.width / 2;
-          const y = (body.y - view.y) * zoom + stageSize.height / 2;
-          const transform = `translate(${snap(x)}px, ${snap(y)}px) scale(${scale.toFixed(5)})`;
-          // Cards off screen are never seen, and the card zooming into focus stays sharp.
-          const offscreen =
-            x > stageSize.width ||
-            y > stageSize.height ||
-            x + width * scale < 0 ||
-            y + height * scale < 0;
-          if (!blurring || offscreen || (mode === "focus" && index === focused)) {
-            return { blur: 0, transform };
-          }
-          // How fast each edge moves on screen, from the springs' own velocities.
-          const vx = (body.vx - view.vx) * zoom + (body.x - view.x) * zoomRate;
-          const vy = (body.vy - view.vy) * zoom + (body.y - view.y) * zoomRate;
-          const vScale = scale * (body.vLogScale + view.vLogZoom);
-          const speed = Math.max(
-            Math.abs(vx),
-            Math.abs(vx + width * vScale),
-            Math.abs(vy),
-            Math.abs(vy + height * vScale),
-          );
-          const blur = Math.min(MAX_BLUR, speed * EXPOSURE) / scale;
-          return { blur: blur < BLUR_FLOOR ? 0 : blur, transform };
+          const x = snap((body.x - view.x) * zoom + stageSize.width / 2);
+          const y = snap((body.y - view.y) * zoom + stageSize.height / 2);
+          return { scale, x, y };
         }),
         fade: Math.min(1, Math.max(0, state.fade)),
       };
     };
 
-    const writeFrame = ({ cards, fade: shade }: StageFrame) => {
-      cards.forEach(({ blur, transform }, index) => {
+    // Rasterize enlarged cards at their display size. Scaling a small composited layer up leaves
+    // WebKit's text and SVGs pixelated; CSS zoom gives descendants the actual drawing scale.
+    const stageTransform = ({ x, y, scale }: StageFrame["cards"][number], zoom: number) =>
+      `translate(${x / zoom}px, ${y / zoom}px) scale(${scale / zoom})`;
+
+    const writeFrame = ({ cards, fade: shade }: StageFrame, resolutions?: number[]) => {
+      cards.forEach((card, index) => {
         const slot = slots[index]!;
-        slot.style.transform = transform;
-        if (blur) slot.style.filter = `blur(${blur.toFixed(2)}px)`;
-        else slot.style.removeProperty("filter");
+        const zoom = resolutions?.[index] ?? Math.max(1, card.scale);
+        slot.style.zoom = String(zoom);
+        slot.style.transform = stageTransform(card, zoom);
       });
       backdrop.style.opacity = String(shade);
     };
@@ -463,9 +479,8 @@ export function DemoCarousel({
 
     // Hands one whole motion to the browser as keyframes, sampled from the springs until they
     // rest. The compositor plays them with no script per frame, so the cards stay smooth even
-    // while the page is busy, and the browser draws each card at the largest size it reaches,
-    // so a card zooming into focus stays sharp. The demos pause meanwhile, so their timers and
-    // canvases leave the frames to the motion.
+    // while the page is busy. Zoom supplies the largest resolution needed during the motion;
+    // the transform only interpolates the placement, including when a large card shrinks.
     const animateStage = () => {
       motionId += 1;
       const id = motionId;
@@ -481,8 +496,11 @@ export function DemoCarousel({
       }
       const final = drawState(restState(), true);
       samples.push(final);
+      const resolutions = slots.map((_, index) =>
+        Math.max(1, ...samples.map((sample) => sample.cards[index]!.scale)),
+      );
       // The cards' own styles hold the last frame, so nothing moves when the animations end.
-      writeFrame(final);
+      writeFrame(final, resolutions);
 
       if (samples.length < 2 || typeof backdrop.animate !== "function") {
         finishMotion();
@@ -494,17 +512,15 @@ export function DemoCarousel({
         fill: "both",
       } satisfies KeyframeAnimationOptions;
       const offsetOf = (frameIndex: number) => frameIndex / (samples.length - 1);
-      motions = slots.map((slot, index) => {
-        const blurs = samples.some((sample) => sample.cards[index]!.blur > 0);
-        return slot.animate(
+      motions = slots.map((slot, index) =>
+        slot.animate(
           samples.map((sample, frameIndex) => ({
             offset: offsetOf(frameIndex),
-            transform: sample.cards[index]!.transform,
-            ...(blurs ? { filter: `blur(${sample.cards[index]!.blur.toFixed(2)}px)` } : {}),
+            transform: stageTransform(sample.cards[index]!, resolutions[index]!),
           })),
           timing,
-        );
-      });
+        ),
+      );
       motions.push(
         backdrop.animate(
           samples.map((sample, frameIndex) => ({
@@ -514,7 +530,6 @@ export function DemoCarousel({
           timing,
         ),
       );
-      setStageMoving(true);
       motions[0]!.finished.then(
         () => {
           if (id === motionId) finishMotion();
@@ -556,7 +571,7 @@ export function DemoCarousel({
     };
 
     // Settles the springs on their targets and drops the finished animations, which the cards'
-    // own styles already match, then lets the demos run again.
+    // own styles already match.
     const finishMotion = () => {
       const rest = restState();
       bodies = rest.bodies;
@@ -565,9 +580,11 @@ export function DemoCarousel({
       vFade = 0;
       motions.forEach((motion) => motion.cancel());
       motions = [];
-      setStageMoving(false);
       if (mode === "strip") settle();
-      else lockPage();
+      else {
+        writeFrame(drawState(rest, true));
+        lockPage();
+      }
     };
 
     // Lifts the strip onto the stage exactly where it is, so nothing moves until the springs do.
@@ -609,9 +626,9 @@ export function DemoCarousel({
     const settle = () => {
       staged = false;
       delete section.dataset.staged;
+      slots.forEach((slot) => slot.style.removeProperty("zoom"));
       unlockPage();
       backdrop.style.removeProperty("opacity");
-      slots.forEach((slot) => slot.style.removeProperty("filter"));
       lastOffset = offset;
       speed = 0;
       velocity = 0;
@@ -745,10 +762,23 @@ export function DemoCarousel({
       // enough back that the intro spin coasts to a stop on the initial slide.
       const shift = centers.length ? offset - centers[current]! : -(velocity - CRUISE) * FRICTION;
       let cursor = 0;
+      const before = { sizes, stage: stageSize };
       sizes = slots.map((slot) => ({
         height: slot.offsetHeight,
         width: Number.parseFloat(getComputedStyle(slot).width),
       }));
+      const same = (a: Size, b: Size | undefined) =>
+        !!b && Math.abs(a.width - b.width) < 0.5 && Math.abs(a.height - b.height) < 0.5;
+      if (staged) {
+        readStage();
+        // Zoom can notify ResizeObserver without changing the card's layout dimensions.
+        // Leave the stage untouched in that case, including its margins and zoom styles.
+        if (
+          same(stageSize, before.stage) &&
+          sizes.every((size, index) => same(size, before.sizes[index]))
+        )
+          return;
+      }
       centers = sizes.map(({ width }, index) => {
         const center = cursor + width / 2;
         cursor += width + GAP;
@@ -778,7 +808,6 @@ export function DemoCarousel({
       if (staged) {
         pull = 0;
         freeze();
-        readStage();
         retarget();
         animateStage();
       }
@@ -786,6 +815,7 @@ export function DemoCarousel({
     };
 
     const pointerDown = (event: PointerEvent) => {
+      ignoreClick = false;
       if (staged || !event.isPrimary || (event.pointerType === "mouse" && event.button !== 0))
         return;
       // Pressing catches the row, so a fling or wheel glide stops under the pointer.
@@ -801,6 +831,11 @@ export function DemoCarousel({
 
     const pointerMove = (event: PointerEvent) => {
       if (!drag || event.pointerId !== drag.id) return;
+      // A mouse release outside the window need not deliver pointerup here.
+      if (event.pointerType === "mouse" && event.buttons === 0) {
+        cancelDrag();
+        return;
+      }
       const dx = event.clientX - drag.x;
       const dy = event.clientY - drag.y;
       if (!drag.moved) {
@@ -826,6 +861,21 @@ export function DemoCarousel({
       delete viewport.dataset.dragging;
       if (viewport.hasPointerCapture(event.pointerId))
         viewport.releasePointerCapture(event.pointerId);
+      holdUntil = 0;
+      resume();
+    };
+
+    const cancelDrag = () => {
+      if (!drag) return;
+      const { id, moved } = drag;
+      drag = null;
+      ignoreClick = moved;
+      window.clearTimeout(clickReset);
+      // Suppress any late click from this cancelled gesture. A fresh pointerdown or keyboard
+      // action clears it, so the user's next deliberate action still works.
+      delete viewport.dataset.dragging;
+      if (viewport.hasPointerCapture(id)) viewport.releasePointerCapture(id);
+      velocity = 0;
       holdUntil = 0;
       resume();
     };
@@ -894,6 +944,7 @@ export function DemoCarousel({
     };
 
     const keyDown = (event: KeyboardEvent) => {
+      ignoreClick = false;
       pointerFocus = false;
       if (staged) {
         if (mode !== "strip") stageKeyDown(event);
@@ -936,6 +987,8 @@ export function DemoCarousel({
     };
 
     const updateActivity = () => {
+      if (document.hidden) cancelDrag();
+      if (!viewport.contains(document.activeElement)) keyboardFocus = false;
       if (media.matches) lens = 0;
       // Nothing will play the intro while it is out of view or motion is reduced.
       if (!visible || media.matches) finishIntro();
@@ -989,6 +1042,9 @@ export function DemoCarousel({
     window.addEventListener("pointermove", pointerMove, { passive: false });
     window.addEventListener("pointerup", pointerUp);
     window.addEventListener("pointercancel", pointerUp);
+    viewport.addEventListener("lostpointercapture", cancelDrag);
+    window.addEventListener("blur", cancelDrag);
+    window.addEventListener("focus", updateActivity);
     viewport.addEventListener("click", click, true);
     track.addEventListener("click", stageClick);
     close.addEventListener("click", back);
@@ -1008,7 +1064,6 @@ export function DemoCarousel({
       motions.forEach((motion) => motion.cancel());
       window.clearTimeout(introTimeout);
       unlockPage();
-      setStageMoving(false);
       delete section.dataset.staged;
       delete section.dataset.stage;
       delete section.dataset.warp;
@@ -1018,6 +1073,7 @@ export function DemoCarousel({
       track.style.removeProperty("filter");
       slots.forEach((slot, index) => {
         slot.style.removeProperty("transform");
+        slot.style.removeProperty("zoom");
         slot.style.removeProperty("margin-left");
         slot.style.removeProperty("filter");
         slot.style.removeProperty("will-change");
@@ -1032,6 +1088,9 @@ export function DemoCarousel({
       window.removeEventListener("pointermove", pointerMove);
       window.removeEventListener("pointerup", pointerUp);
       window.removeEventListener("pointercancel", pointerUp);
+      viewport.removeEventListener("lostpointercapture", cancelDrag);
+      window.removeEventListener("blur", cancelDrag);
+      window.removeEventListener("focus", updateActivity);
       viewport.removeEventListener("click", click, true);
       track.removeEventListener("click", stageClick);
       close.removeEventListener("click", back);

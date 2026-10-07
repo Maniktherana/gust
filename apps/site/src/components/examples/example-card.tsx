@@ -2,7 +2,6 @@ import type * as React from "react";
 
 import { DemoCopyButton } from "@/components/demo-copy-button";
 import { useInView } from "@/hooks/use-element";
-import { useStageMoving } from "@/hooks/use-stage-motion";
 import { useDemoMotion, type DemoMotion } from "@/hooks/use-demo-motion";
 import { cn } from "@/lib/utils";
 
@@ -32,11 +31,10 @@ export type Example = {
   title: string;
 };
 
-// Examples stop their timers while the card is off screen or the carousel stage is moving.
+// Examples stop their timers while the card is off screen.
 export function ExampleCard({ example, className }: { example: Example; className?: string }) {
   const [ref, inView] = useInView<HTMLDivElement>();
-  const moving = useStageMoving();
-  const paused = !inView || moving;
+  const paused = !inView;
   const motion = useDemoMotion(
     example.motionTitle ?? example.title,
     example.id,

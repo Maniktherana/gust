@@ -48,10 +48,6 @@
   cursor: grabbing;
 }
 
-.demo-carousel__viewport:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: -4px;
-}
 
 .demo-carousel__track {
   position: relative;
@@ -91,6 +87,7 @@
    the strip gets its own GPU layer, so the drift and swipes move it without repainting the live
    demo inside. */
 .demo-carousel[data-warp="transform"]:not([data-staged]) .demo-carousel__slot {
+  transform-origin: 0 0;
   will-change: transform;
 }
 
@@ -113,12 +110,11 @@
   display: none;
 }
 
-.demo-carousel__open:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
 
-.demo-carousel__slot:focus {
+/* The strip and its cards show no focus ring. */
+.demo-carousel__viewport:focus,
+.demo-carousel__slot:focus,
+.demo-carousel__open:focus {
   outline: none;
 }
 

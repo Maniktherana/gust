@@ -47,7 +47,6 @@ test("the structural stylesheet is framework-independent", async () => {
   expect(css).not.toContain("@import");
   expect(css).not.toContain("@tailwind");
   expect(css).toContain("white-space: pre");
-  expect(css).not.toContain("will-change");
 });
 
 test("looping character animations do not accumulate lifecycle listeners", async () => {
@@ -84,7 +83,10 @@ test("completed character animations release their effects", async () => {
   expect(enterHook).toContain("ownerDocument.hidden");
   expect(exitHook).toContain("ownerDocument.hidden");
   expect(component).not.toContain('data-gust-animating="true"');
-  expect(css).not.toContain("will-change");
+  // Only the root keeps a compositing boundary. Finished characters must not retain a layer
+  // each, which grows memory usage in counters and other continuously changing text.
+  const characterStyles = css.slice(css.indexOf(':where([data-gust-part="sizer"]'));
+  expect(characterStyles).not.toContain("will-change");
   expect(css).toContain(':where([data-gust-part="glyph"]) {\n    opacity: 1;');
   expect(css).toContain(':where([data-gust-part="exit"]) {\n    opacity: 0;');
 });

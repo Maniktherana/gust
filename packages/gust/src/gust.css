@@ -2,6 +2,10 @@
   :where([data-slot="gust"]) {
     position: relative;
     isolation: isolate;
+    /* Keep the compositing boundary stable as character layers enter and leave. In WebKit,
+       promoting the subtree only when motion starts can skip its first painted frames and
+       change the pixel snapping of nearby controls. Native animations still own playback. */
+    will-change: transform;
     display: inline-grid;
     width: max-content;
     overflow: visible;

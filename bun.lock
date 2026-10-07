@@ -64,6 +64,7 @@
     },
   },
   "patchedDependencies": {
+    "cobe@2.0.1": "apps/site/patches/cobe@2.0.1.patch",
     "liveline@0.0.7": "apps/site/patches/liveline@0.0.7.patch",
   },
   "packages": {

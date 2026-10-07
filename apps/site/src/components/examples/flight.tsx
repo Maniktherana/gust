@@ -384,7 +384,9 @@ export function FlightExample({
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-[41%] left-1/2 -translate-x-1/2"
+        // Keep the plane above the globe's canvas and backdrop layers while the card scales.
+        // WebKit can otherwise omit the SVG from intermediate composited frames.
+        className="pointer-events-none absolute top-[41%] left-1/2 z-10 -translate-x-1/2 transform-gpu"
       >
         <div className="absolute top-9 left-[17px] h-28 w-px bg-gradient-to-b from-white/40 to-transparent" />
         <div className="absolute top-9 right-[17px] h-28 w-px bg-gradient-to-b from-white/40 to-transparent" />

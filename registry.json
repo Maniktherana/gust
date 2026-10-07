@@ -57,6 +57,7 @@
 					":where([data-slot=\"gust\"])": {
 						"position": "relative",
 						"isolation": "isolate",
+						"will-change": "transform",
 						"display": "inline-grid",
 						"width": "max-content",
 						"overflow": "visible"
