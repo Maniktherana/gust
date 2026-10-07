@@ -5,6 +5,7 @@
 import * as React from "react";
 
 import type { GustKeyframes } from "./keyframes";
+import { withLeadIn } from "./keyframes";
 import type { RenderedGustCharacter } from "./characters";
 import type { GustCharacterMeasure, GustRootRect } from "./measure";
 import { measureElementRect, measureGustCharacterSlots, widthsMatch } from "./measure";
@@ -105,9 +106,9 @@ export function useEnterAnimations({
 
       existing?.cancel();
 
-      const animation = element.animate(enterKeyframes.keyframes, {
-        delay: character.order * enterStagger,
-        duration: enterKeyframes.duration,
+      const entrance = withLeadIn(enterKeyframes, character.order * enterStagger);
+      const animation = element.animate(entrance.keyframes, {
+        duration: entrance.duration,
         easing: "linear",
         fill: "backwards",
       });
@@ -115,7 +116,7 @@ export function useEnterAnimations({
       enterAnimations.current.set(character.index, animation);
       enterFiredKeys.current.set(character.index, character.entryKey);
       enterFiredKeyframes.current.set(character.index, enterKeyframes);
-      // Backwards fill covers the stagger delay; CSS owns the settled state.
+      // The lead-in holds the first frame through the stagger; CSS owns the settled state.
     });
 
     const activeIndexes = new Set(renderedCharacters.map(({ index }) => index));
@@ -206,14 +207,13 @@ export function useExitAnimations({
     if (ownerDocument?.hidden) return;
 
     exitElements.current.forEach(({ element, measure, order }) => {
-      const positionedKeyframes = exitKeyframes.keyframes.map((keyframe) => ({
-        ...keyframe,
-        color: measure.color,
-        translate: `${measure.x}px ${measure.y}px`,
-      }));
-      const animation = element.animate(positionedKeyframes, {
-        delay: order * exitStagger,
-        duration: exitKeyframes.duration,
+      // Where the character stood and its color never change while it leaves, so they sit on
+      // the element itself. The animation then holds only properties the compositor can play.
+      element.style.color = measure.color;
+      element.style.translate = `${measure.x}px ${measure.y}px`;
+      const exit = withLeadIn(exitKeyframes, order * exitStagger);
+      const animation = element.animate(exit.keyframes, {
+        duration: exit.duration,
         easing: "linear",
         fill: "backwards",
       });

@@ -28,6 +28,32 @@ export type GustKeyframes = {
   keyframes: Keyframe[];
 };
 
+const leadIns = new WeakMap<GustKeyframes, Map<number, GustKeyframes>>();
+
+// The same motion held on its first frame for `delay` ms. A character's stagger goes into its
+// keyframes instead of the animation's delay, so every animation is running from its first
+// frame and the compositor plays all of it. Safari only starts a delayed animation once the
+// page next draws, so on a quiet page staggered characters would freeze and then jump.
+export function withLeadIn(motion: GustKeyframes, delay: number): GustKeyframes {
+  if (!(delay > 0) || !motion.keyframes.length) return motion;
+  let cached = leadIns.get(motion);
+  if (!cached) leadIns.set(motion, (cached = new Map()));
+  const hit = cached.get(delay);
+  if (hit) return hit;
+  const duration = delay + motion.duration;
+  const last = motion.keyframes.length - 1;
+  const keyframes = [
+    { ...motion.keyframes[0], offset: 0 },
+    ...motion.keyframes.map((keyframe, index) => {
+      const offset = typeof keyframe.offset === "number" ? keyframe.offset : index / (last || 1);
+      return { ...keyframe, offset: (delay + offset * motion.duration) / duration };
+    }),
+  ];
+  const leadIn = { duration, keyframes };
+  cached.set(delay, leadIn);
+  return leadIn;
+}
+
 function evalTrack(track: MotionTrack, globalTime: number) {
   const { ease, times, values } = track;
 
