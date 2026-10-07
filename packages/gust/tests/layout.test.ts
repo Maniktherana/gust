@@ -4,7 +4,7 @@ import { cubicBezier } from "../src/easing";
 import { animateGustRootWidth } from "../src/hooks";
 import { resolveGustConfig } from "../src/config";
 import { buildEnterKeyframes, buildExitKeyframes } from "../src/keyframes";
-import { measureGustCharacterSlots } from "../src/measure";
+import { measureElementRect, measureGustCharacterSlots } from "../src/measure";
 
 type Alignment = "left" | "center" | "right";
 const layoutEase = cubicBezier(0.16, 1, 0.3, 1);
@@ -271,4 +271,56 @@ test("interrupting a width morph preserves live width and outgoing glyph coordin
   second.cancel();
   for (const [index, measure] of measures)
     expect(scene.exit.getBoundingClientRect().left + measure.x).toBeCloseTo(glyphLefts[index], 6);
+});
+
+// A scaled or zoomed ancestor scales what getBoundingClientRect reports, but Gust writes widths
+// and offsets in the root's own pixels. The same layout must measure the same at any scale.
+test("measurements stay in the root's own pixels under a scaled ancestor", () => {
+  const view = {
+    getComputedStyle: (element: { css: Record<string, string> }) => element.css,
+  };
+  const box = (scale: number, x: number, y: number, width: number, height: number) => ({
+    css: {
+      boxSizing: "border-box",
+      color: "rgb(1, 2, 3)",
+      height: `${height}px`,
+      translate: "none",
+      width: `${width}px`,
+    },
+    getBoundingClientRect: () => ({
+      height: height * scale,
+      left: 300 + x * scale,
+      top: 120 + y * scale,
+      width: width * scale,
+    }),
+    isConnected: true,
+    ownerDocument: { defaultView: view },
+    querySelector: () => null,
+  });
+  const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+  Object.defineProperty(globalThis, "window", { configurable: true, value: view });
+  try {
+    for (const scale of [0.8, 1, 2.5]) {
+      const root = box(scale, 0, 0, 42.5, 20) as unknown as HTMLSpanElement;
+      const slots = new Map(
+        [0, 1, 2].map((index) => [
+          index,
+          box(scale, 3 + index * 12.25, 1.5, 12.25, 18) as unknown as HTMLSpanElement,
+        ]),
+      );
+      const rect = measureElementRect(root);
+      expect(rect.width).toBeCloseTo(42.5, 6);
+      expect(rect.height).toBeCloseTo(20, 6);
+      expect(rect.scale).toBeCloseTo(scale, 6);
+      for (const [index, measure] of measureGustCharacterSlots(root, slots)) {
+        expect(measure.x).toBeCloseTo(3 + index * 12.25, 6);
+        expect(measure.y).toBeCloseTo(1.5, 6);
+        expect(measure.width).toBeCloseTo(12.25, 6);
+        expect(measure.height).toBeCloseTo(18, 6);
+      }
+    }
+  } finally {
+    if (originalWindow) Object.defineProperty(globalThis, "window", originalWindow);
+    else Reflect.deleteProperty(globalThis, "window");
+  }
 });

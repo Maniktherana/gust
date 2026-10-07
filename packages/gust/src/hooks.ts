@@ -283,11 +283,12 @@ export function useRootWidthMorph({
     // screen before the in-flight morph is cancelled, so it glides on from there instead of
     // jumping to its new spot.
     const carried = new Map<Element, number>();
+    const { scale } = measureElementRect(root);
     glyphs.forEach((glyph) => {
       const slot = glyph.parentElement;
       if (!slot || !knownGlyphs.current.has(glyph)) return;
       const translate = Number.parseFloat(window.getComputedStyle(glyph).translate) || 0;
-      carried.set(glyph, slot.getBoundingClientRect().left + translate);
+      carried.set(glyph, slot.getBoundingClientRect().left / scale + translate);
     });
     knownGlyphs.current = new WeakSet(glyphs);
 
@@ -369,7 +370,7 @@ export function animateGustRootWidth({
   duration: number;
   outgoing?: HTMLSpanElement;
   exitAnchor?: number;
-  /** Viewport x of glyphs already on screen before this morph, by glyph element. */
+  /** Viewport x, in the root's own pixels, of glyphs on screen before this morph, by glyph. */
   carried?: ReadonlyMap<Element, number>;
 }) {
   const timing = { duration, easing: layoutEaseCss, fill: "both" as const };
@@ -392,7 +393,7 @@ export function animateGustRootWidth({
     const offset =
       shown === undefined || !glyph.parentElement
         ? to.left - initial.left
-        : shown - glyph.parentElement.getBoundingClientRect().left;
+        : shown - glyph.parentElement.getBoundingClientRect().left / initial.scale;
     if (Math.abs(offset) <= 0.001) return;
     effects.push(
       glyph.animate([{ translate: `${offset}px 0px` }, { translate: "0px 0px" }], timing),

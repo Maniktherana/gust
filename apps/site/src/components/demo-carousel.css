@@ -86,3 +86,154 @@
 .demo-carousel__surface {
   height: 100%;
 }
+
+/* Each card wears a button that catches clicks until it is focused, so the demos only take input
+   once zoomed in on. */
+.demo-carousel__open {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--radius) * 1.4);
+  background: transparent;
+  cursor: inherit;
+  transition: background-color 150ms ease-out;
+}
+
+.demo-carousel__open[hidden] {
+  display: none;
+}
+
+.demo-carousel__open:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.demo-carousel__slot:focus {
+  outline: none;
+}
+
+/* The stage covers the page while the strip is folded into a grid or a card is in focus. */
+.demo-carousel__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  visibility: hidden;
+  background: var(--page-background);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.demo-carousel[data-staged] .demo-carousel__backdrop {
+  visibility: visible;
+}
+
+.demo-carousel[data-staged] .demo-carousel__track {
+  position: fixed;
+  inset: 0;
+  z-index: 61;
+  width: auto;
+  height: auto;
+  cursor: default;
+  touch-action: none;
+}
+
+/* While the cards fly back into the strip, only they catch the pointer. */
+.demo-carousel[data-staged][data-stage="strip"] .demo-carousel__track {
+  pointer-events: none;
+}
+
+.demo-carousel[data-staged] .demo-carousel__slot {
+  top: 0;
+  left: 0;
+  margin-left: 0 !important;
+  transform-origin: 0 0;
+  pointer-events: auto;
+}
+
+.demo-carousel[data-staged] .demo-carousel__open {
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .demo-carousel[data-staged]:not([data-stage="strip"]) .demo-carousel__open:hover {
+    background-color: color-mix(in oklab, var(--foreground) 5%, transparent);
+  }
+}
+
+.demo-carousel__close {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 62;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 999px;
+  visibility: hidden;
+  background: var(--surface-raised);
+  color: var(--muted-foreground);
+  cursor: pointer;
+  opacity: 0;
+  scale: 0.9;
+  transition:
+    opacity 200ms ease-out,
+    scale 200ms ease-out,
+    color 200ms ease-out,
+    visibility 0s linear 200ms;
+}
+
+@media (min-width: 640px) {
+  .demo-carousel__close {
+    top: 24px;
+    left: 24px;
+  }
+}
+
+.demo-carousel[data-staged]:not([data-stage="strip"]) .demo-carousel__close {
+  visibility: visible;
+  opacity: 1;
+  scale: 1;
+  transition-delay: 0s;
+}
+
+.demo-carousel__close:hover {
+  color: var(--foreground);
+}
+
+.demo-carousel__close:active {
+  scale: 0.96;
+}
+
+.demo-carousel__close:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* The close mark turns into a back arrow while a card is in focus. */
+.demo-carousel__close-icon {
+  grid-area: 1 / 1;
+  width: 18px;
+  height: 18px;
+  transition:
+    opacity 300ms cubic-bezier(0.2, 0, 0, 1),
+    scale 300ms cubic-bezier(0.2, 0, 0, 1),
+    filter 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.demo-carousel__close-icon[data-icon="back"],
+.demo-carousel[data-stage="focus"] .demo-carousel__close-icon[data-icon="close"] {
+  opacity: 0;
+  scale: 0.25;
+  filter: blur(4px);
+}
+
+.demo-carousel[data-stage="focus"] .demo-carousel__close-icon[data-icon="back"] {
+  opacity: 1;
+  scale: 1;
+  filter: none;
+}

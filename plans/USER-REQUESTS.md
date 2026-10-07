@@ -89,3 +89,17 @@
 - Follow the Motion Primitives progressive-blur pattern: gentle upper layers, increasing blur toward the footer, sharp text above. Clip the complete flight scene once to its rounded corners; overscan blur beneath the boundary to avoid an unblurred corner seam.
 - Correct the Building circular arrow's rotation. Tailwind's spin shorthand must include reverse so it cannot reset the separately declared direction.
 - Remove the "When Gust fits" and "Prompts" sections from the landing page, along with their unused local helpers and imports. Completed; typecheck and targeted lint/format checks pass.
+
+## Strip, grid and focus — October 7
+
+Reference: [Kit Langton's infinite wgpu canvas](https://x.com/kitlangton/status/2107266189441581545). A simplified version: strip → grid → focused card, with the recording's motion.
+
+- Keep the strip's drift, drag, wheel and fast-motion lens.
+- Clicking a strip card lifts every card onto a full-screen stage and folds the strip into a grid. No labels or text. Cards keep the strip's left-to-right order and their relative sizes, in centred, evenly filled rows.
+- Clicking a grid card zooms the camera in to centre and fit it. Neighbours stay visible at the edges. Clicking a neighbour pans to it; arrow keys do the same.
+- A back/X button sits top left: X closes the grid, the back arrow leaves focus. Escape steps back too. Clicking the empty stage steps out one level, so the grid returns to the strip.
+- Only the focused card takes input. Strip and grid cards are covered by a button and their demos are inert. This supersedes the earlier request that ordinary clicks reach the examples in the strip.
+- Motion measured frame by frame from the recording (60fps): zooming in and out both follow a critically damped spring, ω ≈ 12.6 rad/s on the log of the zoom. About 50% at 133ms, 96% by 400ms, settled by about 500ms. The strip ↔ grid fold uses the same spring. Every card gets directional motion blur from its edge speeds, and the page behind fades on a spring twice as fast.
+- Correction: the transitions were too slow. The stage spring now runs at 24 rad/s, about twice the recording's pace: half way at 70ms and within 2% by 250ms. Motion blur is lighter (at most 10px), its filter region is smaller, and cards off screen skip it, because blurring live demos was costing frames.
+- Correction: Gust broke inside the scaled grid and focused card. It measured characters in on-screen pixels but wrote offsets and widths in its own CSS pixels. Fixed inside Gust itself: every measurement is divided by the root's on-screen scale, so Gust works under any transformed or zoomed ancestor.
+- Correction: zooming into focus showed blocky, pixelated cards and stalled frames. The per-card SVG blur repainted every live demo through a filter each frame, at the wrong resolution once scaled. Motion blur is now CSS `blur()` (at most 8px). While the motion is fast, each card has its own GPU layer, so moving and blurring it never repaints the demo. Once the blur fades the layers are dropped, so the slow end of the zoom and the resting card are drawn sharp at their real size.
