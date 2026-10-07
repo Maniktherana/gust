@@ -87,8 +87,9 @@
   height: 100%;
 }
 
-/* Where the lens is drawn with transforms, each card in the strip gets its own GPU layer, so
-   the drift, swipes and the lens move it without repainting the live demo inside. */
+/* Wherever the lens is not an SVG filter, including touch screens where it is off, each card in
+   the strip gets its own GPU layer, so the drift and swipes move it without repainting the live
+   demo inside. */
 .demo-carousel[data-warp="transform"]:not([data-staged]) .demo-carousel__slot {
   will-change: transform;
 }

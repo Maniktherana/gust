@@ -151,13 +151,13 @@ export function DemoCarousel({
       (slot) => slot.querySelector<HTMLButtonElement>(".demo-carousel__open")!,
     );
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    // A mouse or trackpad. Touch screens wake the lens at swipe speeds and skip motion blur.
+    // A mouse or trackpad. Touch screens skip the lens and the motion blur altogether.
     const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-    // Only Chromium draws an SVG filter over live HTML on the GPU. Safari, every iOS browser
-    // and Firefox filter it in software, which cannot keep up while the row moves, so they get
-    // the lens drawn with transforms instead, and no motion blur. Only Chromium has
-    // navigator.userAgentData.
-    const filterLens = "userAgentData" in navigator;
+    // Only Chromium draws an SVG filter over live HTML on the GPU. Safari and Firefox filter it
+    // in software, which cannot keep up while the row moves, so they get the lens drawn with
+    // transforms instead, and no motion blur. Only Chromium has navigator.userAgentData.
+    const chromium = "userAgentData" in navigator;
+    const filterLens = () => chromium && finePointer.matches;
     let centers: number[] = [];
     let sizes: Size[] = [];
     let slotTop = 0;
@@ -173,7 +173,6 @@ export function DemoCarousel({
     let lensFade = 0;
     let pull = 0;
     let reach = 0;
-    let stripWidth = 0;
     let disposed = false;
     let frame = 0;
     let previousTime = 0;
@@ -268,7 +267,7 @@ export function DemoCarousel({
     };
 
     const paintStrip = () => {
-      if (!filterLens) {
+      if (!filterLens()) {
         paintWarp();
         return;
       }
@@ -400,7 +399,7 @@ export function DemoCarousel({
       const zoomRate = zoom * view.vLogZoom;
       const pixel = window.devicePixelRatio || 1;
       const snap = (value: number) => (resting ? Math.round(value * pixel) / pixel : value);
-      const blurring = filterLens && finePointer.matches && !resting;
+      const blurring = filterLens() && !resting;
       return {
         cards: state.bodies.map((body, index) => {
           const { width, height } = sizes[index]!;
@@ -700,12 +699,9 @@ export function DemoCarousel({
         }
 
         speed = ease(speed, (offset - lastOffset) / dt, 0.05, dt);
-        // A phone swipe is far slower in px/s than a desktop flick, so on touch screens the lens
-        // wakes and fills by the screen's width per second instead.
-        const [wake, fill] = finePointer.matches
-          ? [240, 1800]
-          : [Math.max(80, 0.2 * stripWidth), Math.max(400, 1.2 * stripWidth)];
-        const swell = Math.min(1, Math.max(0, (Math.abs(speed) - wake) / fill));
+        const swell = finePointer.matches
+          ? Math.min(1, Math.max(0, (Math.abs(speed) - 240) / 1800))
+          : 0;
         lens = ease(lens, swell, swell > lens ? 0.08 : 0.3, dt);
         if (lens < 0.001) lens = 0;
         lensFade = ease(lensFade, lensReady ? 1 : 0, 0.1, dt);
@@ -765,7 +761,6 @@ export function DemoCarousel({
       radius = (2 * (cycle - GAP * slots.length)) / slots.length;
       // The filter covers the row plus room above and below for slides to swell into.
       const frameWidth = viewport.clientWidth;
-      stripWidth = frameWidth;
       const frameHeight = viewport.clientHeight;
       reach = frameHeight * 0.75;
       pull = -1;
@@ -969,8 +964,14 @@ export function DemoCarousel({
         .catch(() => undefined);
     }
 
-    section.dataset.warp = filterLens ? "filter" : "transform";
+    // A tablet can gain or lose a trackpad, which switches the lens on or off.
+    const syncLens = () => {
+      section.dataset.warp = filterLens() ? "filter" : "transform";
+      paint();
+    };
+
     measure();
+    syncLens();
     setMode("strip");
     viewport.dataset.ready = "true";
     if (media.matches) finishIntro();
@@ -998,6 +999,7 @@ export function DemoCarousel({
     window.addEventListener("resize", resizeStage);
     document.addEventListener("visibilitychange", updateActivity);
     media.addEventListener("change", updateActivity);
+    finePointer.addEventListener("change", syncLens);
     resume();
 
     return () => {
@@ -1040,6 +1042,7 @@ export function DemoCarousel({
       window.removeEventListener("resize", resizeStage);
       document.removeEventListener("visibilitychange", updateActivity);
       media.removeEventListener("change", updateActivity);
+      finePointer.removeEventListener("change", syncLens);
     };
   }, [initialSlide, lensId, slides]);
 
