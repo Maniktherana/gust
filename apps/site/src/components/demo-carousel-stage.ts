@@ -105,7 +105,7 @@ export function layoutGrid({
   }
 
   const placements: Placement[] = sizes.map(() => ({ scale: 1, x: 0, y: 0 }));
-  if (!best) return { placements, scale: 1 };
+  if (!best) return { placements, rows: [] as number[][], scale: 1 };
   const { scale } = best;
   let y = (frame.height - best.height * scale) / 2;
   best.rows.forEach((row, rowIndex) => {
@@ -118,7 +118,7 @@ export function layoutGrid({
     }
     y += (rowHeight + gap) * scale;
   });
-  return { placements, scale };
+  return { placements, rows: best.rows, scale };
 }
 
 // The camera that brings one grid card to the middle of the screen, as large as fits.

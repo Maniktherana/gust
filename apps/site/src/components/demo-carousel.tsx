@@ -188,6 +188,7 @@ export function DemoCarousel({
     let lastFocused = -1;
     // The grid's reading order: the strip's cards from left to right when it folded.
     let order: number[] = [];
+    let rows: number[][] = [];
     let bodies: Body[] = [];
     let targets: Placement[] = [];
     let camera: View = { logZoom: 0, vLogZoom: 0, vx: 0, vy: 0, x: 0, y: 0 };
@@ -351,6 +352,7 @@ export function DemoCarousel({
       }
       const grid = layoutGrid({ frame: stageSize, gap: GAP, order, sizes });
       targets = grid.placements;
+      rows = grid.rows;
       cameraTarget =
         mode === "focus"
           ? focusCamera(targets[focused]!, sizes[focused]!, stageSize, MAX_FOCUS)
@@ -941,12 +943,28 @@ export function DemoCarousel({
       }
       if (mode !== "focus") return;
       const direction = event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : 0;
+      const vertical = event.key === "ArrowUp" ? -1 : event.key === "ArrowDown" ? 1 : 0;
       // Arrow keys inside the focused demo belong to the demo.
       const inside = event.target instanceof Node && slots[focused]!.contains(event.target);
-      if (!direction || (inside && event.target !== slots[focused])) return;
+      if ((!direction && !vertical) || (inside && event.target !== slots[focused])) return;
       event.preventDefault();
-      const position = order.indexOf(focused);
-      focusSlide(order[(position + direction + order.length) % order.length]!);
+      if (direction) {
+        const position = order.indexOf(focused);
+        focusSlide(order[(position + direction + order.length) % order.length]!);
+        return;
+      }
+      const row = rows.findIndex((indices) => indices.includes(focused));
+      const adjacent = rows[row + vertical];
+      if (!adjacent) return;
+      // Uneven rows and different card widths need a spatial match, not a fixed index jump.
+      const centerX = (index: number) =>
+        targets[index]!.x + (sizes[index]!.width * targets[index]!.scale) / 2;
+      const x = centerX(focused);
+      focusSlide(
+        adjacent.reduce((nearest, index) =>
+          Math.abs(centerX(index) - x) < Math.abs(centerX(nearest) - x) ? index : nearest,
+        ),
+      );
     };
 
     const keyDown = (event: KeyboardEvent) => {
