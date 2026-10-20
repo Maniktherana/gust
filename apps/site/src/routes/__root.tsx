@@ -38,6 +38,30 @@ export const Route = createRootRoute({
         property: "og:url",
         content: "https://gust.manikrana.dev",
       },
+      {
+        property: "og:site_name",
+        content: "gust",
+      },
+      {
+        property: "og:image",
+        content: "https://gust.manikrana.dev/og.png",
+      },
+      {
+        property: "og:image:width",
+        content: "1200",
+      },
+      {
+        property: "og:image:height",
+        content: "630",
+      },
+      {
+        property: "og:image:alt",
+        content: "gust icon above npm i @maniktherana/gust, with the word gust lifting away",
+      },
+      {
+        name: "twitter:card",
+        content: "summary_large_image",
+      },
     ],
     links: [
       {
@@ -46,8 +70,17 @@ export const Route = createRootRoute({
       },
       {
         rel: "icon",
+        href: "/favicon.ico",
+        sizes: "48x48",
+      },
+      {
+        rel: "icon",
         type: "image/svg+xml",
         href: "/icon.svg",
+      },
+      {
+        rel: "apple-touch-icon",
+        href: "/apple-touch-icon.png",
       },
       {
         rel: "canonical",
