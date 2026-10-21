@@ -127,7 +127,7 @@ export function TickerDemo({
         />
       </div>
 
-      <div className="absolute inset-0 z-10 flex items-center justify-center">
+      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
         {/* The badge tints itself from its own text color. */}
         <span
           className={`flex items-center gap-2.5 rounded-xl px-4 py-3 transition-colors duration-300 motion-reduce:transition-none ${up ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}
