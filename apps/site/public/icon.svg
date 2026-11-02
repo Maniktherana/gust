@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
   <defs>
-    <filter id="b1" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="0.3"/></filter>
-    <filter id="b2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="0.6"/></filter>
-    <filter id="b3" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="0.9"/></filter>
+    <filter id="b1" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="0.3"/></filter>
+    <filter id="b2" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="0.6"/></filter>
+    <filter id="b3" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="0.9"/></filter>
   </defs>
   <rect width="32" height="32" rx="8" fill="#141414"/>
   <rect x="0.5" y="0.5" width="31" height="31" rx="7.5" stroke="#fff" stroke-opacity="0.1"/>
-  <circle cx="8.5" cy="21" r="3" fill="#fff"/>
-  <circle cx="15" cy="18.5" r="2.6" fill="#fff" fill-opacity="0.75" filter="url(#b1)"/>
-  <circle cx="20.6" cy="14.8" r="2.1" fill="#fff" fill-opacity="0.5" filter="url(#b2)"/>
-  <circle cx="25" cy="10.5" r="1.6" fill="#fff" fill-opacity="0.3" filter="url(#b3)"/>
+  <rect x="3.49" y="5.5" width="3.7" height="7.38" rx="0.74" fill="#fff" fill-opacity="0.36" filter="url(#b3)"/>
+  <rect x="9.19" y="8.5" width="4.08" height="8.16" rx="0.82" fill="#fff" fill-opacity="0.47" filter="url(#b2)"/>
+  <rect x="15.27" y="11.5" width="5.24" height="10.46" rx="1.04" fill="#fff" fill-opacity="0.79" filter="url(#b1)"/>
+  <rect x="22.51" y="14.5" width="6" height="12" rx="1.2" fill="#fff"/>
 </svg>
