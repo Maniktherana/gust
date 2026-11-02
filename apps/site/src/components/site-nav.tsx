@@ -1,80 +1,61 @@
 import { Link } from "@tanstack/react-router";
-
 import { IconGithub } from "@/components/icons";
-import { cn } from "@/lib/utils";
 
 const navLinkClassName =
-  "grid h-11 place-items-center rounded-lg px-3 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground [&.active]:text-foreground";
+  "grid h-11 place-items-center rounded-md px-2 text-sm text-muted-foreground outline-none transition-colors duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none [&.active]:text-foreground";
 
 function TopNav() {
   return (
-    <header
-      data-intro-after
-      className="flex h-16 shrink-0 items-center justify-between px-3 sm:px-6"
-    >
-      <nav aria-label="Main navigation" className="flex items-center">
-        <Link to="/" activeOptions={{ exact: true }} className={navLinkClassName}>
-          Home
-        </Link>
-        <Link to="/agent" className={navLinkClassName}>
-          Agent
-        </Link>
-      </nav>
-      <a
-        href="https://github.com/Maniktherana/gust"
-        target="_blank"
-        rel="noreferrer"
-        aria-label="GitHub"
-        className="grid size-11 place-items-center rounded-lg text-muted-foreground transition-colors duration-200 hover:text-foreground"
+    <header className="flex h-16 shrink-0 items-center justify-between gap-4">
+      <Link
+        to="/"
+        className="-ml-2 grid h-11 place-items-center rounded-md px-2 font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <IconGithub size="16px" />
-      </a>
+        Gust
+      </Link>
+      <nav aria-label="Main navigation" className="-mr-2 flex items-center gap-1">
+        <Link to="/examples" className={navLinkClassName}>
+          Examples
+        </Link>
+        <Link to="/lab" className={navLinkClassName}>
+          Lab
+        </Link>
+        <a
+          href="https://github.com/Maniktherana/gust"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="GitHub"
+          className={`${navLinkClassName} w-11`}
+        >
+          <IconGithub size="16px" />
+        </a>
+      </nav>
     </header>
   );
 }
 
 function Footer() {
   return (
-    <footer
-      data-intro-after
-      className="flex items-center justify-between border-t border-border py-8 text-sm text-muted-foreground"
-    >
+    <footer className="mt-16 flex items-center justify-between border-t border-separator py-8 text-sm text-muted-foreground">
       <span>MIT licensed</span>
-      <span>
-        By{" "}
-        <a
-          href="https://manikrana.dev"
-          target="_blank"
-          rel="noreferrer"
-          className="text-foreground"
-        >
-          Manik
-        </a>
-      </span>
+      <a
+        href="https://manikrana.dev"
+        target="_blank"
+        rel="noreferrer"
+        className="rounded-sm underline decoration-foreground/30 underline-offset-3 outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        Manik Rana
+      </a>
     </footer>
   );
 }
 
-const shellWidths = {
-  default: "max-w-2xl md:px-0",
-  document: "max-w-4xl",
-  wide: "max-w-5xl",
-};
-
-export function SiteShell({
-  children,
-  width = "default",
-}: {
-  children: React.ReactNode;
-  width?: keyof typeof shellWidths;
-}) {
+export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="mx-auto flex min-h-dvh w-[calc(100%-40px)] max-w-reading flex-col pt-6 sm:pt-10">
       <TopNav />
-      <div className={cn("mx-auto flex w-full flex-1 flex-col px-6", shellWidths[width])}>
-        <div className="flex-1">{children}</div>
-        <Footer />
-      </div>
+      <div className="flex-1">{children}</div>
+      <Footer />
     </div>
   );
 }

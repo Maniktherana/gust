@@ -3,10 +3,7 @@
 import { useEffect, useState } from "react";
 import { Gust } from "@maniktherana/gust";
 
-const headlines = ["a gust of wind.", "a gust of words.", "a gust of motion."];
-
-// "a gust of " is a shared prefix, so only the last word moves. Next skips
-// ahead and restarts the timer.
+const headlines = ["Draft", "Draft saved", "In review", "Published"];
 export function HeadlineDemo({ paused = false }: { paused?: boolean }) {
   const [index, setIndex] = useState(0);
   const [epoch, setEpoch] = useState(0);

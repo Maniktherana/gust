@@ -19,8 +19,7 @@ export const Route = createRootRoute({
       },
       {
         name: "description",
-        content:
-          "Animate changing React text one character at a time. No animation library, and shared prefixes stay still.",
+        content: "Text transitions for React.",
       },
       {
         property: "og:title",
@@ -28,7 +27,7 @@ export const Route = createRootRoute({
       },
       {
         property: "og:description",
-        content: "Animate changing React text one character at a time. Text that moves like air.",
+        content: "Text transitions for React.",
       },
       {
         property: "og:type",
@@ -62,8 +61,23 @@ export const Route = createRootRoute({
         name: "twitter:card",
         content: "summary_large_image",
       },
+      { name: "theme-color", content: "#0f0f0f" },
     ],
     links: [
+      {
+        rel: "preload",
+        href: "/fonts/open-runde/OpenRunde-Regular.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        href: "/fonts/open-runde/OpenRunde-Medium.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
       {
         rel: "stylesheet",
         href: appCss,

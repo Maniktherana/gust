@@ -10,6 +10,7 @@ type CopyButtonProps = Omit<
   "children" | "onClick" | "value"
 > & {
   copiedLabel?: string;
+  animateLabel?: boolean;
   gustProps?: Omit<GustProps, "value">;
   label?: string;
   resetAfter?: number;
@@ -23,6 +24,7 @@ const glyphTransition =
 export function CopyButton({
   className,
   copiedLabel = "Copied",
+  animateLabel = true,
   gustProps,
   label = "Copy",
   resetAfter = 2000,
@@ -77,7 +79,13 @@ export function CopyButton({
           )}
         />
       </span>
-      {showLabel ? <Gust {...gustProps} value={copied ? copiedLabel : label} /> : null}
+      {showLabel ? (
+        animateLabel ? (
+          <Gust {...gustProps} value={copied ? copiedLabel : label} />
+        ) : (
+          <span>{label}</span>
+        )
+      ) : null}
     </Button>
   );
 }

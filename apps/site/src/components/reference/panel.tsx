@@ -18,9 +18,9 @@ export function PropSection({
 }) {
   return (
     <section className="flex flex-col">
-      <div className="flex flex-col gap-2 border-b border-border pb-6">
-        <h3 className="text-lg font-medium tracking-tight">{title}</h3>
-        <p className="text-base text-pretty text-muted-foreground">{description}</p>
+      <div className="flex flex-col gap-2 border-b border-separator pb-5">
+        <h2 className="text-base font-medium">{title}</h2>
+        <p className="text-sm text-muted-foreground">{description}</p>
       </div>
       {children}
     </section>
@@ -47,17 +47,17 @@ export function PropRow({
   return (
     <article
       id={name}
-      className="grid scroll-mt-10 gap-8 border-b border-border py-10 last:border-b-0 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]"
+      className="grid scroll-mt-10 gap-6 border-b border-separator py-8 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]"
     >
       <div className="flex min-w-0 flex-col gap-5">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-3">
-            <h4 className="font-mono text-base">{name}</h4>
+            <h3 className="font-mono text-sm">{name}</h3>
             <span className="rounded-md bg-surface-raised px-2 py-0.5 font-mono text-caption text-muted-foreground">
               {type}
             </span>
           </div>
-          <p className="text-base text-pretty text-muted-foreground">{description}</p>
+          <p className="text-sm leading-6 text-muted-foreground">{description}</p>
           <p className="text-sm text-muted-foreground">
             Default <code className="font-mono text-code text-foreground">{defaultValue}</code>
           </p>

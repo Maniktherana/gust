@@ -1,9 +1,40 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@maniktherana/gust/styles.css";
-@import "@fontsource-variable/inter";
 @import "@fontsource-variable/geist-mono";
 @custom-variant dark (&:is(.dark *));
+
+@font-face {
+  font-family: "Open Runde";
+  src: url("/fonts/open-runde/OpenRunde-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Runde";
+  src: url("/fonts/open-runde/OpenRunde-Medium.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Runde";
+  src: url("/fonts/open-runde/OpenRunde-Semibold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Runde";
+  src: url("/fonts/open-runde/OpenRunde-Bold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
 
 :root {
   color-scheme: dark;
@@ -82,6 +113,7 @@
   --tabs-list-bg: var(--muted);
   --tabs-indicator-bg: var(--card);
   --border: var(--outline);
+  --separator: oklch(0 0 0 / 8%);
   --border-strong: var(--outline-strong);
   --input: oklch(0.21 0 0 / 10%);
   --ring: var(--gray-300);
@@ -116,26 +148,28 @@
 
 .dark {
   /* Surfaces / neutrals */
-  --shell: var(--black);
-  --page-background: var(--black);
-  --surface: var(--gray-900);
-  --surface-raised: var(--gray-950);
-  --surface-control: var(--gray-950);
-  --surface-control-hover: var(--gray-800);
-  --field: oklch(1 0 0 / 5.35%);
-  --well: color-mix(in oklab, var(--gray-950), var(--white) 5.35%);
-  --field-hover: oklch(1 0 0 / 8%);
-  --outline: oklch(1 0 0 / 8%);
+  --shell: oklch(0.169807 0 0);
+  --page-background: var(--shell);
+  --surface: oklch(0.215607 0 0);
+  --surface-raised: var(--surface);
+  --surface-control: oklch(0.248391 0 0);
+  --surface-control-hover: oklch(0.321093 0 0);
+  --field: oklch(1 0 0 / 11%);
+  --well: oklch(0.145747 0 0);
+  --field-hover: oklch(1 0 0 / 14%);
+  --outline: oklch(0.821412 0 0 / 7%);
+  --separator: oklch(1 0 0 / 8%);
   --outline-subtle: oklch(1 0 0 / 5%);
   --outline-strong: oklch(1 0 0 / 20%);
   --background: var(--page-background);
-  --foreground: var(--gray-100);
-  --card-foreground: var(--gray-100);
-  --popover-foreground: var(--gray-100);
-  --primary: var(--gray-100);
-  --primary-foreground: var(--gray-900);
-  --secondary-foreground: var(--gray-400);
-  --muted-foreground: var(--gray-500);
+  --foreground: oklch(0.946558 0 0);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface-control);
+  --popover-foreground: var(--foreground);
+  --primary: var(--foreground);
+  --primary-foreground: var(--page-background);
+  --secondary-foreground: oklch(0.845222 0 0);
+  --muted-foreground: oklch(0.805443 0 0);
   --accent: oklch(1 0 0 / 8%);
   --accent-foreground: var(--gray-100);
   --destructive: var(--red-400);
@@ -144,9 +178,9 @@
   --button-primary: var(--foreground);
   --button-primary-pressed: var(--gray-300);
   --button-primary-foreground: var(--gray-900);
-  --button-secondary: var(--gray-700);
-  --button-secondary-hover: var(--gray-600);
-  --button-secondary-foreground: var(--gray-100);
+  --button-secondary: var(--surface-control);
+  --button-secondary-hover: var(--surface-control-hover);
+  --button-secondary-foreground: var(--foreground);
   --button-outline-fill-hover: var(--field-hover);
   --control-unchecked-bg: var(--gray-800);
   --control-unchecked-hover-bg: var(--gray-700);
@@ -157,7 +191,7 @@
   --control-checked-foreground: var(--gray-900);
   --tabs-list-bg: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 10%);
-  --ring: oklch(1 0 0 / 48%);
+  --ring: var(--white);
 
   --shadow-card:
     0 0 0 1px rgb(255 255 255 / 7%), 0 -1px 0 0 rgb(255 255 255 / 6%), 0 0 0 1px #27272a,
@@ -190,6 +224,7 @@
 }
 
 @theme inline {
+  --container-reading: 644px;
   /* Geist Mono has a smaller x-height than Inter, so code sits one step above
      the 13px caption size, with room between lines. */
   --text-code: 0.875rem;
@@ -198,7 +233,7 @@
   --text-caption: 0.8125rem;
   --text-caption--line-height: 1.4;
   --font-heading: var(--font-sans);
-  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Open Runde", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", "Geist Mono", "SFMono-Regular", ui-monospace, monospace;
   --color-black: var(--black);
   --color-gray-50: var(--gray-50);
@@ -226,6 +261,7 @@
   --color-input: var(--input);
   --color-border-strong: var(--border-strong);
   --color-border: var(--border);
+  --color-separator: var(--separator);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
@@ -327,7 +363,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
   }
   ::selection {
     background-color: var(--foreground);
@@ -343,8 +379,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-optical-sizing: auto;
-    font-synthesis-weight: none;
-    text-rendering: optimizeSpeed;
+    font-synthesis: none;
   }
   @media (prefers-reduced-motion: no-preference) {
     html {

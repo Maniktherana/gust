@@ -1,6 +1,5 @@
 import * as React from "react";
 
-import { DemoCarousel, type CarouselSlide } from "@/components/demo-carousel";
 import { DemoCopyButton } from "@/components/demo-copy-button";
 import { CopyDemo, copyMotion } from "@/components/demos/copy-demo";
 import copySource from "@/components/demos/copy-demo.tsx?raw";
@@ -32,6 +31,8 @@ export function HeadlineBox({ className }: { className?: string }) {
   return (
     <div
       ref={ref}
+      role="group"
+      aria-label="Headline"
       className={cn(
         "relative h-48 overflow-hidden rounded-xl bg-surface-raised sm:h-56",
         className,
@@ -43,7 +44,7 @@ export function HeadlineBox({ className }: { className?: string }) {
   );
 }
 
-const demos = [
+export const demos = [
   {
     id: "status",
     motion: statusMotion,
@@ -76,7 +77,7 @@ const demos = [
   }),
 }));
 
-function DemoBox({ demo, className }: { demo: (typeof demos)[number]; className?: string }) {
+export function DemoBox({ demo, className }: { demo: (typeof demos)[number]; className?: string }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const paused = !inView;
   const motion = useDemoMotion(demo.title, demo.id, demo.motion);
@@ -84,6 +85,8 @@ function DemoBox({ demo, className }: { demo: (typeof demos)[number]; className?
   return (
     <div
       ref={ref}
+      role="group"
+      aria-label={demo.title}
       className={cn(
         "relative grid h-48 place-items-center overflow-hidden rounded-xl bg-surface-raised",
         demo.padded && "px-6",
@@ -96,43 +99,18 @@ function DemoBox({ demo, className }: { demo: (typeof demos)[number]; className?
   );
 }
 
-const carouselOrder = [
-  "guests",
-  "color-swatches",
-  "flight",
-  "headline",
-  "status",
-  "copy",
-  "otp",
-  "download",
-  "live-price",
-];
-
-const carouselSlides: CarouselSlide[] = carouselOrder.flatMap((id) => {
-  if (id === "headline") {
-    return [
-      { id, title: "Headline", width: 360, content: <HeadlineBox className="h-full sm:h-full" /> },
-    ];
-  }
-
-  const demo = demos.find((entry) => entry.id === id);
-  if (demo) {
-    return [{ id, title: demo.title, content: <DemoBox demo={demo} className="h-full" /> }];
-  }
-
-  const example = examples.find((entry) => entry.id === id);
-  return example
-    ? [
-        {
-          id,
-          title: example.title,
-          width: example.id === "flight" ? 560 : 320,
-          content: <ExampleCard example={example} className="h-full sm:col-span-1" />,
-        },
-      ]
-    : [];
-});
-
-export function HeroCarousel() {
-  return <DemoCarousel initialSlide="headline" slides={carouselSlides} />;
+export function DemoGrid() {
+  return (
+    <section aria-label="Gust demos" className="grid grid-cols-2 gap-3">
+      <HeadlineBox className="col-span-2 h-48 sm:col-span-1 sm:h-56" />
+      {examples.filter((example) => example.id === "live-price").map((example) => (
+        <ExampleCard key={example.id} example={example} className="col-span-2 h-48 sm:col-span-1 sm:h-56" />
+      ))}
+      {demos
+        .filter((demo) => demo.id !== "otp")
+        .map((demo) => (
+          <DemoBox key={demo.id} demo={demo} className="h-36 px-3 sm:h-40" />
+        ))}
+    </section>
+  );
 }

@@ -6,8 +6,6 @@ import livelinePatch from "../../../patches/liveline@0.0.7.patch?raw";
 import { DownloadExample, downloadMotion, downloadNumberMotion } from "./download";
 import downloadSource from "./download.tsx?raw";
 import type { Example } from "./example-card";
-import { FlightExample, flightMotion, flightNumberMotion } from "./flight";
-import flightSource from "./flight.tsx?raw";
 import { GuestsExample, guestsMotion } from "./guests";
 import guestsSource from "./guests.tsx?raw";
 import { LivePriceExample, livePriceMotion } from "./live-price";
@@ -28,18 +26,6 @@ const standaloneLivePrice = [
 const livePriceSetup = `\n\nThis graph uses a small patch to liveline 0.0.7 to hide its guides and time axis. Install exactly liveline@0.0.7, save the diff below as a package patch, and apply it using the project's package manager (for example Bun patchedDependencies, pnpm patch, or patch-package). The diff paths are relative to the liveline package root. Keep guides={false} in the component. Run the typecheck and build after applying the patch.\n\n\`\`\`diff\n${livelinePatch.trim()}\n\`\`\``;
 
 const entries: (Omit<Example, "prompt"> & { source: string; dependencies?: string[] })[] = [
-  {
-    component: FlightExample,
-    dependencies: ["cobe"],
-    fullBleed: true,
-    id: "flight",
-    motion: flightMotion,
-    motionTitle: "Flight · waypoint",
-    profiles: [{ prop: "numberMotion", title: "Flight · distance", motion: flightNumberMotion }],
-    source: flightSource,
-    span: 2 as const,
-    title: "Flight",
-  },
   {
     component: LivePriceExample,
     dependencies: ["liveline@0.0.7"],

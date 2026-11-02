@@ -184,7 +184,7 @@ function ValueRow() {
       name="value"
       type="string"
       defaultValue="required"
-      description="The text to show. Your component decides what the text is and when it changes; Gust animates each change. Leading and trailing spaces are trimmed."
+      description="The text to animate."
       snippet={
         custom === null
           ? `const [label, setLabel] = useState("Save");\n\n${gustSnippet([["value", expression("label")]])}`
@@ -222,7 +222,7 @@ function ClassNameRow() {
       name="className"
       type="string"
       defaultValue="—"
-      description="Classes for the root span. Gust takes its font, size and color from here or from the surrounding text. Other span attributes, such as id, style and aria-*, pass through too."
+      description="CSS classes for the root span."
       snippet={gustSnippet([
         ["value", expression("count")],
         ["className", className || undefined],
@@ -261,7 +261,7 @@ function StaggerRow() {
       name="stagger"
       type="number"
       defaultValue={String(defaultMotion.stagger)}
-      description="Extra delay before each next character starts, in milliseconds. The dots pulse with the arriving characters."
+      description="Delay between consecutive characters, in milliseconds."
       snippet={gustSnippet([
         ["value", expression("label")],
         ["stagger", stagger],
@@ -319,7 +319,7 @@ function AnglesRow() {
       name="enterAngle, exitAngle"
       type="number"
       defaultValue="-90"
-      description="Travel angles in screen degrees: 0 is right, 90 is down and −90 is up. Arriving characters travel along enterAngle, so they come from the opposite side. Drag anywhere on the ring to aim the nearest arrow."
+      description="Travel angles in degrees: 0 points right, 90 down, −90 up. Characters enter from the opposite side of enterAngle."
       snippet={gustSnippet([
         ["value", expression("label")],
         ["enterAngle", enterAngle],
@@ -362,7 +362,7 @@ function DownRow() {
       name="down"
       type="boolean"
       defaultValue="false"
-      description="Sends both directions down. Set it from your data, such as down={price < previous}, so falling values fall. Explicit angles take precedence."
+      description="Moves characters downward unless explicit angles override it."
       snippet={gustSnippet([
         ["value", expression("price")],
         ["down", down || undefined],
@@ -397,7 +397,7 @@ function PreservePrefixRow() {
       name="preservePrefix"
       type="boolean"
       defaultValue="true"
-      description="Keeps matching leading characters still, so only what changed moves. The boxes show each character's role as the real transition runs."
+      description="Keeps matching leading characters still."
       snippet={gustSnippet([
         ["value", expression("status")],
         ["preservePrefix", preservePrefix ? undefined : false],
@@ -429,20 +429,20 @@ const exitWords = ["Fade", "Drift", "Vanish"] as const;
 export function PropReference() {
   return (
     <div className="flex flex-col gap-16">
-      <PropSection title="Basics" description="What to show and how it looks.">
+      <PropSection title="Basics" description="Text content and root styles.">
         <ValueRow />
         <ClassNameRow />
       </PropSection>
 
       <PropSection
         title="Timing"
-        description="Every changed character runs its own animation, and leaving characters animate at the same time as arriving ones."
+        description="Character timing, with overlapping entrance and exit animations."
       >
         <MotionPropRow
           name="duration"
           type="number"
           words={timingWords}
-          description="How long each arriving character takes to settle, in milliseconds."
+          description="Entrance duration per character, in milliseconds."
           control={(value, onChange) => (
             <SliderField
               label="Duration"
@@ -459,7 +459,7 @@ export function PropReference() {
           name="exitDuration"
           type="number"
           words={exitWords}
-          description="How long each leaving character takes to disappear, in milliseconds."
+          description="Exit duration per character, in milliseconds."
           control={(value, onChange) => (
             <SliderField
               label="Exit duration"
@@ -475,20 +475,23 @@ export function PropReference() {
         <StaggerRow />
       </PropSection>
 
-      <PropSection title="Direction" description="Which way characters travel.">
+      <PropSection
+        title="Direction"
+        description="Travel direction for entering and exiting characters."
+      >
         <AnglesRow />
         <DownRow />
       </PropSection>
 
       <PropSection
         title="Entrance"
-        description="Arriving characters start away from their spot, pass it, and settle. Distances use 100 = 1em, so they scale with the text."
+        description="Entrance motion settings; distances use 100 = 1em."
       >
         <MotionPropRow
           name="entranceHeight"
           type="number"
           words={entranceWords}
-          description="How far from its resting spot a character starts. The dot is where it starts."
+          description="Starting distance from the character's resting position."
           chart={{
             curve: "enter",
             domain: [-2.1, 0.45],
@@ -511,7 +514,7 @@ export function PropReference() {
           name="entranceOvershoot"
           type="number"
           words={entranceWords}
-          description="How far a character overshoots its spot before settling. The dot is the top of the overshoot; 0 removes it."
+          description="Distance past the resting position; 0 disables overshoot."
           chart={{
             curve: "enter",
             domain: [-1, 1.35],
@@ -534,7 +537,7 @@ export function PropReference() {
           name="entranceScale"
           type="number"
           words={entranceWords}
-          description="A character's scale during its arrival, from 0 to 2."
+          description="Character scale during arrival."
           chart={{
             curve: "enter",
             domain: [-0.1, 2.1],
@@ -558,7 +561,7 @@ export function PropReference() {
           name="entranceBlur"
           type="number"
           words={entranceWords}
-          description="Blur when a character starts arriving, in pixels. It sharpens as it settles. The default is 0."
+          description="Initial character blur, in pixels."
           chart={{
             curve: "enter",
             domain: [-0.6, 12.6],
@@ -580,15 +583,12 @@ export function PropReference() {
         />
       </PropSection>
 
-      <PropSection
-        title="Exit"
-        description="Leaving characters travel, shrink, blur and fade together. Most of the movement happens right away."
-      >
+      <PropSection title="Exit" description="Motion settings for exiting characters.">
         <MotionPropRow
           name="exitHeight"
           type="number"
           words={exitWords}
-          description="How far a leaving character travels before it disappears. 100 equals 1em."
+          description="Exit travel distance; 100 equals 1em."
           chart={{
             curve: "exit",
             domain: [-0.15, 2.15],
@@ -611,7 +611,7 @@ export function PropReference() {
           name="exitScale"
           type="number"
           words={exitWords}
-          description="How large a leaving character is when it disappears, from 0 to 1.5."
+          description="Final character scale before removal."
           chart={{
             curve: "exit",
             domain: [-0.1, 1.6],
@@ -635,7 +635,7 @@ export function PropReference() {
           name="exitBlur"
           type="number"
           words={exitWords}
-          description="How blurred a leaving character is when it disappears, in pixels. Blur does not grow with font size: 4px suits display text, about 1px suits 12–14px text."
+          description="Final character blur, in pixels."
           chart={{
             curve: "exit",
             domain: [-0.6, 12.6],
@@ -657,12 +657,12 @@ export function PropReference() {
         />
       </PropSection>
 
-      <PropSection title="Effects" description="Switches for parts of the motion.">
+      <PropSection title="Effects" description="Optional effects and shared-prefix handling.">
         <MotionPropRow
           name="blur"
           type="boolean"
           words={exitWords}
-          description="Enables entrance and exit blur. Each has its own amount; entrance blur defaults to 0."
+          description="Enables entrance and exit blur."
           control={(value, onChange) => (
             <ToggleField label="Blur characters" checked={value} onCheckedChange={onChange} />
           )}
@@ -671,7 +671,7 @@ export function PropReference() {
           name="scale"
           type="boolean"
           words={entranceWords}
-          description="Scales characters as they arrive and leave. Turn it off to keep every character at its normal size."
+          description="Enables entrance and exit scaling."
           control={(value, onChange) => (
             <ToggleField label="Scale characters" checked={value} onCheckedChange={onChange} />
           )}

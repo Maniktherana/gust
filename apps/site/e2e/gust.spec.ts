@@ -5,14 +5,13 @@ import { expect, test } from "@playwright/test";
 test("native glyph tracks interpolate together and release to their resting styles", async ({
   page,
 }) => {
-  await page.goto("/");
-  await expect(page.locator(".demo-carousel__viewport")).toHaveAttribute("data-intro", "done");
-  const { frames, size } = await page
-    .getByRole("group", { name: "Counter", exact: true })
-    .first()
-    .evaluate(async (group) => {
-      (group.querySelector('[aria-label="Increase count"]') as HTMLButtonElement).click();
-      await new Promise(requestAnimationFrame);
+  await page.goto("/examples", { waitUntil: "networkidle" });
+  await page.evaluate(() => document.fonts.ready);
+  await page.addStyleTag({ content: '[class*="dialkit"] { visibility: hidden !important; }' });
+  const counter = page.getByRole("group", { name: "Counter", exact: true });
+  await counter.getByRole("button", { name: "Increase count" }).click();
+  await expect(counter.locator('[data-gust-part="glyph"]').first()).toBeAttached();
+  const { frames, size } = await counter.evaluate(async (group) => {
       const root = group.querySelector('[data-slot="gust"]')!;
       const animations = root.getAnimations({ subtree: true });
       animations.forEach((animation) => animation.pause());

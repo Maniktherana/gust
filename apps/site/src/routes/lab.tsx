@@ -1,8 +1,19 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { PropReference } from "@/components/reference/props";
+import { SiteShell } from "@/components/site-nav";
 
-// The demos and interactive prop reference now live on the landing page.
 export const Route = createFileRoute("/lab")({
-  beforeLoad: () => {
-    throw redirect({ to: "/" });
-  },
+  head: () => ({ meta: [{ title: "Lab · Gust" }] }),
+  component: Lab,
 });
+
+function Lab() {
+  return (
+    <SiteShell>
+      <main className="flex flex-col gap-8 pt-4">
+        <h1 className="text-lg font-medium">Lab</h1>
+        <PropReference />
+      </main>
+    </SiteShell>
+  );
+}
