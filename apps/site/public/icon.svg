@@ -1,13 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <defs>
-    <filter id="b1" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="0.3"/></filter>
-    <filter id="b2" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="0.6"/></filter>
-    <filter id="b3" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="0.9"/></filter>
-  </defs>
-  <rect width="32" height="32" rx="8" fill="#141414"/>
-  <rect x="0.5" y="0.5" width="31" height="31" rx="7.5" stroke="#fff" stroke-opacity="0.1"/>
-  <rect x="3.49" y="5.5" width="3.7" height="7.38" rx="0.74" fill="#fff" fill-opacity="0.36" filter="url(#b3)"/>
-  <rect x="9.19" y="8.5" width="4.08" height="8.16" rx="0.82" fill="#fff" fill-opacity="0.47" filter="url(#b2)"/>
-  <rect x="15.27" y="11.5" width="5.24" height="10.46" rx="1.04" fill="#fff" fill-opacity="0.79" filter="url(#b1)"/>
-  <rect x="22.51" y="14.5" width="6" height="12" rx="1.2" fill="#fff"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32"><defs><filter id="b1" width="300%" height="300%" x="-100%" y="-100%"><feGaussianBlur stdDeviation=".3"/></filter><filter id="b2" width="300%" height="300%" x="-100%" y="-100%"><feGaussianBlur stdDeviation=".6"/></filter><filter id="b3" width="300%" height="300%" x="-100%" y="-100%"><feGaussianBlur stdDeviation=".9"/></filter></defs><rect width="32" height="32" fill="#141414" rx="8"/><rect width="31" height="31" x=".5" y=".5" stroke="#fff" stroke-opacity=".1" rx="7.5"/><rect width="3.7" height="7.38" x="3.49" y="5.5" fill="#fff" fill-opacity=".36" filter="url(#b3)" rx=".74"/><rect width="4.08" height="8.16" x="9.19" y="8.5" fill="#fff" fill-opacity=".47" filter="url(#b2)" rx=".82"/><rect width="5.24" height="10.46" x="15.27" y="11.5" fill="#fff" fill-opacity=".79" filter="url(#b1)" rx="1.04"/><rect width="6" height="12" x="22.51" y="14.5" fill="#fff" rx="1.2"/></svg>
