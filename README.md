@@ -31,7 +31,7 @@ Styles are included.
 import { Gust } from "@maniktherana/gust";
 
 export function Status({ text }: { text: string }) {
-  return <Gust>{text}</Gust>;
+	return <Gust>{text}</Gust>;
 }
 ```
 
@@ -41,7 +41,7 @@ Use `as` to choose the element and pass through its HTML attributes:
 
 ```tsx
 <Gust as="p" className="status" aria-live="polite">
-  {status}
+	{status}
 </Gust>
 ```
 
@@ -68,8 +68,8 @@ Add a live region only when changes need to be announced.
 import { Gust, type GustMotionOptions } from "@maniktherana/gust";
 
 const motion = {
-  duration: 320,
-  exitDuration: 240,
+	duration: 320,
+	exitDuration: 240,
 } satisfies GustMotionOptions;
 
 <Gust motion={motion}>{text}</Gust>;
@@ -88,16 +88,6 @@ bun run build
 ```
 
 After building, use `bun run --cwd apps/site preview`. The server build targets Bun.
-
-## Publishing
-
-After committing the version bump, run:
-
-```sh
-bun run release:prepared
-```
-
-This publishes to npm, pushes the commit and version tag, and creates a GitHub release. It requires a clean working tree and does not bump the version or create another commit.
 
 ## Why?
 
