@@ -73,23 +73,18 @@ function Footer() {
 
 export function SiteShell({
   children,
-  className,
-  footer = <Footer />,
+  contentClassName,
 }: {
   children: React.ReactNode;
-  className?: string;
-  footer?: React.ReactNode;
+  contentClassName?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "mx-auto flex min-h-dvh w-[calc(100%-40px)] max-w-reading flex-col pt-6 sm:pt-10",
-        className,
-      )}
-    >
-      <TopNav />
-      {children}
-      {footer}
+    <div className="mx-auto flex min-h-dvh w-[calc(100%-40px)] max-w-reading flex-col">
+      <div className={cn("flex shrink-0 flex-col pt-6 sm:pt-10", contentClassName)}>
+        <TopNav />
+        {children}
+      </div>
+      <Footer />
     </div>
   );
 }

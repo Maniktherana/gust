@@ -425,14 +425,30 @@ function usePlaybackPause(ref: React.RefObject<HTMLButtonElement | null>, playin
 }
 
 export function MotionLab() {
-  const [editorRef, editorSize] = useElementSize<HTMLElement>();
+  const editorRef = React.useRef<HTMLElement>(null);
+  const [editorSpace, setEditorSpace] = React.useState<number | null>(null);
   const [headerRef, headerSize] = useElementSize<HTMLDivElement>();
   const [contentRef, contentSize] = useElementSize<HTMLDivElement>();
   const reducedMotion = useReducedMotion();
-  const previewHeight = editorSize.height
-    ? Math.min(256, Math.max(0, editorSize.height - headerSize.height - 16 - 80))
-    : 256;
-  const availableHeight = Math.max(0, editorSize.height - previewHeight - 16);
+
+  React.useLayoutEffect(() => {
+    const update = () => {
+      const node = editorRef.current;
+      if (!node) return;
+      const top = node.getBoundingClientRect().top + window.scrollY;
+      setEditorSpace(Math.max(0, window.innerHeight - top - 16));
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  const previewHeight = editorSpace === null
+    ? 256
+    : Math.min(256, Math.max(0, editorSpace - headerSize.height - 16 - 80));
+  const availableHeight = editorSpace === null
+    ? undefined
+    : Math.max(0, editorSpace - previewHeight - 16);
   const contentHeight = headerSize.height + contentSize.height;
   const [options, setOptions] = React.useState<GustMotionOptions>(() => ({
     ...labExamples.status.motion,
@@ -449,7 +465,11 @@ export function MotionLab() {
   const [playing, setPlaying] = React.useState(true);
   const [{ tab, direction }, setTab] = React.useState({ tab: "Timing", direction: 1 });
   const group = controlGroups.find((group) => group.title === tab);
-  const { ref: scrollRef, onScroll: updateScrollFade, style: scrollFadeStyle } = useScrollFade<HTMLDivElement>(tab, "y");
+  const {
+    ref: scrollRef,
+    onScroll: updateScrollFade,
+    style: scrollFadeStyle,
+  } = useScrollFade<HTMLDivElement>(tab, "y");
   React.useLayoutEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
     updateScrollFade();
@@ -549,7 +569,7 @@ export function MotionLab() {
     <section
       ref={editorRef}
       aria-label="Motion editor"
-      className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-hidden"
+      className="flex min-h-0 min-w-0 flex-col gap-4 overflow-hidden"
     >
       <div
         className="relative shrink-0 overflow-hidden rounded-xl bg-surface-raised"
@@ -606,10 +626,10 @@ export function MotionLab() {
         initial={false}
         animate={{
           height:
-            editorSize.height && contentHeight ? Math.min(contentHeight, availableHeight) : "auto",
+            contentHeight ? Math.min(contentHeight, availableHeight ?? Infinity) : "auto",
         }}
         transition={{ duration: reducedMotion ? 0 : 0.25, ease: [0.25, 1, 0.5, 1] }}
-        style={{ maxHeight: `calc(100% - ${previewHeight + 16}px)` }}
+        style={{ maxHeight: availableHeight }}
         className="min-h-0 min-w-0 shrink-0 overflow-hidden rounded-xl bg-surface-raised"
       >
         <Tabs

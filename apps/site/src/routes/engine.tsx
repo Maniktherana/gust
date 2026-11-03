@@ -9,8 +9,8 @@ export const Route = createFileRoute("/engine")({
 
 function Engine() {
   return (
-    <SiteShell className="h-dvh min-h-0 pb-4" footer={null}>
-      <main className="flex min-h-0 flex-1 flex-col gap-6 pt-1">
+    <SiteShell contentClassName="max-h-dvh min-h-0">
+      <main className="flex min-h-0 flex-col gap-6 pt-1">
         <h1 className="text-lg font-medium">Engine</h1>
         <MotionLab />
       </main>
