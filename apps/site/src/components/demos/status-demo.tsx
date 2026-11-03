@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { motion as m } from "motion/react";
 import { DEFAULT_MOTION, Gust, type GustMotionOptions } from "@maniktherana/gust";
 import { cn } from "@/lib/utils";
 
@@ -98,6 +99,10 @@ export function StatusDemo({
   const [index, setIndex] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
   const step = statusSteps[index] ?? statusSteps[0];
+  const layoutTransition = {
+    duration: (motion.layoutDuration ?? motion.duration ?? DEFAULT_MOTION.duration) / 1000,
+    ease: DEFAULT_MOTION.layoutEasing,
+  };
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -118,15 +123,30 @@ export function StatusDemo({
   }, [paused, reducedMotion]);
 
   return (
-    <span className="flex items-center gap-2.5 rounded-full bg-foreground/5 px-4 py-1.5">
-      <span
-        className={cn("grid size-5 place-items-center transition-colors duration-500", step.color)}
+    <m.span
+      layout={!reducedMotion}
+      initial={false}
+      transition={{ layout: layoutTransition }}
+      style={{ borderRadius: 9999 }}
+      className="flex items-center rounded-full bg-foreground/5 px-4 py-1.5"
+    >
+      <m.span
+        layout={reducedMotion ? false : "position"}
+        transition={{ layout: layoutTransition }}
+        className="flex items-center gap-2.5"
       >
-        <StatusIcon active={step.key} animating={!paused && !reducedMotion} />
-      </span>
-      <Gust motion={motion} className={cn("text-xl font-semibold", step.color)}>
-        {step.label}
-      </Gust>
-    </span>
+        <span
+          className={cn(
+            "grid size-5 place-items-center transition-colors duration-500",
+            step.color,
+          )}
+        >
+          <StatusIcon active={step.key} animating={!paused && !reducedMotion} />
+        </span>
+        <Gust motion={motion} className={cn("text-xl font-semibold", step.color)}>
+          {step.label}
+        </Gust>
+      </m.span>
+    </m.span>
   );
 }

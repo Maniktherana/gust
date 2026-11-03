@@ -18,8 +18,16 @@ const examples: Record<string, { title: string; files: string[]; setup?: string 
     title: "Headline",
     files: [sourceFile("components/demos/headline-demo.tsx", headline)],
   },
-  status: { title: "Status", files: [sourceFile("components/demos/status-demo.tsx", status)] },
-  copy: { title: "Copy", files: [sourceFile("components/demos/copy-demo.tsx", copy)] },
+  status: {
+    title: "Status",
+    setup: "Install Motion with `npm install motion`.",
+    files: [sourceFile("components/demos/status-demo.tsx", status)],
+  },
+  copy: {
+    title: "Copy",
+    setup: "Install Motion with `npm install motion`.",
+    files: [sourceFile("components/demos/copy-demo.tsx", copy)],
+  },
   otp: { title: "One-time code", files: [sourceFile("components/demos/otp-demo.tsx", otp)] },
   guests: {
     title: "Guest count",

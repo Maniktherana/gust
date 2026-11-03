@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { motion as m } from "motion/react";
 import { DEFAULT_MOTION, Gust, type GustMotionOptions } from "@maniktherana/gust";
 
 import { cn } from "@/lib/utils";
@@ -65,6 +66,10 @@ export function CopyDemo({
   text?: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const layoutTransition = {
+    duration: (motion.layoutDuration ?? motion.duration ?? DEFAULT_MOTION.duration) / 1000,
+    ease: DEFAULT_MOTION.layoutEasing,
+  };
   const resetTimer = useRef<number | null>(null);
   const autoplayPaused = useSyncExternalStore(
     subscribeToPlayback,
@@ -96,27 +101,37 @@ export function CopyDemo({
   };
 
   return (
-    <button
+    <m.button
+      layout={!autoplayPaused}
+      initial={false}
+      transition={{ layout: layoutTransition }}
+      style={{ borderRadius: 8 }}
       type="button"
       aria-label={copied ? "Copied" : "Copy"}
       onClick={copy}
-      className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-input bg-background pr-2.5 pl-2 text-sm font-medium shadow-xs transition-[background-color,scale] duration-100 hover:bg-accent active:scale-[0.98] dark:bg-input/30 dark:hover:bg-input/50"
+      className="inline-flex h-8 items-center rounded-lg border border-input bg-background pr-2.5 pl-2 text-sm font-medium shadow-xs transition-[background-color,scale] duration-100 hover:bg-accent active:scale-[0.98] dark:bg-input/30 dark:hover:bg-input/50"
     >
-      <span className="grid place-items-center">
-        <CopyIcon
-          className={cn(
-            "col-start-1 row-start-1 size-4 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
-            copied ? "scale-25 opacity-0 blur-[4px]" : "scale-100 opacity-100 blur-none",
-          )}
-        />
-        <CheckIcon
-          className={cn(
-            "col-start-1 row-start-1 size-4 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
-            copied ? "scale-100 opacity-100 blur-none" : "scale-25 opacity-0 blur-[4px]",
-          )}
-        />
-      </span>
-      <Gust motion={motion}>{copied ? "Copied" : "Copy"}</Gust>
-    </button>
+      <m.span
+        layout={autoplayPaused ? false : "position"}
+        transition={{ layout: layoutTransition }}
+        className="inline-flex items-center gap-1.5"
+      >
+        <span className="grid place-items-center">
+          <CopyIcon
+            className={cn(
+              "col-start-1 row-start-1 size-4 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
+              copied ? "scale-25 opacity-0 blur-[4px]" : "scale-100 opacity-100 blur-none",
+            )}
+          />
+          <CheckIcon
+            className={cn(
+              "col-start-1 row-start-1 size-4 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
+              copied ? "scale-100 opacity-100 blur-none" : "scale-25 opacity-0 blur-[4px]",
+            )}
+          />
+        </span>
+        <Gust motion={motion}>{copied ? "Copied" : "Copy"}</Gust>
+      </m.span>
+    </m.button>
   );
 }
