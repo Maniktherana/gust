@@ -443,12 +443,12 @@ export function MotionLab() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  const previewHeight = editorSpace === null
-    ? 256
-    : Math.min(256, Math.max(0, editorSpace - headerSize.height - 16 - 80));
-  const availableHeight = editorSpace === null
-    ? undefined
-    : Math.max(0, editorSpace - previewHeight - 16);
+  const previewHeight =
+    editorSpace === null
+      ? 256
+      : Math.min(256, Math.max(0, editorSpace - headerSize.height - 16 - 80));
+  const availableHeight =
+    editorSpace === null ? undefined : Math.max(0, editorSpace - previewHeight - 16);
   const contentHeight = headerSize.height + contentSize.height;
   const [options, setOptions] = React.useState<GustMotionOptions>(() => ({
     ...labExamples.status.motion,
@@ -625,8 +625,7 @@ export function MotionLab() {
         data-testid="motion-lab-controls"
         initial={false}
         animate={{
-          height:
-            contentHeight ? Math.min(contentHeight, availableHeight ?? Infinity) : "auto",
+          height: contentHeight ? Math.min(contentHeight, availableHeight ?? Infinity) : "auto",
         }}
         transition={{ duration: reducedMotion ? 0 : 0.25, ease: [0.25, 1, 0.5, 1] }}
         style={{ maxHeight: availableHeight }}
