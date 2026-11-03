@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { IconGithub } from "@/components/icons";
+import { cn } from "@/lib/utils";
 
 function TopNav() {
   return (
@@ -70,12 +71,25 @@ function Footer() {
   );
 }
 
-export function SiteShell({ children }: { children: React.ReactNode }) {
+export function SiteShell({
+  children,
+  className,
+  footer = <Footer />,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  footer?: React.ReactNode;
+}) {
   return (
-    <div className="mx-auto flex min-h-dvh w-[calc(100%-40px)] max-w-reading flex-col pt-6 sm:pt-10">
+    <div
+      className={cn(
+        "mx-auto flex min-h-dvh w-[calc(100%-40px)] max-w-reading flex-col pt-6 sm:pt-10",
+        className,
+      )}
+    >
       <TopNav />
       {children}
-      <Footer />
+      {footer}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "motion/react";
 import {
   Gust,
   DEFAULT_MOTION,
@@ -13,7 +14,7 @@ import { IconSwap } from "@/components/ui/icon-swap";
 import { InlineOptions } from "@/components/ui/inline-options";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
-import { ScrollInput } from "@/components/ui/scroll-fade";
+import { ScrollInput, useScrollFade } from "@/components/ui/scroll-fade";
 import {
   completeAuthorMotion,
   exportMotionConfiguration,
@@ -26,6 +27,7 @@ import {
 
 import { labExamples, type LabExample, type LabExampleKey } from "@/lib/lab-examples";
 import { cn } from "@/lib/utils";
+import { useElementSize } from "@/hooks/use-element";
 
 const controlGroups: { title: string; fields: MotionFieldKey[] }[] = [
   {
@@ -75,6 +77,50 @@ const controlGroups: { title: string; fields: MotionFieldKey[] }[] = [
     fields: ["layoutDuration", "layoutEasing", "preserveMatching"],
   },
 ];
+
+const tabTitles = [...controlGroups.map((group) => group.title), "JSON"];
+
+function ControlPanel({
+  children,
+  direction,
+  ref,
+}: {
+  children: React.ReactNode;
+  direction: number;
+  ref?: React.Ref<HTMLDivElement>;
+}) {
+  const present = useIsPresent();
+  const reducedMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      ref={ref}
+      custom={direction}
+      variants={{
+        enter: (direction: number) => ({
+          opacity: 0,
+          x: reducedMotion ? 0 : direction * 16,
+          filter: reducedMotion ? "blur(0px)" : "blur(4px)",
+        }),
+        center: { opacity: 1, x: 0, filter: "blur(0px)" },
+        exit: (direction: number) => ({
+          opacity: 0,
+          x: reducedMotion ? 0 : direction * -16,
+          filter: reducedMotion ? "blur(0px)" : "blur(4px)",
+        }),
+      }}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      transition={{ duration: reducedMotion ? 0.12 : 0.24, ease: [0, 0, 0.2, 1] }}
+      aria-hidden={!present}
+      inert={!present}
+      className="min-w-0"
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 function NumberField({
   label,
@@ -379,6 +425,15 @@ function usePlaybackPause(ref: React.RefObject<HTMLButtonElement | null>, playin
 }
 
 export function MotionLab() {
+  const [editorRef, editorSize] = useElementSize<HTMLElement>();
+  const [headerRef, headerSize] = useElementSize<HTMLDivElement>();
+  const [contentRef, contentSize] = useElementSize<HTMLDivElement>();
+  const reducedMotion = useReducedMotion();
+  const previewHeight = editorSize.height
+    ? Math.min(256, Math.max(0, editorSize.height - headerSize.height - 16 - 80))
+    : 256;
+  const availableHeight = Math.max(0, editorSize.height - previewHeight - 16);
+  const contentHeight = headerSize.height + contentSize.height;
   const [options, setOptions] = React.useState<GustMotionOptions>(() => ({
     ...labExamples.status.motion,
   }));
@@ -392,7 +447,13 @@ export function MotionLab() {
   const [{ index, previous }, setPosition] = React.useState({ index: 0, previous: "" });
   const [replay, setReplay] = React.useState(0);
   const [playing, setPlaying] = React.useState(true);
-  const [tab, setTab] = React.useState("Timing");
+  const [{ tab, direction }, setTab] = React.useState({ tab: "Timing", direction: 1 });
+  const group = controlGroups.find((group) => group.title === tab);
+  const { ref: scrollRef, onScroll: updateScrollFade, style: scrollFadeStyle } = useScrollFade<HTMLDivElement>(tab, "y");
+  React.useLayoutEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    updateScrollFade();
+  }, [tab, scrollRef, updateScrollFade]);
   const tabsId = React.useId();
   const [speed, setSpeed] = React.useState(1);
   const [configError, setConfigError] = React.useState("");
@@ -486,11 +547,13 @@ export function MotionLab() {
   const exported = React.useMemo(() => exportMotionConfiguration(options), [options]);
   return (
     <section
+      ref={editorRef}
       aria-label="Motion editor"
-      className="flex h-[calc(100svh-185px)] min-h-[440px] min-w-0 flex-col gap-4 overflow-hidden"
+      className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-hidden"
     >
       <div
-        className="relative h-64 shrink-0 overflow-hidden rounded-xl bg-surface-raised"
+        className="relative shrink-0 overflow-hidden rounded-xl bg-surface-raised"
+        style={{ height: previewHeight }}
         data-testid="motion-lab-preview"
       >
         <button
@@ -538,296 +601,331 @@ export function MotionLab() {
           {index + 1} / {values.length}
         </span>
       </div>
-      <Tabs
+      <motion.div
         data-testid="motion-lab-controls"
-        value={tab}
-        onValueChange={(value) => setTab(String(value))}
-        className="min-h-0 min-w-0 w-full flex-1 overflow-x-hidden overflow-y-auto overscroll-contain rounded-xl bg-surface-raised pt-3"
+        initial={false}
+        animate={{
+          height:
+            editorSize.height && contentHeight ? Math.min(contentHeight, availableHeight) : "auto",
+        }}
+        transition={{ duration: reducedMotion ? 0 : 0.25, ease: [0.25, 1, 0.5, 1] }}
+        style={{ maxHeight: `calc(100% - ${previewHeight + 16}px)` }}
+        className="min-h-0 min-w-0 shrink-0 overflow-hidden rounded-xl bg-surface-raised"
       >
-        <div className="flex min-w-0 shrink-0 flex-col gap-2 px-4">
-          <div className="w-full min-w-0 shrink-0">
-            <ScrollInput
-              type="text"
-              aria-label="Values"
-              value={valuesDraft}
-              className="min-h-9 min-w-0 rounded-lg border-0 bg-field px-2.5 text-right text-base font-normal text-foreground outline-none focus-visible:ring-0 focus-visible:ring-ring/24 aria-invalid:ring-2 aria-invalid:ring-destructive/20 disabled:opacity-50"
-              autoComplete="off"
-              spellCheck={false}
-              aria-invalid={!!valuesError}
-              aria-describedby={valuesError ? `${tabsId}-values-error` : undefined}
-              onChange={(event) => {
-                setValuesDraft(event.target.value);
-                setValuesDirty(true);
-                setValuesError("");
-              }}
-              onBlur={commitValues}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  commitValues();
-                }
-              }}
-            />
-            {valuesError ? (
-              <p
-                id={`${tabsId}-values-error`}
-                role="alert"
-                className="pt-1 text-sm text-destructive"
-              >
-                {valuesError}
-              </p>
-            ) : null}
-          </div>
-          <div className="grid min-h-9 min-w-0 grid-cols-[max-content_minmax(0,1fr)] items-center gap-x-4 gap-y-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-            <span className="text-base font-normal whitespace-nowrap text-muted-foreground">
-              Example
-            </span>
-            <InlineOptions
-              label="Text sequence"
-              value={sequence}
-              onValueChange={(value) => {
-                if (value === "custom") return;
-                const next = value as LabExampleKey;
-                const selected: LabExample = labExamples[next];
-                setSequence(next);
-                setOptions({ ...selected.motion });
-                setSpeed(1);
-                setConfigError("");
-                setJsonError("");
-                setJson("");
-                setNotice("");
-                changeValues(selected.values, selected.initialIndex);
-              }}
-              options={[
-                ...(sequence === "custom" ? [{ value: "custom", label: "Custom" }] : []),
-                ...Object.entries(labExamples).map(([key, entry]) => ({
-                  value: key,
-                  label: entry.label,
-                })),
-              ]}
-            />
-          </div>
-          <div className="grid min-h-9 min-w-0 grid-cols-[max-content_minmax(0,1fr)] items-center gap-x-4 gap-y-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-            <span className="text-base font-normal whitespace-nowrap text-muted-foreground">
-              Speed
-            </span>
-            <InlineOptions
-              label="Speed"
-              value={String(speed)}
-              onValueChange={(value) => setSpeed(Number(value))}
-              options={[
-                { value: "1", label: "1×" },
-                { value: "0.5", label: "0.5×" },
-                { value: "0.25", label: "0.25×" },
-                { value: "0.1", label: "0.1×" },
-              ]}
-            />
-          </div>
-        </div>
-        <div aria-hidden="true" className="shrink-0 border-t border-separator" />
-        <div className="min-w-0 shrink-0 px-4">
-          <TabsList aria-label="Motion control groups">
-            {[...controlGroups.map((group) => group.title), "JSON"].map((title) => (
-              <TabsTrigger key={title} value={title}>
-                {title}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
-        <div className="min-w-0 shrink-0 px-4 pb-4">
-          {controlGroups.map((group) => (
-            <TabsContent key={group.title} value={group.title}>
-              {tab === group.title ? (
-                <form
-                  key={`${sequence}-${replay}`}
-                  noValidate
-                  onSubmit={(event) => event.preventDefault()}
-                  aria-label="Motion controls"
-                  className="flex flex-col gap-2"
-                >
-                  {group.title === "Timing" ? (
-                    <>
-                      <div className="grid min-h-9 min-w-0 grid-cols-[max-content_minmax(0,1fr)] items-center gap-x-4 gap-y-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-                        <span className="text-base font-normal whitespace-nowrap text-muted-foreground">
-                          Stagger mode
-                        </span>
-                        <InlineOptions
-                          label="Stagger mode"
-                          value={staggerMode}
-                          onValueChange={(value) =>
-                            update("staggerMode", value as "fixed" | "bounded")
-                          }
-                          options={[
-                            { value: "fixed", label: "Fixed" },
-                            { value: "bounded", label: "Bounded" },
-                          ]}
-                        />
-                      </div>
-                      {staggerMode === "bounded" ? (
-                        <NumberField
-                          label="Stagger spread"
-                          unit="%"
-                          value={(options.staggerSpread ?? DEFAULT_MOTION.staggerSpread) * 100}
-                          min={0}
-                          max={150}
-                          step={1}
-                          onChange={(value) => update("staggerSpread", value / 100)}
-                        />
-                      ) : null}
-                    </>
-                  ) : null}
-                  {group.fields
-                    .filter(
-                      (name) =>
-                        (staggerMode !== "bounded" ||
-                          !["stagger", "enterStagger", "exitStagger"].includes(name)) &&
-                        (name !== "entranceScalePeak" ||
-                          (options.enterEasing ?? DEFAULT_MOTION.enterEasing) !== "spring"),
-                    )
-                    .map((name) => (
-                      <MotionControl
-                        key={name}
-                        name={name}
-                        options={options}
-                        layoutDuration={timeline.layoutDuration}
-                        onChange={update}
-                      />
-                    ))}
-                </form>
-              ) : null}
-            </TabsContent>
-          ))}
-          {configError ? (
-            <p role="alert" className="py-2 text-sm text-destructive">
-              {configError}
-            </p>
-          ) : null}
-          <TabsContent value="JSON">
-            {tab === "JSON" ? (
-              <div className="flex flex-col gap-4 py-1">
-                <label className="flex flex-col gap-2 text-base font-normal text-muted-foreground">
-                  Current configuration (1×, read only)
-                  <textarea
-                    readOnly
-                    value={exported}
-                    rows={8}
-                    spellCheck={false}
-                    className="min-h-9 min-w-0 rounded-lg border-0 bg-field px-2.5 py-3 text-left font-mono text-base font-normal text-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/24 aria-invalid:ring-2 aria-invalid:ring-destructive/20 disabled:opacity-50"
-                  />
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    variant="flat"
-                    className="text-base font-normal"
-                    onClick={async () => {
-                      try {
-                        await navigator.clipboard.writeText(exported);
-                        setNotice("Configuration copied.");
-                      } catch {
-                        setNotice("Clipboard unavailable. Copy the JSON above.");
-                      }
-                    }}
-                  >
-                    Copy JSON
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="flat"
-                    className="text-base font-normal"
-                    onClick={() => {
-                      const url = URL.createObjectURL(
-                        new Blob([exported], { type: "application/json" }),
-                      );
-                      const link = document.createElement("a");
-                      link.href = url;
-                      link.download = "gust-motion.json";
-                      link.click();
-                      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-                      setNotice("Configuration exported.");
-                    }}
-                  >
-                    Download JSON
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="flat"
-                    className="text-base font-normal"
-                    onClick={() => {
-                      if (
-                        !window.confirm("Discard this draft and restore Gust’s unchanged defaults?")
-                      )
-                        return;
-                      setOptions({ ...DEFAULT_MOTION });
-                      setConfigError("");
-                      setNotice("Restored engine defaults.");
-                    }}
-                  >
-                    Restore defaults
-                  </Button>
-                </div>
-                <form
-                  className="flex flex-col gap-4"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    try {
-                      const next = parseMotionConfiguration(json);
-                      setOptions(next);
-                      setJsonError("");
-                      setConfigError("");
-                      setNotice("Configuration imported.");
-                    } catch (error) {
-                      setJsonError(
-                        error instanceof Error ? error.message : "Could not import configuration.",
-                      );
-                      setNotice("");
+        <Tabs
+          value={tab}
+          onValueChange={(value) => {
+            const next = String(value);
+            setTab((current) =>
+              next === current.tab
+                ? current
+                : {
+                    tab: next,
+                    direction: tabTitles.indexOf(next) > tabTitles.indexOf(current.tab) ? 1 : -1,
+                  },
+            );
+          }}
+          className="h-full min-h-0 w-full min-w-0 gap-0"
+        >
+          <div ref={headerRef} className="flex min-w-0 shrink-0 flex-col gap-2 pt-3 pb-2">
+            <div className="flex min-w-0 shrink-0 flex-col gap-2 px-4">
+              <div className="w-full min-w-0 shrink-0">
+                <ScrollInput
+                  type="text"
+                  aria-label="Values"
+                  value={valuesDraft}
+                  className="min-h-9 min-w-0 rounded-lg border-0 bg-field px-2.5 text-right text-base font-normal text-foreground outline-none focus-visible:ring-0 focus-visible:ring-ring/24 aria-invalid:ring-2 aria-invalid:ring-destructive/20 disabled:opacity-50"
+                  autoComplete="off"
+                  spellCheck={false}
+                  aria-invalid={!!valuesError}
+                  aria-describedby={valuesError ? `${tabsId}-values-error` : undefined}
+                  onChange={(event) => {
+                    setValuesDraft(event.target.value);
+                    setValuesDirty(true);
+                    setValuesError("");
+                  }}
+                  onBlur={commitValues}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      commitValues();
                     }
                   }}
-                >
-                  <label
-                    htmlFor="motion-json-import"
-                    className="text-base font-normal text-muted-foreground"
+                />
+                {valuesError ? (
+                  <p
+                    id={`${tabsId}-values-error`}
+                    role="alert"
+                    className="pt-1 text-sm text-destructive"
                   >
-                    Import configuration
-                  </label>
-                  <textarea
-                    id="motion-json-import"
-                    value={json}
-                    onChange={(event) => {
-                      setJson(event.target.value);
-                      setNotice("");
-                    }}
-                    rows={6}
-                    spellCheck={false}
-                    autoComplete="off"
-                    className="min-h-9 min-w-0 rounded-lg border-0 bg-field px-2.5 py-3 text-left font-mono text-base font-normal text-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/24 aria-invalid:ring-2 aria-invalid:ring-destructive/20 disabled:opacity-50"
-                    aria-invalid={!!jsonError}
-                    aria-describedby={jsonError ? "motion-json-error" : undefined}
-                  />
-                  {jsonError ? (
-                    <p id="motion-json-error" role="alert" className="text-sm text-destructive">
-                      {jsonError}
-                    </p>
-                  ) : null}
-                  <Button
-                    type="submit"
-                    variant="flat"
-                    className="self-start text-base font-normal"
-                    disabled={!json.trim()}
-                  >
-                    Import JSON
-                  </Button>
-                </form>
-                {notice ? (
-                  <p role="status" className="text-sm text-muted-foreground">
-                    {notice}
+                    {valuesError}
                   </p>
                 ) : null}
               </div>
-            ) : null}
-          </TabsContent>
-        </div>
-      </Tabs>
+              <div className="grid min-h-9 min-w-0 grid-cols-[max-content_minmax(0,1fr)] items-center gap-x-4 gap-y-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+                <span className="text-base font-normal whitespace-nowrap text-muted-foreground">
+                  Example
+                </span>
+                <InlineOptions
+                  label="Text sequence"
+                  value={sequence}
+                  onValueChange={(value) => {
+                    if (value === "custom") return;
+                    const next = value as LabExampleKey;
+                    const selected: LabExample = labExamples[next];
+                    setSequence(next);
+                    setOptions({ ...selected.motion });
+                    setSpeed(1);
+                    setConfigError("");
+                    setJsonError("");
+                    setJson("");
+                    setNotice("");
+                    changeValues(selected.values, selected.initialIndex);
+                  }}
+                  options={[
+                    ...(sequence === "custom" ? [{ value: "custom", label: "Custom" }] : []),
+                    ...Object.entries(labExamples).map(([key, entry]) => ({
+                      value: key,
+                      label: entry.label,
+                    })),
+                  ]}
+                />
+              </div>
+              <div className="grid min-h-9 min-w-0 grid-cols-[max-content_minmax(0,1fr)] items-center gap-x-4 gap-y-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+                <span className="text-base font-normal whitespace-nowrap text-muted-foreground">
+                  Speed
+                </span>
+                <InlineOptions
+                  label="Speed"
+                  value={String(speed)}
+                  onValueChange={(value) => setSpeed(Number(value))}
+                  options={[
+                    { value: "1", label: "1×" },
+                    { value: "0.5", label: "0.5×" },
+                    { value: "0.25", label: "0.25×" },
+                    { value: "0.1", label: "0.1×" },
+                  ]}
+                />
+              </div>
+            </div>
+            <div aria-hidden="true" className="shrink-0 border-t border-separator" />
+            <div className="min-w-0 shrink-0 px-4">
+              <TabsList aria-label="Motion control groups">
+                {tabTitles.map((title) => (
+                  <TabsTrigger key={title} value={title}>
+                    {title}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+          </div>
+          <div
+            ref={scrollRef}
+            onScroll={updateScrollFade}
+            style={scrollFadeStyle}
+            className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-4 [scrollbar-width:thin] [scrollbar-color:gray_transparent]"
+          >
+            <TabsContent ref={contentRef} value={tab} className="relative pb-2">
+              <AnimatePresence initial={false} mode="popLayout" custom={direction}>
+                <ControlPanel key={tab} direction={direction}>
+                  {group ? (
+                    <form
+                      key={`${sequence}-${replay}`}
+                      noValidate
+                      onSubmit={(event) => event.preventDefault()}
+                      aria-label="Motion controls"
+                      className="flex flex-col gap-2"
+                    >
+                      {group.title === "Timing" ? (
+                        <>
+                          <div className="grid min-h-9 min-w-0 grid-cols-[max-content_minmax(0,1fr)] items-center gap-x-4 gap-y-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+                            <span className="text-base font-normal whitespace-nowrap text-muted-foreground">
+                              Stagger mode
+                            </span>
+                            <InlineOptions
+                              label="Stagger mode"
+                              value={staggerMode}
+                              onValueChange={(value) =>
+                                update("staggerMode", value as "fixed" | "bounded")
+                              }
+                              options={[
+                                { value: "fixed", label: "Fixed" },
+                                { value: "bounded", label: "Bounded" },
+                              ]}
+                            />
+                          </div>
+                          {staggerMode === "bounded" ? (
+                            <NumberField
+                              label="Stagger spread"
+                              unit="%"
+                              value={(options.staggerSpread ?? DEFAULT_MOTION.staggerSpread) * 100}
+                              min={0}
+                              max={150}
+                              step={1}
+                              onChange={(value) => update("staggerSpread", value / 100)}
+                            />
+                          ) : null}
+                        </>
+                      ) : null}
+                      {group.fields
+                        .filter(
+                          (name) =>
+                            (staggerMode !== "bounded" ||
+                              !["stagger", "enterStagger", "exitStagger"].includes(name)) &&
+                            (name !== "entranceScalePeak" ||
+                              (options.enterEasing ?? DEFAULT_MOTION.enterEasing) !== "spring"),
+                        )
+                        .map((name) => (
+                          <MotionControl
+                            key={name}
+                            name={name}
+                            options={options}
+                            layoutDuration={timeline.layoutDuration}
+                            onChange={update}
+                          />
+                        ))}
+                    </form>
+                  ) : (
+                    <div className="flex flex-col gap-4 py-1">
+                      <label className="flex flex-col gap-2 text-base font-normal text-muted-foreground">
+                        Current configuration (1×, read only)
+                        <textarea
+                          readOnly
+                          value={exported}
+                          rows={8}
+                          spellCheck={false}
+                          className="min-h-9 min-w-0 rounded-lg border-0 bg-field px-2.5 py-3 text-left font-mono text-base font-normal text-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/24 aria-invalid:ring-2 aria-invalid:ring-destructive/20 disabled:opacity-50"
+                        />
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          variant="flat"
+                          className="text-base font-normal"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(exported);
+                              setNotice("Configuration copied.");
+                            } catch {
+                              setNotice("Clipboard unavailable. Copy the JSON above.");
+                            }
+                          }}
+                        >
+                          Copy JSON
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="flat"
+                          className="text-base font-normal"
+                          onClick={() => {
+                            const url = URL.createObjectURL(
+                              new Blob([exported], { type: "application/json" }),
+                            );
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.download = "gust-motion.json";
+                            link.click();
+                            window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+                            setNotice("Configuration exported.");
+                          }}
+                        >
+                          Download JSON
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="flat"
+                          className="text-base font-normal"
+                          onClick={() => {
+                            if (
+                              !window.confirm(
+                                "Discard this draft and restore Gust’s unchanged defaults?",
+                              )
+                            )
+                              return;
+                            setOptions({ ...DEFAULT_MOTION });
+                            setConfigError("");
+                            setNotice("Restored engine defaults.");
+                          }}
+                        >
+                          Restore defaults
+                        </Button>
+                      </div>
+                      <form
+                        className="flex flex-col gap-4"
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          try {
+                            const next = parseMotionConfiguration(json);
+                            setOptions(next);
+                            setJsonError("");
+                            setConfigError("");
+                            setNotice("Configuration imported.");
+                          } catch (error) {
+                            setJsonError(
+                              error instanceof Error
+                                ? error.message
+                                : "Could not import configuration.",
+                            );
+                            setNotice("");
+                          }
+                        }}
+                      >
+                        <label
+                          htmlFor="motion-json-import"
+                          className="text-base font-normal text-muted-foreground"
+                        >
+                          Import configuration
+                        </label>
+                        <textarea
+                          id="motion-json-import"
+                          value={json}
+                          onChange={(event) => {
+                            setJson(event.target.value);
+                            setNotice("");
+                          }}
+                          rows={6}
+                          spellCheck={false}
+                          autoComplete="off"
+                          className="min-h-9 min-w-0 rounded-lg border-0 bg-field px-2.5 py-3 text-left font-mono text-base font-normal text-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/24 aria-invalid:ring-2 aria-invalid:ring-destructive/20 disabled:opacity-50"
+                          aria-invalid={!!jsonError}
+                          aria-describedby={jsonError ? "motion-json-error" : undefined}
+                        />
+                        {jsonError ? (
+                          <p
+                            id="motion-json-error"
+                            role="alert"
+                            className="text-sm text-destructive"
+                          >
+                            {jsonError}
+                          </p>
+                        ) : null}
+                        <Button
+                          type="submit"
+                          variant="flat"
+                          className="self-start text-base font-normal"
+                          disabled={!json.trim()}
+                        >
+                          Import JSON
+                        </Button>
+                      </form>
+                      {notice ? (
+                        <p role="status" className="text-sm text-muted-foreground">
+                          {notice}
+                        </p>
+                      ) : null}
+                    </div>
+                  )}
+                  {configError ? (
+                    <p role="alert" className="py-2 text-sm text-destructive">
+                      {configError}
+                    </p>
+                  ) : null}
+                </ControlPanel>
+              </AnimatePresence>
+            </TabsContent>
+          </div>
+        </Tabs>
+      </motion.div>
     </section>
   );
 }

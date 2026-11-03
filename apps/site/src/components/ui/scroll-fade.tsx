@@ -3,18 +3,21 @@ import { cn } from "@/lib/utils";
 
 const useLayoutEffect = typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;
 
-export function useScrollFade<T extends HTMLElement>(value?: unknown) {
+export function useScrollFade<T extends HTMLElement>(value?: unknown, axis: "x" | "y" = "x") {
   const ref = React.useRef<T>(null);
-  const [edges, setEdges] = React.useState({ left: false, right: false });
+  const [edges, setEdges] = React.useState({ start: false, end: false });
   const update = React.useCallback(() => {
     const node = ref.current;
     if (!node) return;
-    const left = node.scrollLeft > 1;
-    const right = node.scrollWidth - node.clientWidth - node.scrollLeft > 1;
+    const offset = axis === "x" ? node.scrollLeft : node.scrollTop;
+    const size = axis === "x" ? node.clientWidth : node.clientHeight;
+    const contentSize = axis === "x" ? node.scrollWidth : node.scrollHeight;
+    const start = offset > 1;
+    const end = contentSize - size - offset > 1;
     setEdges((previous) =>
-      previous.left === left && previous.right === right ? previous : { left, right },
+      previous.start === start && previous.end === end ? previous : { start, end },
     );
-  }, []);
+  }, [axis]);
 
   useLayoutEffect(() => {
     const node = ref.current;
@@ -35,8 +38,8 @@ export function useScrollFade<T extends HTMLElement>(value?: unknown) {
 
   const style: React.CSSProperties = {
     maskImage:
-      edges.left || edges.right
-        ? `linear-gradient(to right, ${edges.left ? "transparent, #000 32px" : "#000 0px"}, ${edges.right ? "#000 calc(100% - 32px), transparent" : "#000 100%"})`
+      edges.start || edges.end
+        ? `linear-gradient(to ${axis === "x" ? "right" : "bottom"}, ${edges.start ? "transparent, #000 32px" : "#000 0px"}, ${edges.end ? "#000 calc(100% - 32px), transparent" : "#000 100%"})`
         : undefined,
   };
   return { ref, onScroll: update, style };
