@@ -1,0 +1,117 @@
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
+const useLayoutEffect = typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;
+
+export function useScrollFade<T extends HTMLElement>(value?: unknown) {
+  const ref = React.useRef<T>(null);
+  const [edges, setEdges] = React.useState({ left: false, right: false });
+  const update = React.useCallback(() => {
+    const node = ref.current;
+    if (!node) return;
+    const left = node.scrollLeft > 1;
+    const right = node.scrollWidth - node.clientWidth - node.scrollLeft > 1;
+    setEdges((previous) =>
+      previous.left === left && previous.right === right ? previous : { left, right },
+    );
+  }, []);
+
+  useLayoutEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    for (const child of node.children) observer.observe(child);
+    let active = true;
+    void document.fonts.ready.then(() => {
+      if (active) update();
+    });
+    return () => {
+      active = false;
+      observer.disconnect();
+    };
+  }, [update, value]);
+
+  const style: React.CSSProperties = {
+    maskImage:
+      edges.left || edges.right
+        ? `linear-gradient(to right, ${edges.left ? "transparent, #000 32px" : "#000 0px"}, ${edges.right ? "#000 calc(100% - 32px), transparent" : "#000 100%"})`
+        : undefined,
+  };
+  return { ref, onScroll: update, style };
+}
+
+export function ScrollFade({
+  children,
+  className,
+  style,
+  onScroll,
+  ...props
+}: React.ComponentProps<"div">) {
+  const fade = useScrollFade<HTMLDivElement>(children);
+  return (
+    <div
+      {...props}
+      ref={fade.ref}
+      className={cn(
+        "min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        className,
+      )}
+      style={{ ...style, ...fade.style }}
+      onScroll={(event) => {
+        fade.onScroll();
+        onScroll?.(event);
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function ScrollInput({
+  className,
+  style,
+  onScroll,
+  onChange,
+  onSelect,
+  onFocus,
+  onBlur,
+  ...props
+}: Omit<React.ComponentProps<"input">, "ref">) {
+  const fade = useScrollFade<HTMLInputElement>(props.value);
+  return (
+    <div data-slot="scroll-input" className="min-w-0 rounded-lg bg-field">
+      <input
+        {...props}
+        ref={fade.ref}
+        className={cn(
+          "block w-full min-w-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          className,
+          "bg-transparent",
+        )}
+        style={{ ...style, ...fade.style }}
+        onScroll={(event) => {
+          fade.onScroll();
+          onScroll?.(event);
+        }}
+        onChange={(event) => {
+          onChange?.(event);
+          fade.onScroll();
+        }}
+        onSelect={(event) => {
+          onSelect?.(event);
+          fade.onScroll();
+        }}
+        onFocus={(event) => {
+          onFocus?.(event);
+          fade.onScroll();
+        }}
+        onBlur={(event) => {
+          onBlur?.(event);
+          fade.onScroll();
+        }}
+      />
+    </div>
+  );
+}

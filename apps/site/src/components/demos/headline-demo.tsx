@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Gust } from "@maniktherana/gust";
 
-const headlines = ["Draft", "Draft saved", "In review", "Published"];
+export const headlines = ["Draft", "Draft saved", "In review", "Published"];
 export function HeadlineDemo({ paused = false }: { paused?: boolean }) {
   const [index, setIndex] = useState(0);
   const [epoch, setEpoch] = useState(0);
@@ -26,10 +26,9 @@ export function HeadlineDemo({ paused = false }: { paused?: boolean }) {
 
   return (
     <div className="relative grid size-full place-items-center px-6">
-      <Gust
-        value={headlines[index % headlines.length] ?? ""}
-        className="max-w-full text-3xl font-medium tracking-tight sm:text-4xl"
-      />
+      <Gust className="max-w-full text-3xl font-medium tracking-tight sm:text-4xl">
+        {headlines[index % headlines.length] ?? ""}
+      </Gust>
       <button
         type="button"
         onClick={() => {

@@ -1,30 +1,32 @@
 import * as React from "react";
 
-import { DemoCopyButton } from "@/components/demo-copy-button";
-import { CopyDemo, copyMotion } from "@/components/demos/copy-demo";
-import copySource from "@/components/demos/copy-demo.tsx?raw";
+import { CopyDemo } from "@/components/demos/copy-demo";
 import { HeadlineDemo } from "@/components/demos/headline-demo";
-import headlineSource from "@/components/demos/headline-demo.tsx?raw";
-import { OtpDemo, otpMotion } from "@/components/demos/otp-demo";
-import otpSource from "@/components/demos/otp-demo.tsx?raw";
-import { StatusDemo, statusMotion } from "@/components/demos/status-demo";
-import statusSource from "@/components/demos/status-demo.tsx?raw";
+import { OtpDemo } from "@/components/demos/otp-demo";
+import { StatusDemo } from "@/components/demos/status-demo";
 import { examples } from "@/components/examples";
 import { ExampleCard } from "@/components/examples/example-card";
 import { useInView } from "@/hooks/use-element";
 import { useDemoMotion } from "@/hooks/use-demo-motion";
 import { componentPrompt } from "@/lib/prompts";
+import { getExampleSource } from "@/lib/example-sources";
 import { cn } from "@/lib/utils";
-import type { GustProps } from "@maniktherana/gust";
+import { DEFAULT_MOTION, type GustMotionOptions } from "@maniktherana/gust";
 
-type Motion = Omit<GustProps, "value">;
+type Motion = GustMotionOptions;
 
 export const headlinePrompt = componentPrompt({
-  source: headlineSource,
-  title: "cycling headline",
+  source: getExampleSource("headline"),
+  title: "Headline",
 });
 
-export function HeadlineBox({ className }: { className?: string }) {
+export function HeadlineBox({
+  className,
+  children,
+}: {
+  className?: string;
+  children?: React.ReactNode;
+}) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const paused = !inView;
 
@@ -38,7 +40,7 @@ export function HeadlineBox({ className }: { className?: string }) {
         className,
       )}
     >
-      <DemoCopyButton prompt={headlinePrompt} title="Headline" />
+      {children}
       <HeadlineDemo paused={paused} />
     </div>
   );
@@ -47,37 +49,42 @@ export function HeadlineBox({ className }: { className?: string }) {
 export const demos = [
   {
     id: "status",
-    motion: statusMotion,
+    motion: DEFAULT_MOTION,
     padded: true,
     render: (motion: Motion, paused: boolean) => <StatusDemo motion={motion} paused={paused} />,
-    source: statusSource,
     title: "Status",
   },
   {
     id: "copy",
-    motion: copyMotion,
+    motion: DEFAULT_MOTION,
     padded: true,
     render: (motion: Motion, paused: boolean) => <CopyDemo motion={motion} paused={paused} />,
-    source: copySource,
     title: "Copy",
   },
   {
     id: "otp",
-    motion: otpMotion,
+    motion: DEFAULT_MOTION,
     padded: true,
     render: (motion: Motion, paused: boolean) => <OtpDemo motion={motion} paused={paused} />,
-    source: otpSource,
     title: "One-time code",
   },
 ].map((demo) => ({
   ...demo,
   prompt: componentPrompt({
-    source: demo.source,
-    title: `${demo.title} demo`,
+    source: getExampleSource(demo.id),
+    title: demo.title,
   }),
 }));
 
-export function DemoBox({ demo, className }: { demo: (typeof demos)[number]; className?: string }) {
+export function DemoBox({
+  demo,
+  className,
+  children,
+}: {
+  demo: (typeof demos)[number];
+  className?: string;
+  children?: React.ReactNode;
+}) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const paused = !inView;
   const motion = useDemoMotion(demo.title, demo.id, demo.motion);
@@ -93,7 +100,7 @@ export function DemoBox({ demo, className }: { demo: (typeof demos)[number]; cla
         className,
       )}
     >
-      <DemoCopyButton prompt={demo.prompt} title={demo.title} />
+      {children}
       {demo.render(motion, paused)}
     </div>
   );
@@ -103,9 +110,15 @@ export function DemoGrid() {
   return (
     <section aria-label="Gust demos" className="grid grid-cols-2 gap-3">
       <HeadlineBox className="col-span-2 h-48 sm:col-span-1 sm:h-56" />
-      {examples.filter((example) => example.id === "live-price").map((example) => (
-        <ExampleCard key={example.id} example={example} className="col-span-2 h-48 sm:col-span-1 sm:h-56" />
-      ))}
+      {examples
+        .filter((example) => example.id === "live-price")
+        .map((example) => (
+          <ExampleCard
+            key={example.id}
+            example={example}
+            className="col-span-2 h-48 sm:col-span-1 sm:h-56"
+          />
+        ))}
       {demos
         .filter((demo) => demo.id !== "otp")
         .map((demo) => (

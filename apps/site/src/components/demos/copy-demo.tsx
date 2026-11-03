@@ -1,22 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Gust, type GustProps } from "@maniktherana/gust";
+import { DEFAULT_MOTION, Gust, type GustMotionOptions } from "@maniktherana/gust";
 
-export const copyMotion = {
-  blur: false,
-  entranceOvershoot: 0,
-  entranceScale: 1,
-  exitDuration: 360,
-  exitHeight: 100,
-  exitScale: 0.6,
-  stagger: 40,
-} satisfies Omit<GustProps, "value">;
+import { cn } from "@/lib/utils";
 
-const glyph =
-  "col-start-1 row-start-1 size-4 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]";
-const shown = "scale-100 opacity-100 blur-none";
-const hidden = "scale-25 opacity-0 blur-[4px]";
 const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
 
 function subscribeToPlayback(onChange: () => void) {
@@ -68,11 +56,11 @@ function CheckIcon({ className }: { className: string }) {
 // "Cop" is a shared prefix of "Copy" and "Copied", so only the ending changes
 // while the icon swaps beside it.
 export function CopyDemo({
-  motion = copyMotion,
+  motion = DEFAULT_MOTION,
   paused = false,
   text = "Gust copied this text",
 }: {
-  motion?: Omit<GustProps, "value">;
+  motion?: GustMotionOptions;
   paused?: boolean;
   text?: string;
 }) {
@@ -115,10 +103,20 @@ export function CopyDemo({
       className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-input bg-background pr-2.5 pl-2 text-sm font-medium shadow-xs transition-[background-color,scale] duration-100 hover:bg-accent active:scale-[0.98] dark:bg-input/30 dark:hover:bg-input/50"
     >
       <span className="grid place-items-center">
-        <CopyIcon className={`${glyph} ${copied ? hidden : shown}`} />
-        <CheckIcon className={`${glyph} ${copied ? shown : hidden}`} />
+        <CopyIcon
+          className={cn(
+            "col-start-1 row-start-1 size-4 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
+            copied ? "scale-25 opacity-0 blur-[4px]" : "scale-100 opacity-100 blur-none",
+          )}
+        />
+        <CheckIcon
+          className={cn(
+            "col-start-1 row-start-1 size-4 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
+            copied ? "scale-100 opacity-100 blur-none" : "scale-25 opacity-0 blur-[4px]",
+          )}
+        />
       </span>
-      <Gust value={copied ? "Copied" : "Copy"} {...motion} />
+      <Gust motion={motion}>{copied ? "Copied" : "Copy"}</Gust>
     </button>
   );
 }

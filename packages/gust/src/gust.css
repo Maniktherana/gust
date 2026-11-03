@@ -1,84 +1,70 @@
-/* Native WAAPI interpolates these on the style timeline. Keeping the glyph's visual
-   properties together prevents iOS from advancing its transform before its first paint.
-   They never inherit, so an update invalidates only the animated glyph. */
-@property --gust-transform {
-  syntax: "<transform-list>";
-  inherits: false;
-  initial-value: translate(0px, 0px) scale(1);
-}
-
-@property --gust-opacity {
-  syntax: "<number>";
-  inherits: false;
-  initial-value: 1;
-}
-
-@property --gust-blur {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
-}
-
 @layer components {
-  :where([data-slot="gust"]) {
+  :where([data-gust-part="motion"]) {
     position: relative;
     isolation: isolate;
-    /* Keep the compositing boundary stable as character layers enter and leave. In WebKit,
-       promoting the subtree only when motion starts can skip its first painted frames and
-       change the pixel snapping of nearby controls. Native animations still own playback. */
-    will-change: transform;
+    /* A stable WebKit compositing boundary avoids first-frame raster skips and
+       pixel-snapping changes in neighboring controls as glyph layers come and go. */
+    /*will-change: transform;*/
     display: inline-grid;
     width: max-content;
     overflow: visible;
-  }
-
-  :where([data-gust-part="sizer"], [data-gust-part="text"]) {
-    grid-area: 1 / 1;
-    white-space: pre;
+    font-kerning: none;
+    font-variant-ligatures: none;
   }
 
   :where([data-gust-part="sizer"]) {
+    grid-area: 1 / 1;
     display: inline-block;
-    visibility: hidden;
+    justify-self: start;
+    width: max-content;
+    white-space: pre;
     pointer-events: none;
   }
 
+  :where([data-gust-ready="true"] > [data-gust-part="sizer"]) {
+    visibility: hidden;
+  }
+
   :where([data-gust-part="text"]) {
-    display: inline-flex;
-    justify-self: start;
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+    white-space: pre;
     user-select: none;
+  }
+
+  :where([data-gust-ready="true"] > [data-gust-part="text"]) {
+    visibility: visible;
   }
 
   :where([data-gust-part="slot"]) {
     display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 
-  :where([data-gust-part="slot"][data-animated="true"]) {
-    position: relative;
-    vertical-align: baseline;
+  :where([data-gust-part="exit-layer"], [data-gust-part="exit-batch"]) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: pre;
+    pointer-events: none;
   }
 
-  :where([data-gust-part="placeholder"]) {
-    visibility: hidden;
-  }
-
-  :where([data-gust-part="glyph"], [data-gust-part="exit"]) {
+  :where([data-gust-part="glyph"], [data-gust-part="exit"], [data-gust-part="exit-carry"]) {
     position: absolute;
     top: 0;
     left: 0;
     display: inline-block;
     transform-origin: center;
-    transform: var(--gust-transform);
-    opacity: var(--gust-opacity);
-    filter: blur(var(--gust-blur));
-  }
-
-  :where([data-gust-part="glyph"]) {
-    --gust-opacity: 1;
+    transform: translate(0px, 0px) scale(1);
+    will-change: transform;
+    opacity: 1;
   }
 
   :where([data-gust-part="exit"]) {
-    --gust-opacity: 0;
+    opacity: 0;
     pointer-events: none;
   }
 

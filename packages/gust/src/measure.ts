@@ -75,26 +75,24 @@ export function widthsMatch(previous: GustRootSize, next: GustRootSize) {
   return Math.abs(previous.width - next.width) < 0.5;
 }
 
-export function measureGustCharacterSlots(
+export function measureGustCharacterSlots<Key>(
   root: HTMLSpanElement,
-  slots: Map<number, HTMLSpanElement>,
+  slots: Map<Key, HTMLSpanElement>,
 ) {
-  const measures = new Map<number, GustCharacterMeasure>();
+  const measures = new Map<Key, GustCharacterMeasure>();
   const rootRect = root.getBoundingClientRect();
   const scale = measureElementScale(root, rootRect);
 
   slots.forEach((slot, index) => {
     if (!slot.isConnected) return;
     const rect = slot.getBoundingClientRect();
-    const glyph = slot.querySelector<HTMLSpanElement>('[data-gust-part="glyph"]');
-    // A width morph counters alignment drift on the glyph, not its slot.
-    // Capture that live offset too when a new value interrupts the morph.
-    const layoutX = glyph ? Number.parseFloat(window.getComputedStyle(glyph).left) || 0 : 0;
+    // The slot's live rectangle includes in-flight layout compensation.
+    const view = root.ownerDocument.defaultView ?? window;
     measures.set(index, {
-      color: window.getComputedStyle(slot).color,
+      color: view.getComputedStyle(slot).color,
       height: rect.height / scale.y,
       width: rect.width / scale.x,
-      x: (rect.left - rootRect.left) / scale.x + layoutX,
+      x: (rect.left - rootRect.left) / scale.x,
       y: (rect.top - rootRect.top) / scale.y,
     });
   });

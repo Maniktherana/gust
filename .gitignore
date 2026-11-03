@@ -5,7 +5,7 @@ node_modules
 dist
 coverage
 .tmp
-apps/site/public/r
 playwright-report
 test-results
 .plans
+.tanstack

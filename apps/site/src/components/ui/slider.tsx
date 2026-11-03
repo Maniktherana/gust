@@ -50,14 +50,14 @@ function composeRefs<T>(...refs: Array<React.Ref<T> | undefined>) {
   };
 }
 
-function useMeasuredWidth<T extends HTMLElement>() {
+function useMeasuredWidth<T extends HTMLElement>(mounted = true) {
   const ref = React.useRef<T>(null);
   const [width, setWidth] = React.useState(0);
 
   useIsomorphicLayoutEffect(() => {
     const node = ref.current;
 
-    if (!node) return undefined;
+    if (!mounted || !node) return undefined;
 
     const updateWidth = () => setWidth(node.offsetWidth);
 
@@ -69,7 +69,7 @@ function useMeasuredWidth<T extends HTMLElement>() {
     observer.observe(node);
 
     return () => observer.disconnect();
-  }, []);
+  }, [mounted]);
 
   return [ref, width] as const;
 }
@@ -169,22 +169,20 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
     const [wrapperRef, wrapperWidth] = useMeasuredWidth<HTMLDivElement>();
     const [labelRef, labelWidth] = useMeasuredWidth<HTMLSpanElement>();
     const [valueRef, valueWidth] = useMeasuredWidth<HTMLButtonElement>();
-    const inputRef = React.useRef<HTMLInputElement>(null);
-    const pointerDownPos = React.useRef<{ x: number; y: number } | null>(null);
+    const pointerDownPos = React.useRef<{ x: number; y: number; valueHit: boolean } | null>(null);
     const isClickRef = React.useRef(true);
     const fillAnimationRef = React.useRef<ReturnType<typeof animate> | null>(null);
     const wrapperRectRef = React.useRef<DOMRect | null>(null);
     const scaleRef = React.useRef(1);
-    const hoverTimeoutRef = React.useRef<number | null>(null);
     const [uncontrolledValue, setUncontrolledValue] = React.useState(() =>
       normalizeValue(firstValue(defaultValue, safeMin), safeMin, safeMax, safeStep),
     );
     const [isDragging, setIsDragging] = React.useState(false);
     const [isInteracting, setIsInteracting] = React.useState(false);
     const [isHovered, setIsHovered] = React.useState(false);
-    const [isValueEditable, setIsValueEditable] = React.useState(false);
     const [isValueHovered, setIsValueHovered] = React.useState(false);
     const [showInput, setShowInput] = React.useState(false);
+    const [inputRef, inputWidth] = useMeasuredWidth<HTMLInputElement>(showInput);
     const [inputValue, setInputValue] = React.useState("");
     const rawValue = isControlled ? firstValue(value, safeMin) : uncontrolledValue;
     const currentValue = normalizeValue(rawValue, safeMin, safeMax, safeStep);
@@ -224,7 +222,6 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
       setIsDragging(false);
       setIsHovered(false);
       setIsInteracting(false);
-      setIsValueEditable(false);
       setIsValueHovered(false);
       setShowInput(false);
       rubberStretchPx.jump(0);
@@ -232,30 +229,11 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
     }, [disabled, rubberStretchPx]);
 
     React.useEffect(() => {
-      if (disabled || !editable || !isValueHovered || showInput || isValueEditable) {
-        if (!isValueHovered && !showInput) setIsValueEditable(false);
-
-        return undefined;
-      }
-
-      hoverTimeoutRef.current = window.setTimeout(() => {
-        setIsValueEditable(true);
-      }, 800);
-
-      return () => {
-        if (hoverTimeoutRef.current) {
-          window.clearTimeout(hoverTimeoutRef.current);
-          hoverTimeoutRef.current = null;
-        }
-      };
-    }, [disabled, editable, isValueEditable, isValueHovered, showInput]);
-
-    React.useEffect(() => {
       if (!showInput) return;
 
       inputRef.current?.focus();
       inputRef.current?.select();
-    }, [showInput]);
+    }, [inputRef, showInput]);
 
     const percentFromValue = React.useCallback(
       (nextValue: number) => valueToPercent(nextValue, safeMin, safeMax),
@@ -347,8 +325,15 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
         if (disabled || showInput) return;
 
         event.preventDefault();
-        event.currentTarget.setPointerCapture(event.pointerId);
-        pointerDownPos.current = { x: event.clientX, y: event.clientY };
+        const valueTarget = (event.target as Element).closest<HTMLButtonElement>(
+          '[data-slot="slider-value"]',
+        );
+        (valueTarget ?? event.currentTarget).setPointerCapture(event.pointerId);
+        pointerDownPos.current = {
+          x: event.clientX,
+          y: event.clientY,
+          valueHit: valueTarget !== null,
+        };
         isClickRef.current = true;
         setIsInteracting(true);
 
@@ -407,7 +392,7 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
       (event: React.PointerEvent<HTMLDivElement>) => {
         if (!isInteracting) return;
 
-        if (isClickRef.current) {
+        if (isClickRef.current && !pointerDownPos.current?.valueHit) {
           const rawNextValue = positionToValue(event.clientX);
           const discreteSteps = (safeMax - safeMin) / safeStep;
           const snappedValue =
@@ -419,7 +404,7 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
             animateFill: true,
             commit: true,
           });
-        } else {
+        } else if (!isClickRef.current) {
           const finalValue = normalizeValue(
             positionToValue(event.clientX),
             safeMin,
@@ -501,29 +486,31 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
       }
 
       setShowInput(false);
-      setIsValueEditable(false);
       setIsValueHovered(false);
     }, [inputValue, setSliderValue]);
 
-    const handleValueClick = React.useCallback(
+    const handleValueDoubleClick = React.useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
-        if (!editable || !isValueEditable) return;
+        if (disabled || !editable || !isClickRef.current) return;
 
         event.stopPropagation();
         event.preventDefault();
         setInputValue(currentValue.toFixed(decimalsForStep(safeStep)));
         setShowInput(true);
       },
-      [currentValue, editable, isValueEditable, safeStep],
+      [currentValue, disabled, editable, safeStep],
     );
 
     const handleInputKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLInputElement>) => {
+        event.stopPropagation();
+
         if (event.key === "Enter") {
+          event.preventDefault();
           handleInputSubmit();
         } else if (event.key === "Escape") {
+          event.preventDefault();
           setShowInput(false);
-          setIsValueEditable(false);
           setIsValueHovered(false);
         }
       },
@@ -532,7 +519,7 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
 
     const handleValueKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLButtonElement>) => {
-        if (!isValueEditable) return;
+        if (disabled || !editable) return;
 
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
@@ -540,11 +527,14 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
           setShowInput(true);
         }
       },
-      [currentValue, isValueEditable, safeStep],
+      [currentValue, disabled, editable, safeStep],
     );
 
+    const editorLabel =
+      typeof label === "string" ? `Edit ${label} value` : `Edit ${ariaLabel ?? "slider"} value`;
     const displayValue =
-      formatValue?.(currentValue) ?? `${currentValue.toFixed(decimalsForStep(safeStep))}${unit}`;
+      formatValue?.(currentValue) ??
+      `${currentValue.toFixed(decimalsForStep(safeStep))}${unit.trim()}`;
     const ariaValueText =
       typeof displayValue === "string" || typeof displayValue === "number"
         ? String(displayValue)
@@ -553,9 +543,10 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
       label && wrapperWidth > 0
         ? ((LABEL_LEFT + labelWidth + HANDLE_BUFFER) / wrapperWidth) * 100
         : 0;
+    const valueAreaWidth = showInput ? inputWidth + VALUE_RIGHT : valueWidth;
     const rightThreshold =
       showValue && wrapperWidth > 0
-        ? ((wrapperWidth - VALUE_RIGHT - valueWidth - HANDLE_BUFFER) / wrapperWidth) * 100
+        ? ((wrapperWidth - valueAreaWidth - HANDLE_BUFFER) / wrapperWidth) * 100
         : 100;
     const valueDodge =
       showValue &&
@@ -594,7 +585,7 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
         style={style}
         tabIndex={disabled ? -1 : 0}
         className={cn(
-          "group/slider relative h-10 w-full min-w-0 touch-none select-none outline-none focus-visible:[&_[data-slot=slider-track]]:shadow-[var(--shadow-control-focus)] data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
+          "group/slider relative h-9 w-full min-w-0 touch-none select-none outline-none focus-visible:[&_[data-slot=slider-track]]:shadow-[var(--shadow-control-focus)] data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-50",
           className,
         )}
         {...props}
@@ -637,11 +628,12 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
             aria-hidden="true"
             data-slot="slider-range"
             style={{ width: fillWidth }}
-            className="pointer-events-none absolute inset-y-0 left-0 bg-muted-foreground/10 transition-colors duration-150 ease-out group-data-[active=true]/slider:bg-muted-foreground/20"
+            className="pointer-events-none absolute inset-y-0 left-0 rounded-lg bg-muted-foreground/10 transition-colors duration-150 ease-out group-data-[active=true]/slider:bg-muted-foreground/20"
           />
 
           <motion.div
             aria-hidden="true"
+            initial={false}
             animate={{
               opacity: handleOpacity,
               scaleX: isActive ? 1 : 0.25,
@@ -662,7 +654,7 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
 
           {label ? (
             <span
-              className="pointer-events-none absolute top-1/2 left-2.5 z-30 inline-flex max-w-[calc(100%-4.5rem)] -translate-y-[calc(50%+0.5px)] items-center truncate text-[13px] leading-none font-medium text-muted-foreground transition-colors duration-150 group-data-[active=true]/slider:text-foreground"
+              className="pointer-events-none absolute top-1/2 left-2.5 z-30 inline-flex max-w-[calc(100%-4.5rem)] -translate-y-[calc(50%+0.5px)] items-center truncate text-sm leading-none font-normal text-muted-foreground transition-colors duration-150 group-data-[active=true]/slider:text-foreground"
               data-slot="slider-label"
               ref={labelRef}
             >
@@ -671,49 +663,48 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
           ) : null}
 
           {showValue ? (
-            showInput ? (
-              <input
-                aria-label={typeof label === "string" ? `Edit ${label} value` : "Edit slider value"}
-                className="absolute top-1/2 right-2.5 z-40 min-w-[3ch] -translate-y-1/2 border-0 border-b border-muted-foreground bg-transparent p-0 pb-px font-mono text-[13px] leading-none font-medium text-foreground outline-none"
-                data-slot="slider-input"
-                onBlur={handleInputSubmit}
-                onChange={(event) => setInputValue(event.target.value)}
-                onClick={(event) => event.stopPropagation()}
-                onKeyDown={handleInputKeyDown}
-                onPointerDown={(event) => event.stopPropagation()}
-                ref={inputRef}
-                style={{
-                  width: `${Math.min(Math.max(inputValue.length, 3), 8)}ch`,
-                }}
-                type="text"
-                value={inputValue}
-              />
-            ) : (
+            <>
+              {showInput ? (
+                <input
+                  aria-label={editorLabel}
+                  className="absolute top-1/2 right-2.5 z-40 min-w-[3ch] -translate-y-1/2 border-0 border-b border-muted-foreground bg-transparent p-0 pb-px font-sans text-base leading-none font-normal text-foreground tabular-nums outline-none sm:text-sm"
+                  data-slot="slider-input"
+                  onBlur={handleInputSubmit}
+                  onChange={(event) => setInputValue(event.target.value)}
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={handleInputKeyDown}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  ref={inputRef}
+                  style={{
+                    width: `${Math.min(Math.max(inputValue.length, 3), 8)}ch`,
+                  }}
+                  type="text"
+                  value={inputValue}
+                />
+              ) : null}
               <button
-                aria-label={typeof label === "string" ? `Edit ${label} value` : "Edit slider value"}
+                aria-label={editorLabel}
                 className={cn(
-                  "absolute top-1/2 right-2.5 z-30 -translate-y-[calc(50%-0.5px)] appearance-none border-0 border-b border-transparent bg-transparent p-0 pb-px text-right font-mono text-[13px] leading-none font-medium text-muted-foreground tabular-nums transition-[border-color,color] duration-150 group-data-[active=true]/slider:text-foreground",
-                  isValueEditable && "border-muted-foreground",
+                  "absolute inset-y-0 right-0 z-30 h-9 min-w-11 appearance-none border-0 bg-transparent px-2.5 text-right font-sans text-sm leading-none font-normal text-muted-foreground tabular-nums decoration-muted-foreground underline-offset-4 transition-colors duration-150 focus-visible:underline group-data-[active=true]/slider:text-foreground",
+                  editable && isValueHovered && "underline",
+                  showInput && "invisible pointer-events-none",
                 )}
                 data-slot="slider-value"
                 disabled={disabled}
-                onClick={handleValueClick}
+                onDoubleClick={handleValueDoubleClick}
                 onKeyDown={handleValueKeyDown}
                 onMouseEnter={() => {
                   if (!disabled) setIsValueHovered(true);
                 }}
                 onMouseLeave={() => setIsValueHovered(false)}
-                onPointerDown={(event) => {
-                  if (isValueEditable) event.stopPropagation();
-                }}
                 ref={valueRef}
-                style={{ cursor: isValueEditable ? "text" : "default" }}
-                tabIndex={isValueEditable ? 0 : -1}
+                style={{ cursor: editable && isValueHovered ? "text" : "default" }}
+                tabIndex={editable && !disabled && !showInput ? 0 : -1}
                 type="button"
               >
                 {displayValue}
               </button>
-            )
+            </>
           ) : null}
         </motion.div>
 

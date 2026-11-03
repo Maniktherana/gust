@@ -1,17 +1,11 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { Gust, type GustProps } from "@maniktherana/gust";
+import { DEFAULT_MOTION, Gust, type GustMotionOptions } from "@maniktherana/gust";
 import { Liveline, type LivelinePoint } from "liveline";
+import { cn } from "@/lib/utils";
 
-export const tickerMotion = {
-  duration: 320,
-  entranceOvershoot: 8,
-  entranceHeight: 100,
-  exitDuration: 320,
-} satisfies Omit<GustProps, "value">;
-
-const tickerPrices = [
+export const tickerPrices = [
   // Original phrase. Keep this order intact for the digit/direction demo.
   199.85, 199.86, 199.91, 200.54, 201, 190.42, 189.76, 189.37, 196, 193.98,
   // A quiet climb with mixed cent-level reversals.
@@ -52,11 +46,11 @@ function usePrefersReducedMotion() {
 // Falling prices move down and rising ones up. The unchanged dollars are a
 // shared prefix, so only the digits that change move.
 export function TickerDemo({
-  motion = tickerMotion,
+  motion = DEFAULT_MOTION,
   paused = false,
   theme = "dark",
 }: {
-  motion?: Omit<GustProps, "value">;
+  motion?: GustMotionOptions;
   paused?: boolean;
   theme?: "dark" | "light";
 }) {
@@ -130,7 +124,10 @@ export function TickerDemo({
       <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
         {/* The badge tints itself from its own text color. */}
         <span
-          className={`flex items-center gap-2.5 rounded-xl px-4 py-3 transition-colors duration-300 motion-reduce:transition-none ${up ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}
+          className={cn(
+            "flex items-center gap-2.5 rounded-xl px-4 py-3 transition-colors duration-300 motion-reduce:transition-none",
+            up ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
+          )}
           style={{
             backgroundColor:
               "color-mix(in oklab, currentColor 12%, var(--surface-raised, var(--card, #111)))",
@@ -140,7 +137,10 @@ export function TickerDemo({
           <svg
             viewBox="0 0 20 20"
             aria-hidden="true"
-            className={`size-4 transition-transform duration-300 motion-reduce:transition-none ${up ? "" : "rotate-180"}`}
+            className={cn(
+              "size-4 transition-transform duration-300 motion-reduce:transition-none",
+              !up && "rotate-180",
+            )}
           >
             <path
               d="m17.794,12.5L12.598,3.5c-.542-.939-1.514-1.5-2.598-1.5s-2.056.561-2.598,1.5L2.206,12.5c-.542.938-.543,2.061,0,3,.542.939,1.514,1.5,2.598,1.5h10.393c1.084,0,2.056-.561,2.598-1.5.542-.939.542-2.062,0-3Z"
@@ -148,11 +148,12 @@ export function TickerDemo({
             />
           </svg>
           <Gust
-            value={`$${price.toFixed(2)}`}
-            {...motion}
-            down={motion.down ?? !up}
+            motion={motion}
+            direction={up ? "up" : "down"}
             className="text-xl font-semibold tabular-nums"
-          />
+          >
+            {`$${price.toFixed(2)}`}
+          </Gust>
         </span>
       </div>
     </div>

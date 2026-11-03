@@ -1,68 +1,84 @@
 # Gust
 
-Animated text transitions for React.
+Text animations for React.
+
+[Examples](https://gust.manikrana.dev/examples) · [Playground](https://gust.manikrana.dev/lab) · [API reference](https://gust.manikrana.dev/gust.md)
+
+## Features
+
+- Animates strings and numbers.
+- Keeps matching text visible during changes.
+- New updates can interrupt an animation in progress.
+- Supports server rendering and React 18+.
+- Respects reduced-motion preferences. Animated copies are hidden from screen readers.
+
+## Limitations
+
+- Single-line text only, without rich JSX children.
+- Cross-character kerning and ligatures are not preserved.
+
+## Installation
 
 ```sh
-bun add @maniktherana/gust
+npm install @maniktherana/gust
 ```
 
+Styles are included.
+
+## Usage
+
 ```tsx
-import { useEffect, useState } from "react";
-import "@maniktherana/gust/styles.css";
 import { Gust } from "@maniktherana/gust";
 
-const messages = ["Queued", "Building", "Live"];
-
-export function Status() {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % messages.length);
-    }, 2000);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  return <Gust value={messages[index] ?? ""} />;
+export function Status({ text }: { text: string }) {
+  return <Gust>{text}</Gust>;
 }
 ```
 
-Your component owns the value and timing. Gust only animates between value changes.
+The initial value renders without animation. Subsequent changes animate.
 
-The stylesheet contains Gust's structural layout and is imported explicitly by your app.
+Use `as` to choose the element and pass through its HTML attributes:
 
-## Props
+```tsx
+<Gust as="p" className="status" aria-live="polite">
+  {status}
+</Gust>
+```
 
-| Prop                | Type      | Default | Description                                                                           |
-| ------------------- | --------- | ------- | ------------------------------------------------------------------------------------- |
-| `value`             | `string`  | -       | Current string. Gust animates whenever it changes.                                    |
-| `duration`          | `number`  | `440`   | Incoming character duration in milliseconds.                                          |
-| `exitDuration`      | `number`  | `400`   | Outgoing character duration in milliseconds.                                          |
-| `stagger`           | `number`  | `20`    | Delay between neighboring characters in milliseconds.                                 |
-| `down`              | `boolean` | `false` | Sends the default entrance and exit directions down. Explicit angles take precedence. |
-| `enterAngle`        | `number`  | `-90`   | Incoming travel angle in degrees. `-90` moves up; `90` moves down.                    |
-| `exitAngle`         | `number`  | `-90`   | Outgoing travel angle in degrees. `-90` moves up; `90` moves down.                    |
-| `entranceOvershoot` | `number`  | `12`    | Entrance overshoot distance, where `100` equals `1em`.                                |
-| `entranceHeight`    | `number`  | `90`    | Initial entry distance, where `100` equals `1em`.                                     |
-| `entranceScale`     | `number`  | `1.1`   | Peak scale during entrance.                                                           |
-| `entranceBlur`      | `number`  | `0`     | Initial entrance blur in pixels; sharpens to 0 while arriving.                        |
-| `exitHeight`        | `number`  | `90`    | Exit travel distance, where `100` equals `1em`.                                       |
-| `exitScale`         | `number`  | `0.4`   | Final scale of outgoing characters.                                                   |
-| `exitBlur`          | `number`  | `4`     | Maximum exit blur in pixels. Use about `1` for 12–14px text.                          |
-| `blur`              | `boolean` | `true`  | Enables entrance and exit blur; each amount is configured separately.                 |
-| `scale`             | `boolean` | `true`  | Enables character scaling during entrance and exit.                                   |
-| `preservePrefix`    | `boolean` | `true`  | Keeps matching leading characters still between values.                               |
-| `className`         | `string`  | -       | Styles the root span. Standard span attributes are also supported.                    |
+Add a live region only when changes need to be announced.
 
-### Motion prop names
+## API
 
-`entranceHeight` and `exitHeight` set travel distance. `entranceOvershoot` sets the entrance bounce. Distances use `100 = 1em`; blur amounts use pixels. The default animation is unchanged.
+| Prop             | Type                                  | Default        | Description                                                                                                     |
+| ---------------- | ------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------- |
+| `children`       | `string \| number`                    | Required       | The text to display.                                                                                            |
+| `as`             | `GustTag`                             | `"span"`       | The text element to render.                                                                                     |
+| `animated`       | `boolean`                             | `true`         | Set to `false` for immediate updates.                                                                           |
+| `direction`      | `"up" \| "down" \| "left" \| "right"` | —              | Overrides numeric trend and motion angles.                                                                      |
+| `trend`          | `"auto" \| "up" \| "down"`            | `"auto"`       | In auto mode, increasing numbers move up and decreasing numbers move down. Pass numbers, not formatted strings. |
+| `preservePrefix` | `boolean`                             | `true`         | Keeps matching text at both ends. Set to `false` to animate the whole value.                                    |
+| `motion`         | `GustMotionOptions`                   | Default motion | Custom animation settings.                                                                                      |
+| `nonce`          | `string`                              | —              | CSP nonce for the included styles.                                                                              |
 
-When updating older configurations, rename the old `entranceHeight` to `entranceOvershoot`, then rename `entranceOffset` to `entranceHeight`. Rename `entranceBlurCap` and `exitBlurCap` to `entranceBlur` and `exitBlur`. The offset and blur-cap names remain deprecated aliases; the new names take precedence.
+`className`, `style`, HTML attributes, and events apply to the outer element. A forwarded `ref` points to that element.
 
-## Using Gust with coding agents
+### Custom motion
 
-Point your agent at the [agent guide](https://gust.manikrana.dev/gust.md). It covers install, every prop with its default, recipes and common mistakes in one plain-text file. An index lives at [llms.txt](https://gust.manikrana.dev/llms.txt), and the props carry JSDoc, so editors and agents see each default on hover.
+```tsx
+import { Gust, type GustMotionOptions } from "@maniktherana/gust";
 
-[Demo and source](https://gust.manikrana.dev)
+const motion = {
+  duration: 320,
+  exitDuration: 240,
+} satisfies GustMotionOptions;
+
+<Gust motion={motion}>{text}</Gust>;
+```
+
+Entry and exit each default to 440ms. Set their durations separately. Try the other motion settings in [Engine](https://gust.manikrana.dev/engine), or see the [API reference](https://gust.manikrana.dev/gust.md).
+
+## Why?
+
+I like the text animations in [NumericText](https://github.com/yokaiqq/numeric-text), [Calligraph](https://github.com/raphaelsalaja/calligraph), and [Torph](https://github.com/lochie/torph). Gust is my take on that kind of motion.
+
+Gust keeps matching text at both ends and brings in the changed characters with a small spring. I kept the stagger short and made the animation interruptible, since a counter might change again before the previous update finishes.

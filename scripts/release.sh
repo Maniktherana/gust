@@ -2,22 +2,30 @@
 
 set -euo pipefail
 
-release="${1:?Pass major, minor, or patch}"
+release="${1:?Pass major, minor, patch, or --prepared}"
 
-(
-  cd packages/gust
-  npm version "$release" \
-    --no-git-tag-version \
-    --workspaces=false
-)
-
-bun install --lockfile-only
+if [[ "$release" == "--prepared" ]]; then
+  if [[ -n "$(git status --porcelain)" ]]; then
+    echo "Commit the prepared release before publishing." >&2
+    exit 1
+  fi
+else
+  (
+    cd packages/gust
+    npm version "$release" \
+      --no-git-tag-version \
+      --workspaces=false
+  )
+  bun install --lockfile-only
+fi
 
 version="$(node -p "require('./packages/gust/package.json').version")"
 tag="v$version"
 
-git add packages/gust/package.json bun.lock
-git commit -m "release: $tag"
+if [[ "$release" != "--prepared" ]]; then
+  git add packages/gust/package.json bun.lock
+  git commit -m "release: $tag"
+fi
 git tag -a "$tag" -m "$tag"
 
 (

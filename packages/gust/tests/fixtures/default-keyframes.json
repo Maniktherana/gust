@@ -3,445 +3,1162 @@
     "duration": 440,
     "keyframes": [
       {
-        "easing": "linear",
         "offset": 0,
-        "opacity": 0,
-        "transform": "translate(0em, 0.9em) scale(1)"
+        "easing": "linear",
+        "transform": "translate(0em, 0.7em) scale(0.6)",
+        "opacity": 0
       },
       {
+        "offset": 0.008333333333333333,
         "easing": "linear",
-        "offset": 0.02564102564102564,
-        "opacity": 0.4721936563028202,
-        "transform": "translate(0em, 0.7902em) scale(1)"
+        "transform": "translate(0em, 0.697716em) scale(0.6014276213633553)",
+        "opacity": 0.002774450910826661
       },
       {
+        "offset": 0.016666666666666666,
         "easing": "linear",
-        "offset": 0.05128205128205128,
-        "opacity": 0.7300704396372435,
-        "transform": "translate(0em, 0.6876em) scale(1)"
+        "transform": "translate(0em, 0.691217em) scale(0.6054896347293439)",
+        "opacity": 0.010668600558860755
       },
       {
+        "offset": 0.025,
         "easing": "linear",
-        "offset": 0.07692307692307693,
-        "opacity": 0.8605767294549385,
-        "transform": "translate(0em, 0.5921em) scale(1)"
+        "transform": "translate(0em, 0.681006em) scale(0.6118712433344178)",
+        "opacity": 0.02307067036627333
       },
       {
+        "offset": 0.03333333333333333,
         "easing": "linear",
-        "offset": 0.10256410256410256,
-        "opacity": 0.9282789962385515,
-        "transform": "translate(0em, 0.5037em) scale(1)"
+        "transform": "translate(0em, 0.667553em) scale(0.6202791104390507)",
+        "opacity": 0.03941058733958955
       },
       {
+        "offset": 0.041666666666666664,
         "easing": "linear",
-        "offset": 0.1282051282051282,
-        "opacity": 0.9642753686594686,
-        "transform": "translate(0em, 0.4221em) scale(1)"
+        "transform": "translate(0em, 0.651295em) scale(0.6304406751663552)",
+        "opacity": 0.05915865446491813
       },
       {
+        "offset": 0.05,
         "easing": "linear",
-        "offset": 0.15384615384615385,
-        "opacity": 0.9833795854976478,
-        "transform": "translate(0em, 0.3472em) scale(1)"
+        "transform": "translate(0em, 0.632635em) scale(0.6421034243499902)",
+        "opacity": 0.08182413561128413
       },
       {
+        "offset": 0.058333333333333334,
         "easing": "linear",
-        "offset": 0.1794871794871795,
-        "opacity": 0.993152320626253,
-        "transform": "translate(0em, 0.2788em) scale(1)"
+        "transform": "translate(0em, 0.611945em) scale(0.6550341294514651)",
+        "opacity": 0.1069537725495405
       },
       {
+        "offset": 0.06666666666666667,
         "easing": "linear",
-        "offset": 0.20512820512820512,
-        "opacity": 0.9977329056913793,
-        "transform": "translate(0em, 0.2168em) scale(1)"
+        "transform": "translate(0em, 0.589571em) scale(0.6690180568059716)",
+        "opacity": 0.13413025013772867
       },
       {
+        "offset": 0.075,
         "easing": "linear",
-        "offset": 0.23076923076923078,
-        "opacity": 0.9995218299087022,
-        "transform": "translate(0em, 0.1609em) scale(1)"
+        "transform": "translate(0em, 0.565827em) scale(0.6838581586959334)",
+        "opacity": 0.16297062424686642
       },
       {
+        "offset": 0.08333333333333333,
         "easing": "linear",
-        "offset": 0.2564102564102564,
-        "opacity": 0.9999746636863693,
-        "transform": "translate(0em, 0.1109em) scale(1)"
+        "transform": "translate(0em, 0.541001em) scale(0.6993742520323758)",
+        "opacity": 0.19312472560367705
       },
       {
+        "offset": 0.09166666666666666,
         "easing": "linear",
-        "offset": 0.28205128205128205,
-        "opacity": 1,
-        "transform": "translate(0em, 0.0667em) scale(1.019686747458322)"
+        "transform": "translate(0em, 0.515356em) scale(0.7154021907456317)",
+        "opacity": 0.22427355140798716
       },
       {
+        "offset": 0.1,
         "easing": "linear",
-        "offset": 0.3076923076923077,
-        "opacity": 1,
-        "transform": "translate(0em, 0.0279em) scale(1.0585295634635563)"
+        "transform": "translate(0em, 0.489131em) scale(0.7317930373482165)",
+        "opacity": 0.2561276553413165
       },
       {
+        "offset": 0.10833333333333334,
         "easing": "linear",
+        "transform": "translate(0em, 0.46254em) scale(0.7484122385332157)",
+        "opacity": 0.2884255454181103
+      },
+      {
+        "offset": 0.11666666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, 0.435778em) scale(0.7651388091103251)",
+        "opacity": 0.32093209804043676
+      },
+      {
+        "offset": 0.125,
+        "easing": "linear",
+        "transform": "translate(0em, 0.409017em) scale(0.78186452805779)",
+        "opacity": 0.35343699559882086
+      },
+      {
+        "offset": 0.13333333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, 0.382411em) scale(0.7984931499807749)",
+        "opacity": 0.3857531940140549
+      },
+      {
+        "offset": 0.14166666666666666,
+        "easing": "linear",
+        "transform": "translate(0em, 0.356097em) scale(0.8149396348139719)",
+        "opacity": 0.417715425735018
+      },
+      {
+        "offset": 0.15,
+        "easing": "linear",
+        "transform": "translate(0em, 0.330193em) scale(0.8311293981872802)",
+        "opacity": 0.4491787428932692
+      },
+      {
+        "offset": 0.15833333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, 0.304804em) scale(0.8469975844868035)",
+        "opacity": 0.48001710456390656
+      },
+      {
+        "offset": 0.16666666666666666,
+        "easing": "linear",
+        "transform": "translate(0em, 0.280019em) scale(0.8624883642879015)",
+        "opacity": 0.5101220113912743
+      },
+      {
+        "offset": 0.175,
+        "easing": "linear",
+        "transform": "translate(0em, 0.255913em) scale(0.8775542575111736)",
+        "opacity": 0.5394011902048242
+      },
+      {
+        "offset": 0.18333333333333332,
+        "easing": "linear",
+        "transform": "translate(0em, 0.232551em) scale(0.8921554833546708)",
+        "opacity": 0.5677773306721154
+      },
+      {
+        "offset": 0.19166666666666668,
+        "easing": "linear",
+        "transform": "translate(0em, 0.209985em) scale(0.9062593377848854)",
+        "opacity": 0.5951868755097663
+      },
+      {
+        "offset": 0.2,
+        "easing": "linear",
+        "transform": "translate(0em, 0.188257em) scale(0.9198395991237758)",
+        "opacity": 0.6215788652964662
+      },
+      {
+        "offset": 0.20833333333333334,
+        "easing": "linear",
+        "transform": "translate(0em, 0.167398em) scale(0.932875962047819)",
+        "opacity": 0.646913838502157
+      },
+      {
+        "offset": 0.21666666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, 0.147434em) scale(0.945353500116482)",
+        "opacity": 0.6711627869615114
+      },
+      {
+        "offset": 0.225,
+        "easing": "linear",
+        "transform": "translate(0em, 0.128381em) scale(0.9572621567701853)",
+        "opacity": 0.6943061666752585
+      },
+      {
+        "offset": 0.23333333333333334,
+        "easing": "linear",
+        "transform": "translate(0em, 0.110246em) scale(0.9685962645804822)",
+        "opacity": 0.7163329635170895
+      },
+      {
+        "offset": 0.24166666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, 0.093033em) scale(0.9793540923964728)",
+        "opacity": 0.7372398131543368
+      },
+      {
+        "offset": 0.25,
+        "easing": "linear",
+        "transform": "translate(0em, 0.07674em) scale(0.9895374199101756)",
+        "opacity": 0.7570301742548711
+      },
+      {
+        "offset": 0.25833333333333336,
+        "easing": "linear",
+        "transform": "translate(0em, 0.061358em) scale(0.9991511390584299)",
+        "opacity": 0.775713553848335
+      },
+      {
+        "offset": 0.26666666666666666,
+        "easing": "linear",
+        "transform": "translate(0em, 0.046875em) scale(1.0082028815887596)",
+        "opacity": 0.7933047835346274
+      },
+      {
+        "offset": 0.275,
+        "easing": "linear",
+        "transform": "translate(0em, 0.033276em) scale(1.0167026720403116)",
+        "opacity": 0.8098233450842525
+      },
+      {
+        "offset": 0.2833333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, 0.02054em) scale(1.0246626053274372)",
+        "opacity": 0.8252927438516401
+      },
+      {
+        "offset": 0.2916666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, 0.008646em) scale(1.032096548061633)",
+        "opacity": 0.8397399283217912
+      },
+      {
+        "offset": 0.3,
+        "easing": "linear",
+        "transform": "translate(0em, -0.002432em) scale(1.0390198627064329)",
+        "opacity": 0.8531947540306608
+      },
+      {
+        "offset": 0.30833333333333335,
+        "easing": "linear",
+        "transform": "translate(0em, -0.012719em) scale(1.0454491536284742)",
+        "opacity": 0.8656894900387456
+      },
+      {
+        "offset": 0.31666666666666665,
+        "easing": "linear",
+        "transform": "translate(0em, -0.022243em) scale(1.0514020340854577)",
+        "opacity": 0.8772583660936004
+      },
+      {
+        "offset": 0.325,
+        "easing": "linear",
+        "transform": "translate(0em, -0.031035em) scale(1.0568969131772417)",
+        "opacity": 0.8879371585888679
+      },
+      {
         "offset": 0.3333333333333333,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0056em) scale(1.078726262020364)"
+        "easing": "linear",
+        "transform": "translate(0em, -0.039124em) scale(1.0619528017790227)",
+        "opacity": 0.8977628134132546
       },
       {
+        "offset": 0.3416666666666667,
         "easing": "linear",
-        "offset": 0.358974358974359,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0342em) scale(1.08899746005491)"
+        "transform": "translate(0em, -0.046543em) scale(1.0665891364747522)",
+        "opacity": 0.9067731037813052
       },
       {
+        "offset": 0.35,
         "easing": "linear",
-        "offset": 0.38461538461538464,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0582em) scale(1.0943851896191206)"
+        "transform": "translate(0em, -0.053321em) scale(1.0708256205138478)",
+        "opacity": 0.9150063211473903
       },
       {
+        "offset": 0.35833333333333334,
         "easing": "linear",
-        "offset": 0.41025641025641024,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0777em) scale(1.0972579820095085)"
+        "transform": "translate(0em, -0.059491em) scale(1.0746820808242799)",
+        "opacity": 0.9225009973237805
       },
       {
+        "offset": 0.36666666666666664,
         "easing": "linear",
-        "offset": 0.4358974358974359,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0931em) scale(1.0987694849104526)"
+        "transform": "translate(0em, -0.065085em) scale(1.078178340129576)",
+        "opacity": 0.9292956559517986
       },
       {
+        "offset": 0.375,
         "easing": "linear",
-        "offset": 0.46153846153846156,
-        "opacity": 1,
-        "transform": "translate(0em, -0.1048em) scale(1.0995242033521282)"
+        "transform": "translate(0em, -0.070135em) scale(1.0813341032356476)",
+        "opacity": 0.9354285915107176
       },
       {
+        "offset": 0.38333333333333336,
         "easing": "linear",
-        "offset": 0.48717948717948717,
-        "opacity": 1,
-        "transform": "translate(0em, -0.1129em) scale(1.0998605337356442)"
+        "transform": "translate(0em, -0.07467em) scale(1.0841688565750471)",
+        "opacity": 0.9409376740912564
       },
       {
+        "offset": 0.39166666666666666,
         "easing": "linear",
-        "offset": 0.5128205128205128,
-        "opacity": 1,
-        "transform": "translate(0em, -0.1178em) scale(1.099978166278714)"
+        "transform": "translate(0em, -0.078723em) scale(1.0867017801208223)",
+        "opacity": 0.945860178208254
       },
       {
+        "offset": 0.4,
         "easing": "linear",
-        "offset": 0.5384615384615384,
-        "opacity": 1,
-        "transform": "translate(0em, -0.1199em) scale(1.0999997925143497)"
+        "transform": "translate(0em, -0.082323em) scale(1.0889516708090996)",
+        "opacity": 0.9502326339794959
       },
       {
+        "offset": 0.4083333333333333,
         "easing": "linear",
-        "offset": 0.5641025641025641,
-        "opacity": 1,
-        "transform": "translate(0em, -0.1194em) scale(1.0767130852349895)"
+        "transform": "translate(0em, -0.085499em) scale(1.090936876638453)",
+        "opacity": 0.9540906990538957
       },
       {
+        "offset": 0.4166666666666667,
         "easing": "linear",
-        "offset": 0.5897435897435898,
-        "opacity": 1,
-        "transform": "translate(0em, -0.1166em) scale(1.0516705630017364)"
+        "transform": "translate(0em, -0.08828em) scale(1.0926752406446483)",
+        "opacity": 0.957469049731558
       },
       {
+        "offset": 0.425,
         "easing": "linear",
-        "offset": 0.6153846153846154,
-        "opacity": 1,
-        "transform": "translate(0em, -0.1119em) scale(1.03451173721983)"
+        "transform": "translate(0em, -0.090694em) scale(1.0941840539811138)",
+        "opacity": 0.9604012897799876
       },
       {
+        "offset": 0.43333333333333335,
         "easing": "linear",
-        "offset": 0.6410256410256411,
-        "opacity": 1,
-        "transform": "translate(0em, -0.1055em) scale(1.0231246629232982)"
+        "transform": "translate(0em, -0.092768em) scale(1.0954800173681762)",
+        "opacity": 0.9629198755142206
       },
       {
+        "offset": 0.44166666666666665,
         "easing": "linear",
+        "transform": "translate(0em, -0.094527em) scale(1.096579210207411)",
+        "opacity": 0.9650560557734049
+      },
+      {
+        "offset": 0.45,
+        "easing": "linear",
+        "transform": "translate(0em, -0.095995em) scale(1.0974970666911457)",
+        "opacity": 0.9668398254918129
+      },
+      {
+        "offset": 0.4583333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -0.097197em) scale(1.0982483582709581)",
+        "opacity": 0.9682998916279825
+      },
+      {
+        "offset": 0.4666666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -0.098155em) scale(1.0988471818827676)",
+        "opacity": 0.9694636502812604
+      },
+      {
+        "offset": 0.475,
+        "easing": "linear",
+        "transform": "translate(0em, -0.098891em) scale(1.099306953359576)",
+        "opacity": 0.9703571738900729
+      },
+      {
+        "offset": 0.48333333333333334,
+        "easing": "linear",
+        "transform": "translate(0em, -0.099425em) scale(1.099640405495983)",
+        "opacity": 0.9710052074704876
+      },
+      {
+        "offset": 0.49166666666666664,
+        "easing": "linear",
+        "transform": "translate(0em, -0.099775em) scale(1.0998595902610697)",
+        "opacity": 0.9714311729167492
+      },
+      {
+        "offset": 0.5,
+        "easing": "linear",
+        "transform": "translate(0em, -0.099961em) scale(1.099975884688041)",
+        "opacity": 0.9716571804472584
+      },
+      {
+        "offset": 0.5083333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -0.1em) scale(1.1)",
+        "opacity": 0.9717040463396773
+      },
+      {
+        "offset": 0.5166666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -0.099579em) scale(1.0995794874126514)",
+        "opacity": 0.9718167765220057
+      },
+      {
+        "offset": 0.525,
+        "easing": "linear",
+        "transform": "translate(0em, -0.098632em) scale(1.0986319146488208)",
+        "opacity": 0.9720707999535264
+      },
+      {
+        "offset": 0.5333333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -0.097221em) scale(1.0972210397434412)",
+        "opacity": 0.9724490245063958
+      },
+      {
+        "offset": 0.5416666666666666,
+        "easing": "linear",
+        "transform": "translate(0em, -0.095406em) scale(1.09540623682813)",
+        "opacity": 0.9729355332808961
+      },
+      {
+        "offset": 0.55,
+        "easing": "linear",
+        "transform": "translate(0em, -0.093243em) scale(1.0932426390576435)",
+        "opacity": 0.9735155462899951
+      },
+      {
+        "offset": 0.5583333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -0.090781em) scale(1.0907812901546048)",
+        "opacity": 0.9741753798335344
+      },
+      {
+        "offset": 0.5666666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -0.088069em) scale(1.0880693027463113)",
+        "opacity": 0.9749024040516122
+      },
+      {
+        "offset": 0.575,
+        "easing": "linear",
+        "transform": "translate(0em, -0.08515em) scale(1.0851500218303167)",
+        "opacity": 0.9756849991030531
+      },
+      {
+        "offset": 0.5833333333333334,
+        "easing": "linear",
+        "transform": "translate(0em, -0.082063em) scale(1.082063191859907)",
+        "opacity": 0.9765125103734642
+      },
+      {
+        "offset": 0.5916666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -0.078845em) scale(1.0788451260866678)",
+        "opacity": 0.9773752030782156
+      },
+      {
+        "offset": 0.6,
+        "easing": "linear",
+        "transform": "translate(0em, -0.075529em) scale(1.0755288769350562)",
+        "opacity": 0.9782642165887608
+      },
+      {
+        "offset": 0.6083333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -0.072144em) scale(1.072144406313486)",
+        "opacity": 0.9791715187759795
+      },
+      {
+        "offset": 0.6166666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -0.068719em) scale(1.0687187548879526)",
+        "opacity": 0.9800898606316383
+      },
+      {
+        "offset": 0.625,
+        "easing": "linear",
+        "transform": "translate(0em, -0.065276em) scale(1.0652762094579402)",
+        "opacity": 0.9810127313985888
+      },
+      {
+        "offset": 0.6333333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -0.061838em) scale(1.0618384676804618)",
+        "opacity": 0.9819343144118733
+      },
+      {
+        "offset": 0.6416666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -0.058425em) scale(1.0584247994867415)",
+        "opacity": 0.9828494438264593
+      },
+      {
+        "offset": 0.65,
+        "easing": "linear",
+        "transform": "translate(0em, -0.055052em) scale(1.0550522046276365)",
+        "opacity": 0.9837535623827754
+      },
+      {
+        "offset": 0.6583333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -0.051736em) scale(1.051735565868545)",
+        "opacity": 0.984642680338523
+      },
+      {
         "offset": 0.6666666666666666,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0977em) scale(1.0155578972435764)"
+        "easing": "linear",
+        "transform": "translate(0em, -0.048488em) scale(1.0484877974326405)",
+        "opacity": 0.9855133356743075
       },
       {
+        "offset": 0.675,
         "easing": "linear",
-        "offset": 0.6923076923076923,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0889em) scale(1.0104687852117489)"
+        "transform": "translate(0em, -0.04532em) scale(1.0453199883629916)",
+        "opacity": 0.9863625556614056
       },
       {
+        "offset": 0.6833333333333333,
         "easing": "linear",
-        "offset": 0.717948717948718,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0794em) scale(1.0070060366381168)"
+        "transform": "translate(0em, -0.042242em) scale(1.0422415405398606)",
+        "opacity": 0.9871878198623605
       },
       {
+        "offset": 0.6916666666666667,
         "easing": "linear",
-        "offset": 0.7435897435897436,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0694em) scale(1.004633266375304)"
+        "transform": "translate(0em, -0.03926em) scale(1.039260301149405)",
+        "opacity": 0.9879870246190348
       },
       {
+        "offset": 0.7,
         "easing": "linear",
-        "offset": 0.7692307692307693,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0592em) scale(1.0030057982173333)"
+        "transform": "translate(0em, -0.036383em) scale(1.0363826894545167)",
+        "opacity": 0.9887584490681341
       },
       {
+        "offset": 0.7083333333333334,
         "easing": "linear",
-        "offset": 0.7948717948717948,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0491em) scale(1.0018961261900459)"
+        "transform": "translate(0em, -0.033614em) scale(1.0336138177678764)",
+        "opacity": 0.9895007227109917
       },
       {
+        "offset": 0.7166666666666667,
         "easing": "linear",
-        "offset": 0.8205128205128205,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0393em) scale(1.0011499695700672)"
+        "transform": "translate(0em, -0.030958em) scale(1.0309576065717232)",
+        "opacity": 0.9902127945524858
       },
       {
+        "offset": 0.725,
         "easing": "linear",
-        "offset": 0.8461538461538461,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0301em) scale(1.0006600770357572)"
+        "transform": "translate(0em, -0.028417em) scale(1.02841689376871)",
+        "opacity": 0.9908939038132892
       },
       {
+        "offset": 0.7333333333333333,
         "easing": "linear",
-        "offset": 0.8717948717948718,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0217em) scale(1.0003502402617865)"
+        "transform": "translate(0em, -0.025994em) scale(1.0259935380837544)",
+        "opacity": 0.9915435522101038
       },
       {
+        "offset": 0.7416666666666667,
         "easing": "linear",
-        "offset": 0.8974358974358975,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0144em) scale(1.0001652723608208)"
+        "transform": "translate(0em, -0.023689em) scale(1.0236885166682557)",
+        "opacity": 0.992161477790116
       },
       {
+        "offset": 0.75,
         "easing": "linear",
-        "offset": 0.9230769230769231,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0084em) scale(1.000064555663513)"
+        "transform": "translate(0em, -0.021502em) scale(1.0215020169857971)",
+        "opacity": 0.9927476302984592
       },
       {
+        "offset": 0.7583333333333333,
         "easing": "linear",
-        "offset": 0.9487179487179487,
-        "opacity": 1,
-        "transform": "translate(0em, -0.0039em) scale(1.0000177818655538)"
+        "transform": "translate(0em, -0.019434em) scale(1.0194335230826075)",
+        "opacity": 0.9933021480509998
       },
       {
+        "offset": 0.7666666666666667,
         "easing": "linear",
-        "offset": 0.9743589743589743,
-        "opacity": 1,
-        "transform": "translate(0em, -0.001em) scale(1.0000020738877442)"
+        "transform": "translate(0em, -0.017482em) scale(1.0174818963669945)",
+        "opacity": 0.9938253362791454
       },
       {
+        "offset": 0.775,
         "easing": "linear",
+        "transform": "translate(0em, -0.015645em) scale(1.0156454510398463)",
+        "opacity": 0.9943176469085862
+      },
+      {
+        "offset": 0.7833333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -0.013922em) scale(1.0139220243333846)",
+        "opacity": 0.9947796597298286
+      },
+      {
+        "offset": 0.7916666666666666,
+        "easing": "linear",
+        "transform": "translate(0em, -0.012309em) scale(1.0123090417278806)",
+        "opacity": 0.9952120649150273
+      },
+      {
+        "offset": 0.8,
+        "easing": "linear",
+        "transform": "translate(0em, -0.010804em) scale(1.010803577326186)",
+        "opacity": 0.9956156468329
+      },
+      {
+        "offset": 0.8083333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -0.009402em) scale(1.0094024095739456)",
+        "opacity": 0.9959912691113639
+      },
+      {
+        "offset": 0.8166666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -0.008102em) scale(1.0081020725193623)",
+        "opacity": 0.9963398608959183
+      },
+      {
+        "offset": 0.825,
+        "easing": "linear",
+        "transform": "translate(0em, -0.006899em) scale(1.0068989028106623)",
+        "opacity": 0.9966624042506579
+      },
+      {
+        "offset": 0.8333333333333334,
+        "easing": "linear",
+        "transform": "translate(0em, -0.005789em) scale(1.0057890826320102)",
+        "opacity": 0.9969599226480973
+      },
+      {
+        "offset": 0.8416666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -0.004769em) scale(1.0047686787798364)",
+        "opacity": 0.9972334704936667
+      },
+      {
+        "offset": 0.85,
+        "easing": "linear",
+        "transform": "translate(0em, -0.003834em) scale(1.0038336780814214)",
+        "opacity": 0.9974841236307679
+      },
+      {
+        "offset": 0.8583333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -0.00298em) scale(1.0029800193563176)",
+        "opacity": 0.9977129707726188
+      },
+      {
+        "offset": 0.8666666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -0.002204em) scale(1.0022036221189266)",
+        "opacity": 0.9979211058077248
+      },
+      {
+        "offset": 0.875,
+        "easing": "linear",
+        "transform": "translate(0em, -0.0015em) scale(1.0015004122173767)",
+        "opacity": 0.9981096209266576
+      },
+      {
+        "offset": 0.8833333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -0.000866em) scale(1.0008663445999093)",
+        "opacity": 0.9982796005188888
+      },
+      {
+        "offset": 0.8916666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -0.000297em) scale(1.0002974233953719)",
+        "opacity": 0.9984321157896499
+      },
+      {
+        "offset": 0.9,
+        "easing": "linear",
+        "transform": "translate(0em, 0.00021em) scale(0.9997897194892658)",
+        "opacity": 0.9985682200481811
+      },
+      {
+        "offset": 0.9083333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, 0.000661em) scale(0.9993393857711159)",
+        "opacity": 0.9986889446202462
+      },
+      {
+        "offset": 0.9166666666666666,
+        "easing": "linear",
+        "transform": "translate(0em, 0.001057em) scale(0.9989426702229411)",
+        "opacity": 0.998795295339401
+      },
+      {
+        "offset": 0.925,
+        "easing": "linear",
+        "transform": "translate(0em, 0.001404em) scale(0.9985959270122271)",
+        "opacity": 0.9988882495732122
+      },
+      {
+        "offset": 0.9333333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, 0.001704em) scale(0.9982956257462409)",
+        "opacity": 0.9989687537423775
+      },
+      {
+        "offset": 0.9416666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, 0.001962em) scale(0.9980383590377656)",
+        "opacity": 0.9990377212925198
+      },
+      {
+        "offset": 0.95,
+        "easing": "linear",
+        "transform": "translate(0em, 0.002179em) scale(0.9978208485254484)",
+        "opacity": 0.9990960310802635
+      },
+      {
+        "offset": 0.9583333333333334,
+        "easing": "linear",
+        "transform": "translate(0em, 0.00236em) scale(0.9976399494850374)",
+        "opacity": 0.9991445261370633
+      },
+      {
+        "offset": 0.9666666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, 0.002507em) scale(0.9974926541608019)",
+        "opacity": 0.9991840127761242
+      },
+      {
+        "offset": 0.975,
+        "easing": "linear",
+        "transform": "translate(0em, 0.002624em) scale(0.9973760939395211)",
+        "opacity": 0.9992152600096019
+      },
+      {
+        "offset": 0.9833333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, 0.002712em) scale(0.9972875404825426)",
+        "opacity": 0.9992389992451238
+      },
+      {
+        "offset": 0.9916666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, 0.002776em) scale(0.9972244059246445)",
+        "opacity": 0.9992559242324778
+      },
+      {
         "offset": 1,
-        "opacity": 1,
-        "transform": "translate(0em, 0em) scale(1)"
+        "easing": "linear",
+        "transform": "translate(0em, 0em) scale(1)",
+        "opacity": 1
       }
     ]
   },
   "exit": {
-    "duration": 400,
+    "duration": 440,
     "keyframes": [
       {
-        "easing": "linear",
         "offset": 0,
-        "opacity": 1,
+        "easing": "linear",
         "transform": "translate(0em, 0em) scale(1)",
+        "opacity": 1,
         "filter": "blur(0px)"
       },
       {
+        "offset": 0.016666666666666666,
         "easing": "linear",
-        "offset": 0.037037037037037035,
-        "opacity": 0.785438393053603,
-        "transform": "translate(0em, -0.1931em) scale(0.8712630358321618)",
-        "filter": "blur(0.8994267142213006px)"
+        "transform": "translate(0em, -0.11096em) scale(0.9596509287037917)",
+        "opacity": 0.8991273217594791,
+        "filter": "blur(0.3026180347215629px)"
       },
       {
+        "offset": 0.03333333333333333,
         "easing": "linear",
-        "offset": 0.07407407407407407,
-        "opacity": 0.607811241779934,
-        "transform": "translate(0em, -0.353em) scale(0.7646867450679604)",
-        "filter": "blur(1.6347580511661188px)"
+        "transform": "translate(0em, -0.214187em) scale(0.9221139187481336)",
+        "opacity": 0.805284796870334,
+        "filter": "blur(0.5841456093889978px)"
       },
       {
+        "offset": 0.05,
         "easing": "linear",
-        "offset": 0.1111111111111111,
-        "opacity": 0.46701185668267386,
-        "transform": "translate(0em, -0.4797em) scale(0.6802071140096043)",
-        "filter": "blur(2.2085114781911366px)"
+        "transform": "translate(0em, -0.309161em) scale(0.887577672890009)",
+        "opacity": 0.7189441822250224,
+        "filter": "blur(0.8431674533249327px)"
       },
       {
+        "offset": 0.06666666666666667,
         "easing": "linear",
-        "offset": 0.14814814814814814,
-        "opacity": 0.35829846315273806,
-        "transform": "translate(0em, -0.5775em) scale(0.6149790778916429)",
-        "filter": "blur(2.6443992403206975px)"
+        "transform": "translate(0em, -0.395668em) scale(0.8561207356466696)",
+        "opacity": 0.640301839116674,
+        "filter": "blur(1.0790944826499778px)"
       },
       {
+        "offset": 0.08333333333333333,
         "easing": "linear",
-        "offset": 0.18518518518518517,
-        "opacity": 0.27527265632066644,
-        "transform": "translate(0em, -0.6523em) scale(0.5651635937923999)",
-        "filter": "blur(2.972336761058605px)"
+        "transform": "translate(0em, -0.473783em) scale(0.8277151915575327)",
+        "opacity": 0.5692879788938318,
+        "filter": "blur(1.2921360633185048px)"
       },
       {
+        "offset": 0.1,
         "easing": "linear",
-        "offset": 0.2222222222222222,
-        "opacity": 0.21193164810382625,
-        "transform": "translate(0em, -0.7093em) scale(0.5271589888622958)",
-        "filter": "blur(3.219174218183341px)"
+        "transform": "translate(0em, -0.54383em) scale(0.8022437531744486)",
+        "opacity": 0.5056093829361215,
+        "filter": "blur(1.4831718511916354px)"
       },
       {
+        "offset": 0.11666666666666667,
         "easing": "linear",
-        "offset": 0.25925925925925924,
-        "opacity": 0.1634207278945503,
-        "transform": "translate(0em, -0.7529em) scale(0.49805243673673016)",
-        "filter": "blur(3.4059135399987888px)"
+        "transform": "translate(0em, -0.606309em) scale(0.7795241726597052)",
+        "opacity": 0.44881043164926293,
+        "filter": "blur(1.6535687050522112px)"
       },
       {
+        "offset": 0.13333333333333333,
         "easing": "linear",
-        "offset": 0.2962962962962963,
-        "opacity": 0.126060274828933,
-        "transform": "translate(0em, -0.7865em) scale(0.4756361648973598)",
-        "filter": "blur(3.5480758881182215px)"
+        "transform": "translate(0em, -0.66183em) scale(0.7593347176363517)",
+        "opacity": 0.3983367940908793,
+        "filter": "blur(1.804989617727362px)"
       },
       {
+        "offset": 0.15,
         "easing": "linear",
+        "transform": "translate(0em, -0.71105em) scale(0.741436296384318)",
+        "opacity": 0.353590740960795,
+        "filter": "blur(1.939227777117615px)"
+      },
+      {
+        "offset": 0.16666666666666666,
+        "easing": "linear",
+        "transform": "translate(0em, -0.75463em) scale(0.7255892005431204)",
+        "opacity": 0.31397300135780093,
+        "filter": "blur(2.058080995926597px)"
+      },
+      {
+        "offset": 0.18333333333333332,
+        "easing": "linear",
+        "transform": "translate(0em, -0.793198em) scale(0.7115643020716691)",
+        "opacity": 0.27891075517917296,
+        "filter": "blur(2.1632677344624813px)"
+      },
+      {
+        "offset": 0.2,
+        "easing": "linear",
+        "transform": "translate(0em, -0.827339em) scale(0.6991495713293147)",
+        "opacity": 0.2478739283232867,
+        "filter": "blur(2.25637821503014px)"
+      },
+      {
+        "offset": 0.21666666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -0.857579em) scale(0.6881531219726219)",
+        "opacity": 0.22038280493155482,
+        "filter": "blur(2.3388515852053358px)"
+      },
+      {
+        "offset": 0.23333333333333334,
+        "easing": "linear",
+        "transform": "translate(0em, -0.884389em) scale(0.6784039222570906)",
+        "opacity": 0.1960098056427263,
+        "filter": "blur(2.411970583071821px)"
+      },
+      {
+        "offset": 0.25,
+        "easing": "linear",
+        "transform": "translate(0em, -0.908185em) scale(0.6697510795368222)",
+        "opacity": 0.17437769884205567,
+        "filter": "blur(2.476866903473833px)"
+      },
+      {
+        "offset": 0.26666666666666666,
+        "easing": "linear",
+        "transform": "translate(0em, -0.929329em) scale(0.6620623469480434)",
+        "opacity": 0.15515586737010867,
+        "filter": "blur(2.534532397889674px)"
+      },
+      {
+        "offset": 0.2833333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -0.948139em) scale(0.6552222817054028)",
+        "opacity": 0.13805570426350677,
+        "filter": "blur(2.5858328872094796px)"
+      },
+      {
+        "offset": 0.3,
+        "easing": "linear",
+        "transform": "translate(0em, -0.964892em) scale(0.6491303201466925)",
+        "opacity": 0.12282580036673119,
+        "filter": "blur(2.6315225988998066px)"
+      },
+      {
+        "offset": 0.31666666666666665,
+        "easing": "linear",
+        "transform": "translate(0em, -0.979828em) scale(0.6436989213156799)",
+        "opacity": 0.10924730328919985,
+        "filter": "blur(2.6722580901324005px)"
+      },
+      {
         "offset": 0.3333333333333333,
-        "opacity": 0.09712964304490679,
-        "transform": "translate(0em, -0.8126em) scale(0.4582777858269441)",
-        "filter": "blur(3.656919568649834px)"
+        "easing": "linear",
+        "transform": "translate(0em, -0.993157em) scale(0.6388518572179627)",
+        "opacity": 0.09712964304490668,
+        "filter": "blur(2.70861107086528px)"
       },
       {
+        "offset": 0.35,
         "easing": "linear",
-        "offset": 0.37037037037037035,
-        "opacity": 0.07462691595238868,
-        "transform": "translate(0em, -0.8328em) scale(0.4447761495714332)",
-        "filter": "blur(3.7406078765876507px)"
+        "transform": "translate(0em, -1.005063em) scale(0.6345226824330301)",
+        "opacity": 0.08630670608257551,
+        "filter": "blur(2.7410798817522735px)"
       },
       {
+        "offset": 0.36666666666666664,
         "easing": "linear",
-        "offset": 0.4074074074074074,
-        "opacity": 0.0570716180110008,
-        "transform": "translate(0em, -0.8486em) scale(0.43424297080660046)",
-        "filter": "blur(3.8051088253551644px)"
+        "transform": "translate(0em, -1.015703em) scale(0.6306533891855657)",
+        "opacity": 0.0766334729639142,
+        "filter": "blur(2.7700995811082576px)"
       },
       {
+        "offset": 0.38333333333333336,
         "easing": "linear",
-        "offset": 0.4444444444444444,
-        "opacity": 0.043358302820971306,
-        "transform": "translate(0em, -0.861em) scale(0.4260149816925828)",
-        "filter": "blur(3.854837783653935px)"
+        "transform": "translate(0em, -1.025219em) scale(0.6271932394717363)",
+        "opacity": 0.06798309867934083,
+        "filter": "blur(2.7960507039619777px)"
       },
       {
+        "offset": 0.4,
         "easing": "linear",
-        "offset": 0.48148148148148145,
-        "opacity": 0.03265200634073606,
-        "transform": "translate(0em, -0.8706em) scale(0.4195912038044417)",
-        "filter": "blur(3.893104576660977px)"
+        "transform": "translate(0em, -1.033731em) scale(0.624097758758301)",
+        "opacity": 0.06024439689575234,
+        "filter": "blur(2.819266809312743px)"
       },
       {
+        "offset": 0.4166666666666667,
         "easing": "linear",
-        "offset": 0.5185185185185185,
-        "opacity": 0.024314485804912245,
-        "transform": "translate(0em, -0.8781em) scale(0.4145886914829474)",
-        "filter": "blur(3.9224230353173706px)"
+        "transform": "translate(0em, -1.041348em) scale(0.6213278730885345)",
+        "opacity": 0.05331968272133658,
+        "filter": "blur(2.84004095183599px)"
       },
       {
+        "offset": 0.43333333333333335,
         "easing": "linear",
-        "offset": 0.5555555555555556,
-        "opacity": 0.017852146721534567,
-        "transform": "translate(0em, -0.8839em) scale(0.4107112880329208)",
-        "filter": "blur(3.9447264317214596px)"
+        "transform": "translate(0em, -1.048165em) scale(0.6188491712207109)",
+        "opacity": 0.0471229280517772,
+        "filter": "blur(2.8586312158446683px)"
       },
       {
+        "offset": 0.45,
         "easing": "linear",
-        "offset": 0.5925925925925926,
-        "opacity": 0.01287902708221278,
-        "transform": "translate(0em, -0.8884em) scale(0.40772741624932773)",
-        "filter": "blur(3.9615189240211284px)"
+        "transform": "translate(0em, -1.054264em) scale(0.6166312745145945)",
+        "opacity": 0.041578186286486574,
+        "filter": "blur(2.8752654411405403px)"
       },
       {
+        "offset": 0.4666666666666667,
         "easing": "linear",
-        "offset": 0.6296296296296297,
-        "opacity": 0.009090222042735352,
-        "transform": "translate(0em, -0.8918em) scale(0.4054541332256413)",
-        "filter": "blur(3.9739833210044906px)"
+        "transform": "translate(0em, -1.05972em) scale(0.6146472989675931)",
+        "opacity": 0.036618247418982675,
+        "filter": "blur(2.890145257743052px)"
       },
       {
+        "offset": 0.48333333333333334,
         "easing": "linear",
+        "transform": "translate(0em, -1.064598em) scale(0.6128733956816814)",
+        "opacity": 0.032183489204203775,
+        "filter": "blur(2.9034495323873886px)"
+      },
+      {
+        "offset": 0.5,
+        "easing": "linear",
+        "transform": "translate(0em, -1.068957em) scale(0.6112883578945714)",
+        "opacity": 0.028220894736428637,
+        "filter": "blur(2.915337315790714px)"
+      },
+      {
+        "offset": 0.5166666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -1.072848em) scale(0.6098732844228756)",
+        "opacity": 0.02468321105718896,
+        "filter": "blur(2.9259503668284332px)"
+      },
+      {
+        "offset": 0.5333333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -1.076319em) scale(0.6086112908941201)",
+        "opacity": 0.021528227235300568,
+        "filter": "blur(2.9354153182940985px)"
+      },
+      {
+        "offset": 0.55,
+        "easing": "linear",
+        "transform": "translate(0em, -1.07941em) scale(0.6074872614770673)",
+        "opacity": 0.018718153692668382,
+        "filter": "blur(2.9438455389219946px)"
+      },
+      {
+        "offset": 0.5666666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -1.082159em) scale(0.6064876349636712)",
+        "opacity": 0.0162190874091781,
+        "filter": "blur(2.9513427377724657px)"
+      },
+      {
+        "offset": 0.5833333333333334,
+        "easing": "linear",
+        "transform": "translate(0em, -1.084599em) scale(0.6056002200279726)",
+        "opacity": 0.014000550069931506,
+        "filter": "blur(2.9579983497902056px)"
+      },
+      {
+        "offset": 0.6,
+        "easing": "linear",
+        "transform": "translate(0em, -1.086761em) scale(0.6048140353076248)",
+        "opacity": 0.012035088269062189,
+        "filter": "blur(2.9638947351928135px)"
+      },
+      {
+        "offset": 0.6166666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -1.088672em) scale(0.6041191706431915)",
+        "opacity": 0.010297926607978902,
+        "filter": "blur(2.969106220176063px)"
+      },
+      {
+        "offset": 0.6333333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -1.090357em) scale(0.6035066663882063)",
+        "opacity": 0.008766665970515786,
+        "filter": "blur(2.9737000020884525px)"
+      },
+      {
+        "offset": 0.65,
+        "easing": "linear",
+        "transform": "translate(0em, -1.091837em) scale(0.6029684081866258)",
+        "opacity": 0.007421020466564454,
+        "filter": "blur(2.9777369386003065px)"
+      },
+      {
         "offset": 0.6666666666666666,
+        "easing": "linear",
+        "transform": "translate(0em, -1.093133em) scale(0.6024970350188664)",
         "opacity": 0.006242587547166112,
-        "transform": "translate(0em, -0.8944em) scale(0.4037455525282997)",
-        "filter": "blur(3.983058762260884px)"
+        "filter": "blur(2.9812722373585014px)"
       },
       {
+        "offset": 0.6833333333333333,
         "easing": "linear",
-        "offset": 0.7037037037037037,
-        "opacity": 0.004140564002709568,
-        "transform": "translate(0em, -0.8963em) scale(0.4024843384016258)",
-        "filter": "blur(3.9894974416940228px)"
+        "transform": "translate(0em, -1.094264em) scale(0.6020858586561044)",
+        "opacity": 0.005214646640260945,
+        "filter": "blur(2.984356060079217px)"
       },
       {
+        "offset": 0.7,
         "easing": "linear",
-        "offset": 0.7407407407407407,
-        "opacity": 0.0026256395764944207,
-        "transform": "translate(0em, -0.8976em) scale(0.40157538374589663)",
-        "filter": "blur(3.993906551654056px)"
+        "transform": "translate(0em, -1.095246em) scale(0.6017287929458981)",
+        "opacity": 0.004321982364745125,
+        "filter": "blur(2.9870340529057646px)"
       },
       {
+        "offset": 0.7166666666666667,
         "easing": "linear",
-        "offset": 0.7777777777777778,
-        "opacity": 0.001568429909788116,
-        "transform": "translate(0em, -0.8986em) scale(0.40094105794587287)",
-        "filter": "blur(3.9967796724415536px)"
+        "transform": "translate(0em, -1.096094em) scale(0.6014202915897136)",
+        "opacity": 0.003550728974283879,
+        "filter": "blur(2.9893478130771483px)"
       },
       {
+        "offset": 0.7333333333333333,
         "easing": "linear",
-        "offset": 0.8148148148148148,
-        "opacity": 0.0008626601273254986,
-        "transform": "translate(0em, -0.8992em) scale(0.40051759607639537)",
-        "filter": "blur(3.998520530548692px)"
+        "transform": "translate(0em, -1.096823em) scale(0.601155293272275)",
+        "opacity": 0.0028882331806875383,
+        "filter": "blur(2.9913353004579375px)"
       },
       {
+        "offset": 0.75,
         "easing": "linear",
-        "offset": 0.8518518518518519,
-        "opacity": 0.0004205454133719977,
-        "transform": "translate(0em, -0.8996em) scale(0.4002523272480232)",
-        "filter": "blur(3.9994611730714382px)"
+        "transform": "translate(0em, -1.097445em) scale(0.6009291731702345)",
+        "opacity": 0.002322932925586385,
+        "filter": "blur(2.993031201223241px)"
       },
       {
+        "offset": 0.7666666666666667,
         "easing": "linear",
-        "offset": 0.8888888888888888,
-        "opacity": 0.00016921093613941895,
-        "transform": "translate(0em, -0.8998em) scale(0.40010152656168363)",
-        "filter": "blur(3.9998760096015626px)"
+        "transform": "translate(0em, -1.097971em) scale(0.6007377000087795)",
+        "opacity": 0.0018442500219486568,
+        "filter": "blur(2.994467249934154px)"
       },
       {
+        "offset": 0.7833333333333333,
         "easing": "linear",
-        "offset": 0.9259259259259259,
-        "opacity": 0.00004789215906408906,
-        "transform": "translate(0em, -0.9em) scale(0.4000287352954385)",
-        "filter": "blur(3.999992762485487px)"
+        "transform": "translate(0em, -1.098413em) scale(0.6005769979538569)",
+        "opacity": 0.0014424948846420982,
+        "filter": "blur(2.9956725153460737px)"
       },
       {
+        "offset": 0.8,
         "easing": "linear",
-        "offset": 0.9629629629629629,
-        "opacity": 0.000005726863205990362,
-        "transform": "translate(0em, -0.9em) scale(0.40000343611792366)",
-        "filter": "blur(4px)"
+        "transform": "translate(0em, -1.09878em) scale(0.6004435127283585)",
+        "opacity": 0.001108781820896132,
+        "filter": "blur(2.996673654537312px)"
       },
       {
+        "offset": 0.8166666666666667,
         "easing": "linear",
+        "transform": "translate(0em, -1.099082em) scale(0.6003339814258777)",
+        "opacity": 0.0008349535646943185,
+        "filter": "blur(2.997495139305917px)"
+      },
+      {
+        "offset": 0.8333333333333334,
+        "easing": "linear",
+        "transform": "translate(0em, -1.099325em) scale(0.6002454055680484)",
+        "opacity": 0.0006135139201211004,
+        "filter": "blur(2.9981594582396367px)"
+      },
+      {
+        "offset": 0.85,
+        "easing": "linear",
+        "transform": "translate(0em, -1.099519em) scale(0.6001750270130497)",
+        "opacity": 0.00043756753262413906,
+        "filter": "blur(2.9986872974021277px)"
+      },
+      {
+        "offset": 0.8666666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -1.099669em) scale(0.6001203063753757)",
+        "opacity": 0.0003007659384393069,
+        "filter": "blur(2.999097702184682px)"
+      },
+      {
+        "offset": 0.8833333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -1.099783em) scale(0.6000789036618186)",
+        "opacity": 0.00019725915454660292,
+        "filter": "blur(2.9994082225363603px)"
+      },
+      {
+        "offset": 0.9,
+        "easing": "linear",
+        "transform": "translate(0em, -1.099866em) scale(0.6000486608670235)",
+        "opacity": 0.00012165216755877228,
+        "filter": "blur(2.9996350434973236px)"
+      },
+      {
+        "offset": 0.9166666666666666,
+        "easing": "linear",
+        "transform": "translate(0em, -1.099924em) scale(0.6000275863049247)",
+        "opacity": 0.00006896576231196772,
+        "filter": "blur(2.999793102713064px)"
+      },
+      {
+        "offset": 0.9333333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -1.099962em) scale(0.6000138404807049)",
+        "opacity": 0.000034601201762574085,
+        "filter": "blur(2.999896196394712px)"
+      },
+      {
+        "offset": 0.95,
+        "easing": "linear",
+        "transform": "translate(0em, -1.099984em) scale(0.6000057233323286)",
+        "opacity": 0.000014308330821388715,
+        "filter": "blur(2.999957075007536px)"
+      },
+      {
+        "offset": 0.9666666666666667,
+        "easing": "linear",
+        "transform": "translate(0em, -1.099995em) scale(0.6000016626917731)",
+        "opacity": 0.000004156729432880368,
+        "filter": "blur(2.999987529811701px)"
+      },
+      {
+        "offset": 0.9833333333333333,
+        "easing": "linear",
+        "transform": "translate(0em, -1.099999em) scale(0.6000002038343117)",
+        "opacity": 5.095857794623626e-7,
+        "filter": "blur(2.9999984712426615px)"
+      },
+      {
         "offset": 1,
+        "easing": "linear",
+        "transform": "translate(0em, -1.1em) scale(0.6)",
         "opacity": 0,
-        "transform": "translate(0em, -0.9em) scale(0.4)",
-        "filter": "blur(4px)"
+        "filter": "blur(3px)"
       }
     ]
   }

@@ -27,8 +27,6 @@ import {
 } from "./panel";
 import { useMotionPreview } from "./use-preview";
 
-const previewTextClassName = "max-w-full text-4xl font-medium tracking-tight";
-
 type Chart = {
   // Which animation to plot and which property of it.
   curve: "enter" | "exit";
@@ -83,7 +81,11 @@ function MotionPropRow<Key extends keyof MotionSettings>({
           onNext={preview.cycle.next}
           onReset={value === defaultMotion[name] ? undefined : () => setValue(defaultMotion[name])}
         >
-          <Gust value={preview.cycle.current} {...settings} className={previewTextClassName} />
+          <Gust
+            value={preview.cycle.current}
+            {...settings}
+            className="max-w-full text-4xl font-medium tracking-tight"
+          />
         </PreviewWell>
         {chart && curve ? (
           <ChartWell>
@@ -193,7 +195,10 @@ function ValueRow() {
     >
       <Panel panelRef={preview.panelRef}>
         <PreviewWell onNext={() => (custom === null ? preview.cycle.next() : setCustom(null))}>
-          <Gust value={custom ?? preview.cycle.current} className={previewTextClassName} />
+          <Gust
+            value={custom ?? preview.cycle.current}
+            className="max-w-full text-4xl font-medium tracking-tight"
+          />
         </PreviewWell>
         <TextField
           label="Value"
@@ -208,14 +213,17 @@ function ValueRow() {
 
 // Proportional digits differ in width, which tabular-nums evens out.
 const styleWords = ["1,111", "8,808", "4,417", "1,171"] as const;
-const tintClassName = "text-emerald-600 dark:text-emerald-400";
 
 function ClassNameRow() {
   const [mono, setMono] = React.useState(false);
   const [tabular, setTabular] = React.useState(false);
   const [tint, setTint] = React.useState(false);
   const preview = useMotionPreview(styleWords, defaultMotion);
-  const className = cn(mono && "font-mono", tabular && "tabular-nums", tint && tintClassName);
+  const className = cn(
+    mono && "font-mono",
+    tabular && "tabular-nums",
+    tint && "text-emerald-600 dark:text-emerald-400",
+  );
 
   return (
     <PropRow
@@ -230,7 +238,10 @@ function ClassNameRow() {
     >
       <Panel panelRef={preview.panelRef}>
         <PreviewWell onNext={preview.cycle.next}>
-          <Gust value={preview.cycle.current} className={cn(previewTextClassName, className)} />
+          <Gust
+            value={preview.cycle.current}
+            className={cn("max-w-full text-4xl font-medium tracking-tight", className)}
+          />
         </PreviewWell>
         <ControlGrid>
           <ToggleField label="font-mono" checked={mono} onCheckedChange={setMono} />
@@ -274,7 +285,11 @@ function StaggerRow() {
             stagger === defaultMotion.stagger ? undefined : () => setStagger(defaultMotion.stagger)
           }
         >
-          <Gust value={preview.cycle.current} {...settings} className={previewTextClassName} />
+          <Gust
+            value={preview.cycle.current}
+            {...settings}
+            className="max-w-full text-4xl font-medium tracking-tight"
+          />
         </PreviewWell>
         <ChartWell>
           <StaggerChart timeline={timeline} replayValue={preview.cycle.current} />
@@ -328,7 +343,11 @@ function AnglesRow() {
     >
       <Panel panelRef={preview.panelRef} title="Directions">
         <PreviewWell onNext={preview.cycle.next} onReset={isDefault ? undefined : reset}>
-          <Gust value={preview.cycle.current} {...settings} className={previewTextClassName} />
+          <Gust
+            value={preview.cycle.current}
+            {...settings}
+            className="max-w-full text-4xl font-medium tracking-tight"
+          />
         </PreviewWell>
         <ChartWell className="flex flex-col items-center gap-3 py-5">
           <DirectionDiagram
@@ -373,7 +392,7 @@ function DownRow() {
           <Gust
             value={preview.cycle.current}
             {...settings}
-            className={cn(previewTextClassName, "tabular-nums")}
+            className="max-w-full text-4xl font-medium tracking-tight tabular-nums"
           />
         </PreviewWell>
         <ToggleField label="Send characters down" checked={down} onCheckedChange={setDown} />

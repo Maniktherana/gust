@@ -41,16 +41,19 @@ export function DecryptExample({ paused = false }: { paused?: boolean }) {
   return (
     <span className="font-mono text-2xl font-medium">
       <Gust
-        value={message.slice(0, revealed) + tail}
-        duration={240}
-        exitDuration={180}
-        stagger={4}
-        entranceHeight={50}
-        entranceOvershoot={0}
-        entranceScale={1}
-        exitHeight={50}
-        exitBlur={1.5}
-      />
+        motion={{
+          duration: 240,
+          exitDuration: 180,
+          stagger: 4,
+          entranceHeight: 50,
+          entranceOvershoot: 0,
+          entranceScale: 1,
+          exitHeight: 50,
+          exitBlur: 1.5,
+        }}
+      >
+        {message.slice(0, revealed) + tail}
+      </Gust>
     </span>
   );
 }

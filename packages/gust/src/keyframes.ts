@@ -1,60 +1,18 @@
-// Bakes Motion-style per-property variant timing into Web Animations API
-// keyframes. Each property keeps its own duration and easing (opacity lands
-// early while travel/scale share the base window). All tracks are
-// sampled at a shared set of offsets so a single WAAPI animation reproduces the
-// exact per-property curve.
-
-import { clamp01, cubicBezier, easeOutStrongFn, lerp } from "./easing";
-import type { GustConfig } from "./config";
+import { spring } from "motion";
+import { clamp01, cubicBezier, lerp } from "./easing";
+import type { GustConfig, GustEasing } from "./config";
 import { isWhitespaceCharacter, splitGraphemes } from "./characters";
 
-const ENTER_SAMPLE_COUNT = 40;
-const EXIT_SAMPLE_COUNT = 28;
-const entranceEaseX1 = 0.34;
-const entranceEaseX2 = 0.64;
-
-// A single property's keyframe track, evaluated by sampling. `times` are in
-// [0, 1] and `ease` is applied per-segment, matching how Motion eases between
-// keyframe array entries.
-type MotionTrack = {
-  duration: number;
-  ease: (value: number) => number;
-  times: number[];
-  values: number[];
-};
-
-export type GustKeyframes = {
-  duration: number;
-  keyframes: Keyframe[];
-};
-
-const leadIns = new WeakMap<GustKeyframes, Map<number, GustKeyframes>>();
-const styleMotions = new WeakMap<GustKeyframes, GustKeyframes>();
-
-// The curves stay independent of their DOM representation. Registered, non-inheriting
-// properties let the browser sample every visual track on the style timeline: iOS can
-// otherwise advance accelerated transforms before a new glyph's first raster is ready.
-// WAAPI still owns interpolation, time, stagger and cancellation; there is no JS frame loop.
-export function onStyleTimeline(motion: GustKeyframes): GustKeyframes {
-  const cached = styleMotions.get(motion);
-  if (cached) return cached;
-  const result = {
-    duration: motion.duration,
-    keyframes: motion.keyframes.map(({ transform, opacity, filter, ...frame }) => ({
-      ...frame,
-      "--gust-transform": transform,
-      "--gust-opacity": opacity,
-      ...(filter ? { "--gust-blur": String(filter).slice(5, -1) } : {}),
-    })),
-  };
-  styleMotions.set(motion, result);
-  return result;
+function easingFunction(easing: GustEasing) {
+  if (easing === "linear") return (progress: number) => progress;
+  if (easing === "ease-out") return cubicBezier(0, 0, 0.58, 1);
+  return cubicBezier(...easing);
 }
 
-// The same motion held on its first frame for `delay` ms. A character's stagger goes into its
-// keyframes instead of the animation's delay, so every animation is running from its first
-// frame and the compositor plays all of it. Safari only starts a delayed animation once the
-// page next draws, so on a quiet page staggered characters would freeze and then jump.
+export type GustKeyframes = { duration: number; keyframes: Keyframe[] };
+const leadIns = new WeakMap<GustKeyframes, Map<number, GustKeyframes>>();
+// Hold inside the keyframes, rather than WAAPI delay: Safari can skip delayed
+// animations' first painted frames on an otherwise quiet page.
 export function withLeadIn(motion: GustKeyframes, delay: number): GustKeyframes {
   if (!(delay > 0) || !motion.keyframes.length) return motion;
   let cached = leadIns.get(motion);
@@ -75,89 +33,11 @@ export function withLeadIn(motion: GustKeyframes, delay: number): GustKeyframes 
   return leadIn;
 }
 
-function evalTrack(track: MotionTrack, globalTime: number) {
-  const { ease, times, values } = track;
-
-  if (values.length === 1) return values[0];
-
-  const localProgress = clamp01(track.duration > 0 ? globalTime / track.duration : 1);
-  let segment = 0;
-
-  while (segment < times.length - 2 && localProgress > times[segment + 1]) {
-    segment += 1;
-  }
-
-  const span = times[segment + 1] - times[segment] || 1;
-  const segmentFraction = clamp01((localProgress - times[segment]) / span);
-
-  return lerp(values[segment], values[segment + 1], ease(segmentFraction));
-}
-
-// The entrance gets its bounce from an overshooting bezier; solve that curve so
-// entranceOvershoot maps to the actual above-baseline peak instead of a held keyframe.
-function cubicBezierCoordinate(t: number, point1: number, point2: number) {
-  const invertedT = 1 - t;
-
-  return 3 * invertedT * invertedT * t * point1 + 3 * invertedT * t * t * point2 + t * t * t;
-}
-
-function overshootForControlPoint(controlY1: number) {
-  if (controlY1 <= 1) return 0;
-
-  const peakT = controlY1 / (3 * controlY1 - 2);
-  return cubicBezierCoordinate(peakT, controlY1, 1) - 1;
-}
-
-function entranceControlY1(height: number, offset: number) {
-  if (offset <= 0) return 1;
-
-  const targetOvershoot = Math.max(0, height / offset);
-
-  if (targetOvershoot <= 0) return 1;
-
-  let low = 1;
-  let high = 2;
-
-  while (overshootForControlPoint(high) < targetOvershoot && high < 8) {
-    high *= 2;
-  }
-
-  for (let index = 0; index < 20; index += 1) {
-    const middle = (low + high) / 2;
-
-    if (overshootForControlPoint(middle) < targetOvershoot) {
-      low = middle;
-    } else {
-      high = middle;
-    }
-  }
-
-  return high;
-}
-
-function entrancePeakTime(controlY1: number) {
-  if (controlY1 <= 1) return 0.68;
-
-  const peakT = controlY1 / (3 * controlY1 - 2);
-
-  return cubicBezierCoordinate(peakT, entranceEaseX1, entranceEaseX2);
-}
-
-function entranceTiming(height: number, offset: number) {
-  const controlY1 = entranceControlY1(height, offset);
-
-  return {
-    ease: height > 0 ? cubicBezier(entranceEaseX1, controlY1, entranceEaseX2, 1) : easeOutStrongFn,
-    peakTime: entrancePeakTime(controlY1),
-  };
-}
-
 function directionalTranslate(distance: number, angle: number) {
   const radians = (angle * Math.PI) / 180;
   const x = Math.cos(radians) * (distance / 100);
   const y = Math.sin(radians) * (distance / 100);
-  const clean = (value: number) => (Math.abs(value) < 0.0001 ? 0 : Number(value.toFixed(4)));
-
+  const clean = (value: number) => (Math.abs(value) < 0.000001 ? 0 : Number(value.toFixed(6)));
   return `translate(${clean(x)}em, ${clean(y)}em)`;
 }
 
@@ -167,124 +47,133 @@ export function characterTransitionWindow(
   stagger: number,
   firstAnimatedIndex = 0,
 ) {
-  const animatedCount = splitGraphemes(text)
+  const count = splitGraphemes(text)
     .slice(firstAnimatedIndex)
     .filter((character) => !isWhitespaceCharacter(character)).length;
-
-  if (animatedCount === 0) return 0;
-
-  return duration + Math.max(animatedCount - 1, 0) * stagger;
+  return count ? duration + Math.max(count - 1, 0) * stagger : 0;
 }
 
 export function lastCharacterStartDelay(text: string, stagger: number, firstAnimatedIndex = 0) {
-  const animatedCount = splitGraphemes(text)
+  const count = splitGraphemes(text)
     .slice(firstAnimatedIndex)
     .filter((character) => !isWhitespaceCharacter(character)).length;
+  return Math.max(count - 1, 0) * stagger;
+}
 
-  return Math.max(0, animatedCount - 1) * stagger;
+function entranceFrame(config: GustConfig, offset: number, progress: number): Keyframe {
+  const peak = config.entranceScalePeak ?? 0.65;
+  const arriving = progress <= peak;
+  const phase = arriving ? progress / peak : (progress - peak) / (1 - peak);
+  const distance = arriving
+    ? lerp(-config.entranceHeight, config.entranceOvershoot, phase)
+    : lerp(config.entranceOvershoot, 0, phase);
+  const scale = !config.scale
+    ? 1
+    : arriving
+      ? lerp(config.entranceStartScale, config.entranceScale, phase)
+      : lerp(config.entranceScale, 1, phase);
+  const frame: Keyframe = {
+    offset,
+    easing: "linear",
+    transform: `${directionalTranslate(distance, config.enterAngle)} scale(${scale})`,
+    opacity: lerp(config.entranceOpacity, 1, progress),
+  };
+  if (config.blur && config.entranceBlur > 0)
+    frame.filter = `blur(${config.entranceBlur * (1 - progress)}${config.blurUnit})`;
+  if (config.entranceRotation)
+    frame.transform += ` rotate(${config.entranceRotation * (1 - progress)}deg)`;
+  return frame;
+}
+
+function springEntrance(config: GustConfig): GustKeyframes {
+  const generator = spring({
+    keyframes: [0, 1],
+    duration: Math.max(1, config.enterDuration),
+    bounce: config.springBounce,
+  });
+  const samples = Array.from(
+    { length: 121 },
+    (_, index) => generator.next((index / 120) * Math.max(1, config.enterDuration)).value,
+  );
+  let peakIndex = 0;
+  const distance = [0];
+  for (let index = 1; index < samples.length; index += 1) {
+    if (samples[index] > samples[peakIndex]) peakIndex = index;
+    distance.push(distance[index - 1] + Math.abs(samples[index] - samples[index - 1]));
+  }
+  const peak = samples[peakIndex];
+  const returning = peak > 1;
+  const keyframes = samples.map((value, index): Keyframe => {
+    const offset = index / 120;
+    const beforePeak = index <= peakIndex;
+    const phase = beforePeak ? value / peak : (peak - value) / (peak - 1);
+    const travel = returning
+      ? beforePeak
+        ? lerp(-config.entranceHeight, config.entranceOvershoot, phase)
+        : lerp(config.entranceOvershoot, 0, phase)
+      : lerp(-config.entranceHeight, 0, value);
+    const scale = !config.scale
+      ? 1
+      : returning
+        ? beforePeak
+          ? lerp(config.entranceStartScale, config.entranceScale, phase)
+          : lerp(config.entranceScale, 1, phase)
+        : lerp(config.entranceStartScale, 1, value);
+    const visibility = distance[index] / distance[120];
+    const frame: Keyframe = {
+      offset,
+      easing: "linear",
+      transform: `${directionalTranslate(travel, config.enterAngle)} scale(${scale})`,
+      opacity: lerp(config.entranceOpacity, 1, visibility),
+    };
+    if (config.blur && config.entranceBlur > 0)
+      frame.filter = `blur(${config.entranceBlur * (1 - visibility)}${config.blurUnit})`;
+    if (config.entranceRotation)
+      frame.transform += ` rotate(${config.entranceRotation * (1 - visibility)}deg)`;
+    return frame;
+  });
+  return { duration: config.enterDuration, keyframes };
 }
 
 export function buildEnterKeyframes(config: GustConfig): GustKeyframes {
-  const enter = config.enterDuration;
-  const timing = entranceTiming(config.entranceOvershoot, config.entranceHeight);
-  const peakScale = config.scale ? config.entranceScale : 1;
-  const revealEndTime = Math.min(0.32, Math.max(0.18, timing.peakTime / 2));
-  const opacityTrack: MotionTrack = {
-    duration: enter * revealEndTime,
-    ease: easeOutStrongFn,
-    times: [0, 1],
-    values: [0, 1],
-  };
-  const distanceTrack: MotionTrack = {
-    duration: enter,
-    ease: timing.ease,
-    times: [0, 1],
-    values: [config.entranceHeight, 0],
-  };
-  const scaleTrack: MotionTrack = {
-    duration: enter,
-    ease: easeOutStrongFn,
-    times: [0, revealEndTime, timing.peakTime, 1],
-    values: [1, 1, peakScale, 1],
-  };
-  const filterTrack: MotionTrack | null =
-    config.blur && config.entranceBlur > 0
-      ? {
-          duration: enter * 0.95,
-          ease: easeOutStrongFn,
-          times: [0, 1],
-          values: [config.entranceBlur, 0],
-        }
-      : null;
-  const maxDuration = enter;
-  const keyframes: Keyframe[] = [];
-
-  for (let index = 0; index < ENTER_SAMPLE_COUNT; index += 1) {
-    const offset = index / (ENTER_SAMPLE_COUNT - 1);
-    const globalTime = offset * maxDuration;
-
-    const keyframe: Keyframe = {
-      easing: "linear",
-      offset,
-      opacity: evalTrack(opacityTrack, globalTime),
-      transform: `${directionalTranslate(-evalTrack(distanceTrack, globalTime), config.enterAngle)} scale(${evalTrack(scaleTrack, globalTime)})`,
-    };
-
-    if (filterTrack) keyframe.filter = `blur(${evalTrack(filterTrack, globalTime)}px)`;
-
-    keyframes.push(keyframe);
+  if (config.enterDuration === 0) {
+    return { duration: 0, keyframes: [entranceFrame(config, 0, 0), entranceFrame(config, 1, 1)] };
   }
-
-  return { duration: maxDuration, keyframes };
+  if (config.enterEasing === "spring") return springEntrance(config);
+  const ease = easingFunction(config.enterEasing ?? "ease-out");
+  const peak = config.entranceScalePeak ?? 0.65;
+  const frames = Array.from({ length: 61 }, (_, index) => {
+    const offset = index / 60;
+    return entranceFrame(config, offset, clamp01(ease(offset)));
+  });
+  // Include the actual peak so sampling cannot shave off an authored scale/overshoot target.
+  let lower = 0;
+  let upper = 1;
+  for (let index = 0; index < 40; index += 1) {
+    const middle = (lower + upper) / 2;
+    if (ease(middle) < peak) lower = middle;
+    else upper = middle;
+  }
+  frames.push(entranceFrame(config, (lower + upper) / 2, peak));
+  frames.sort((a, b) => Number(a.offset) - Number(b.offset));
+  return { duration: config.enterDuration, keyframes: frames };
 }
 
 export function buildExitKeyframes(config: GustConfig): GustKeyframes {
-  const exit = config.exitDuration;
-  const exitScale = config.scale ? config.exitScale : 1;
-  const opacityTrack: MotionTrack = {
-    duration: exit,
-    ease: easeOutStrongFn,
-    times: [0, 1],
-    values: [1, 0],
-  };
-  const distanceTrack: MotionTrack = {
-    duration: exit,
-    ease: easeOutStrongFn,
-    times: [0, 1],
-    values: [0, config.exitHeight],
-  };
-  const scaleTrack: MotionTrack = {
-    duration: exit,
-    ease: easeOutStrongFn,
-    times: [0, 1],
-    values: [1, exitScale],
-  };
-  const filterTrack: MotionTrack | null =
-    config.blur && config.exitBlur > 0
-      ? {
-          duration: exit * 0.95,
-          ease: easeOutStrongFn,
-          times: [0, 1],
-          values: [0, config.exitBlur],
-        }
-      : null;
-  const keyframes: Keyframe[] = [];
-
-  for (let index = 0; index < EXIT_SAMPLE_COUNT; index += 1) {
-    const offset = index / (EXIT_SAMPLE_COUNT - 1);
-    const globalTime = offset * exit;
-
-    const keyframe: Keyframe = {
-      easing: "linear",
+  const ease = easingFunction(config.exitEasing);
+  const keyframes = Array.from({ length: 61 }, (_, index): Keyframe => {
+    const offset = index / 60;
+    const progress = clamp01(ease(offset));
+    const frame: Keyframe = {
       offset,
-      opacity: evalTrack(opacityTrack, globalTime),
-      transform: `${directionalTranslate(evalTrack(distanceTrack, globalTime), config.exitAngle)} scale(${evalTrack(scaleTrack, globalTime)})`,
+      easing: "linear",
+      transform: `${directionalTranslate(config.exitHeight * progress, config.exitAngle)} scale(${config.scale ? lerp(1, config.exitScale, progress) : 1})`,
+      opacity: lerp(1, config.exitOpacity, progress),
     };
-
-    if (filterTrack) keyframe.filter = `blur(${evalTrack(filterTrack, globalTime)}px)`;
-
-    keyframes.push(keyframe);
-  }
-
-  return { duration: exit, keyframes };
+    if (config.blur && config.exitBlur > 0)
+      frame.filter = `blur(${config.exitBlur * progress}${config.blurUnit})`;
+    if (config.exitRotation) frame.transform += ` rotate(${config.exitRotation * progress}deg)`;
+    return frame;
+  });
+  return { duration: config.exitDuration, keyframes };
 }

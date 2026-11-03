@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Gust, type GustProps } from "@maniktherana/gust";
-
-export const otpMotion = { entranceOvershoot: 8, stagger: 12 } satisfies Omit<GustProps, "value">;
+import {
+  DEFAULT_MOTION,
+  Gust,
+  resolveMotionOptions,
+  resolveTransitionConfig,
+  type GustMotionOptions,
+} from "@maniktherana/gust";
 
 // Each step also says how it leaves: "wipe" clears the whole code in one
 // staggered exit, "backspace" deletes digit by digit down to the prefix it
@@ -17,7 +21,7 @@ const steps = [
 const timing = { backspace: 100, firstDigit: 280, hold: 1250, type: 100, wipe: 1000 };
 
 type Phase = "backspacing" | "holding" | "typing" | "wiping";
-type State = { code: string; phase: Phase; step: number };
+export type OtpState = { code: string; phase: Phase; step: number };
 
 function sharedPrefixLength(a: string, b: string) {
   let index = 0;
@@ -27,20 +31,24 @@ function sharedPrefixLength(a: string, b: string) {
   return index;
 }
 
-function delayFor({ code, phase }: State, motion: Omit<GustProps, "value">) {
+export function otpDelay({ code, phase }: OtpState, motion: GustMotionOptions = DEFAULT_MOTION) {
   if (phase === "holding") return timing.hold;
   if (phase === "backspacing") return timing.backspace;
   if (phase === "wiping") {
     const digits = steps.find((step) => step.exit === "wipe")?.code.length ?? 0;
+    const resolved = resolveTransitionConfig(resolveMotionOptions(motion), 0, digits);
     return (
-      (motion.exitDuration ?? 400) + Math.max(0, digits - 1) * (motion.stagger ?? 20) + timing.wipe
+      resolved.exitDelay +
+      resolved.exitDuration +
+      Math.max(0, digits - 1) * resolved.exitStagger +
+      timing.wipe
     );
   }
 
   return code.length === 0 ? timing.firstDigit : timing.type;
 }
 
-function advance(current: State): State {
+export function advanceOtp(current: OtpState): OtpState {
   const step = steps[current.step % steps.length] ?? steps[0];
   const nextStep = (current.step + 1) % steps.length;
   const nextCode = steps[nextStep]?.code ?? "";
@@ -70,13 +78,13 @@ function advance(current: State): State {
 
 // Typed digits rise in one by one; deleted ones lift away.
 export function OtpDemo({
-  motion = otpMotion,
+  motion = DEFAULT_MOTION,
   paused = false,
 }: {
-  motion?: Omit<GustProps, "value">;
+  motion?: GustMotionOptions;
   paused?: boolean;
 }) {
-  const [state, setState] = useState<State>({ code: "", phase: "typing", step: 0 });
+  const [state, setState] = useState<OtpState>({ code: "", phase: "typing", step: 0 });
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -89,10 +97,20 @@ export function OtpDemo({
 
   useEffect(() => {
     if (paused || reducedMotion) return undefined;
-    const timer = window.setTimeout(() => setState(advance), delayFor(state, motion));
+    const timer = window.setTimeout(() => setState(advanceOtp), otpDelay(state, motion));
 
     return () => window.clearTimeout(timer);
-  }, [motion.exitDuration, motion.stagger, paused, reducedMotion, state]);
+  }, [
+    motion.exitDelay,
+    motion.exitDuration,
+    motion.exitStagger,
+    motion.stagger,
+    motion.staggerMode,
+    motion.staggerSpread,
+    paused,
+    reducedMotion,
+    state,
+  ]);
 
   return (
     // A tall phone bleeding past the box bottom; the digits land at the box's
@@ -101,16 +119,14 @@ export function OtpDemo({
       <div className="flex flex-col items-center pt-14">
         {/* items-start keeps Gust's top edge fixed while its height collapses
             on an empty code, so leaving digits don't dip mid-wipe. */}
-        <div className="flex h-10 items-start font-mono text-3xl font-semibold tracking-widest tabular-nums">
+        <div className="flex h-10 items-start font-sans text-3xl font-semibold tracking-widest tabular-nums">
           {/* -mr cancels the letter-spacing after the last digit, so a full
               code sits optically centered. */}
-          <Gust
-            value={reducedMotion ? steps[0].code : state.code}
-            {...motion}
-            className="-mr-[0.1em]"
-          />
+          <Gust motion={motion} className="-mr-[0.1em]">
+            {reducedMotion ? steps[0].code : state.code}
+          </Gust>
         </div>
-        <span className="mt-2 font-mono text-[10px] text-muted-foreground">enter code</span>
+        <span className="mt-2 font-sans text-[10px] text-muted-foreground">enter code</span>
       </div>
     </div>
   );

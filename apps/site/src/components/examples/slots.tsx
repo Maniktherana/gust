@@ -76,23 +76,26 @@ export function SlotsExample({ paused = false }: { paused?: boolean }) {
             className="grid size-16 place-items-center overflow-hidden rounded-xl bg-foreground/5 text-3xl"
           >
             <Gust
-              value={symbol}
-              down
-              duration={spinning[index] ? 160 : 520}
-              exitDuration={140}
-              entranceHeight={110}
-              exitHeight={110}
-              entranceOvershoot={spinning[index] ? 0 : 18}
-              entranceScale={spinning[index] ? 1 : 1.15}
-              exitScale={0.8}
-              exitBlur={2}
-            />
+              trend="down"
+              motion={{
+                duration: spinning[index] ? 160 : 520,
+                exitDuration: 140,
+                entranceHeight: 110,
+                exitHeight: 110,
+                entranceOvershoot: spinning[index] ? 0 : 18,
+                entranceScale: spinning[index] ? 1 : 1.15,
+                exitScale: 0.8,
+                exitBlur: 2,
+              }}
+            >
+              {symbol}
+            </Gust>
           </span>
         ))}
       </div>
       <div className="flex items-center gap-3">
         <span className="w-28 text-right text-sm text-muted-foreground">
-          <Gust value={isSpinning ? "Spinning…" : verdict(reels)} {...smallText} />
+          <Gust motion={smallText}>{isSpinning ? "Spinning…" : verdict(reels)}</Gust>
         </span>
         <button
           type="button"

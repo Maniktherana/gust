@@ -27,11 +27,11 @@ function Switch({
       data-slot="switch"
       data-size={size}
       className={cn(
-        "peer group/switch relative inline-flex h-5 shrink-0 items-center rounded-full border border-transparent outline-none transition-[box-shadow,opacity] duration-100 after:absolute after:-inset-x-3 after:-inset-y-2 disabled:cursor-not-allowed disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:opacity-50",
-        size === "sm" ? "w-7" : "w-8",
+        "peer group/switch relative inline-flex shrink-0 items-center rounded-full border border-transparent outline-none transition-[box-shadow,opacity] duration-100 after:absolute after:-inset-x-3 after:-inset-y-2 disabled:cursor-not-allowed disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:opacity-50",
+        size === "sm" ? "h-5 w-7" : "h-6 w-10",
         "focus-visible:[&_[data-slot=switch-track]]:shadow-[0_0_0_1px_var(--ring),var(--shadow-switch-track)]",
         "aria-invalid:[&_[data-slot=switch-track]]:shadow-[0_0_0_1px_color-mix(in_srgb,var(--destructive)_35%,transparent),var(--shadow-switch-track)]",
-        "data-checked:[&_[data-slot=switch-track]]:bg-[var(--switch-checked-bg)] data-unchecked:[&_[data-slot=switch-track]]:bg-input",
+        "data-checked:[&_[data-slot=switch-track]]:bg-[var(--switch-checked-bg)] data-unchecked:[&_[data-slot=switch-track]]:bg-field",
         className,
       )}
       {...props}
@@ -40,18 +40,18 @@ function Switch({
         aria-hidden="true"
         data-slot="switch-track"
         className={cn(
-          "pointer-events-none absolute top-1/2 left-0 w-full -translate-y-1/2 overflow-hidden rounded-full bg-input shadow-[var(--shadow-switch-track)] transition-colors duration-75 ease-out",
-          size === "sm" ? "h-4" : "h-[18px]",
+          "pointer-events-none absolute top-1/2 left-0 w-full -translate-y-1/2 overflow-hidden rounded-full bg-field shadow-[var(--shadow-control)] transition-colors duration-75 ease-out",
+          size === "sm" ? "h-4" : "h-[22px]",
         )}
       />
       <SwitchPrimitive.Thumb
         aria-hidden="true"
         data-slot="switch-thumb"
         className={cn(
-          "pointer-events-none relative z-10 block rounded-full bg-white shadow-[var(--shadow-switch-thumb)] transition-transform duration-100 ease-out ring-0 dark:data-unchecked:bg-foreground",
+          "pointer-events-none relative z-10 block rounded-full bg-white shadow-sm transition-transform duration-100 ease-out ring-0 dark:data-unchecked:bg-foreground",
           size === "sm"
             ? "size-3 data-checked:translate-x-[13px] data-unchecked:translate-x-[3px]"
-            : "size-3.5 data-checked:translate-x-[14px] data-unchecked:translate-x-[3px]",
+            : "size-[18px] data-checked:translate-x-[17px] data-unchecked:translate-x-[3px]",
         )}
       />
     </SwitchPrimitive.Root>

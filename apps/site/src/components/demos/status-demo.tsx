@@ -1,32 +1,26 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { Gust, type GustProps } from "@maniktherana/gust";
+import { DEFAULT_MOTION, Gust, type GustMotionOptions } from "@maniktherana/gust";
+import { cn } from "@/lib/utils";
 
-export const statusMotion = {
-  entranceOvershoot: 10,
-  entranceScale: 1.15,
-  exitDuration: 440,
-  exitHeight: 120,
-} satisfies Omit<GustProps, "value">;
-
-const steps = [
+export const statusSteps = [
   { color: "text-muted-foreground", key: "queued", label: "Queued" },
   { color: "text-amber-600 dark:text-amber-300", key: "building", label: "Building" },
   { color: "text-sky-600 dark:text-sky-400", key: "deploying", label: "Deploying" },
   { color: "text-emerald-600 dark:text-emerald-400", key: "live", label: "Live" },
 ] as const;
 
-type StepKey = (typeof steps)[number]["key"];
-
-const glyphTransition =
-  "transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]";
+type StepKey = (typeof statusSteps)[number]["key"];
 
 function StatusGlyph({ children, shown }: { children: ReactNode; shown: boolean }) {
   return (
     <span
       aria-hidden="true"
-      className={`col-start-1 row-start-1 grid place-items-center ${glyphTransition} ${shown ? "scale-100 opacity-100 blur-none" : "scale-25 opacity-0 blur-[4px]"}`}
+      className={cn(
+        "col-start-1 row-start-1 grid place-items-center transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
+        shown ? "scale-100 opacity-100 blur-none" : "scale-25 opacity-0 blur-[4px]",
+      )}
     >
       {children}
     </span>
@@ -38,13 +32,19 @@ function StatusIcon({ active, animating }: { active: StepKey; animating: boolean
     <>
       <StatusGlyph shown={active === "queued"}>
         <span
-          className={`size-4 rounded-full border-2 border-current ${animating ? "motion-safe:animate-pulse" : ""}`}
+          className={cn(
+            "size-4 rounded-full border-2 border-current",
+            animating && "motion-safe:animate-pulse",
+          )}
         />
       </StatusGlyph>
       <StatusGlyph shown={active === "building"}>
         <svg
           viewBox="0 0 20 20"
-          className={`size-[18px] ${animating ? "motion-safe:animate-[spin_1s_linear_infinite_reverse]" : ""}`}
+          className={cn(
+            "size-[18px]",
+            animating && "motion-safe:animate-[spin_1s_linear_infinite_reverse]",
+          )}
         >
           <path
             d="m5,5.101c1.271-1.297,3.041-2.101,5-2.101,3.866,0,7,3.134,7,7s-3.134,7-7,7c-2.792,0-5.203-1.635-6.326-4"
@@ -67,7 +67,10 @@ function StatusIcon({ active, animating }: { active: StepKey; animating: boolean
       <StatusGlyph shown={active === "deploying"}>
         <span className="relative grid place-items-center">
           <span
-            className={`absolute size-5 rounded-full border-[1.5px] border-current ${animating ? "motion-safe:animate-ping" : ""}`}
+            className={cn(
+              "absolute size-5 rounded-full border-[1.5px] border-current",
+              animating && "motion-safe:animate-ping",
+            )}
           />
           <span className="relative size-2.5 rounded-full bg-current" />
         </span>
@@ -86,15 +89,15 @@ function StatusIcon({ active, animating }: { active: StepKey; animating: boolean
 
 // The label and its color change together while the icon cross-fades.
 export function StatusDemo({
-  motion = statusMotion,
+  motion = DEFAULT_MOTION,
   paused = false,
 }: {
-  motion?: Omit<GustProps, "value">;
+  motion?: GustMotionOptions;
   paused?: boolean;
 }) {
   const [index, setIndex] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const step = steps[index] ?? steps[0];
+  const step = statusSteps[index] ?? statusSteps[0];
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -107,7 +110,7 @@ export function StatusDemo({
   useEffect(() => {
     if (paused || reducedMotion) return undefined;
     const timer = window.setInterval(
-      () => setIndex((current) => (current + 1) % steps.length),
+      () => setIndex((current) => (current + 1) % statusSteps.length),
       2100,
     );
 
@@ -117,11 +120,13 @@ export function StatusDemo({
   return (
     <span className="flex items-center gap-2.5 rounded-full bg-foreground/5 px-4 py-1.5">
       <span
-        className={`grid size-5 place-items-center transition-colors duration-500 ${step.color}`}
+        className={cn("grid size-5 place-items-center transition-colors duration-500", step.color)}
       >
         <StatusIcon active={step.key} animating={!paused && !reducedMotion} />
       </span>
-      <Gust value={step.label} {...motion} className={`text-xl font-semibold ${step.color}`} />
+      <Gust motion={motion} className={cn("text-xl font-semibold", step.color)}>
+        {step.label}
+      </Gust>
     </span>
   );
 }

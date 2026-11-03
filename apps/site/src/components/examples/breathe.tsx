@@ -35,15 +35,18 @@ export function BreatheExample({ paused = false }: { paused?: boolean }) {
         style={{ transform: `scale(${phase.scale})`, transitionDuration: `${phase.ms}ms` }}
       />
       <Gust
-        value={phase.label}
-        down={!phase.rising}
-        duration={900}
-        exitDuration={700}
-        stagger={45}
-        entranceOvershoot={4}
-        entranceScale={1.02}
+        trend={phase.rising ? "up" : "down"}
+        motion={{
+          duration: 900,
+          exitDuration: 700,
+          stagger: 45,
+          entranceOvershoot: 4,
+          entranceScale: 1.02,
+        }}
         className="relative text-xl font-medium"
-      />
+      >
+        {phase.label}
+      </Gust>
     </div>
   );
 }

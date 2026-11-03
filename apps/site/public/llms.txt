@@ -1,17 +1,22 @@
 # Gust
 
-> Animated text transitions for React. Pass a string as `value`; when it changes, Gust animates the characters that changed. Package: @maniktherana/gust.
+> Single-line text transitions for React. Gust keeps matching text at both ends and animates the changed middle.
 
 ## Docs
 
-- [Agent guide](https://gust.manikrana.dev/gust.md): install, usage, every prop with its default, recipes and common mistakes. Read this before writing code.
-- [README](https://github.com/Maniktherana/gust#readme): install and props on GitHub.
+- [API reference](https://gust.manikrana.dev/gust.md): installation, props, motion settings, and limits.
+- [README](https://github.com/Maniktherana/gust#readme): usage and development.
+- [Examples](https://gust.manikrana.dev/examples)
+- [Engine](https://gust.manikrana.dev/engine): optional motion controls.
 
-## Install
+## Usage
 
-- [npm package](https://www.npmjs.com/package/@maniktherana/gust): `npm i @maniktherana/gust`, then import `@maniktherana/gust/styles.css` once.
-- [shadcn registry item](https://gust.manikrana.dev/r/gust.json): `npx shadcn@latest add https://gust.manikrana.dev/r/gust.json`.
-
-## Optional
-
-- [Live demos](https://gust.manikrana.dev): interactive examples of Gust in product UI, on the landing page.
+- Install with `npm install @maniktherana/gust`, then `import { Gust } from "@maniktherana/gust"`.
+- Render `<Gust>{text}</Gust>` with a string or number. The first value is static; updates animate. Styles are included.
+- Use `as`, `className`, `style`, HTML attributes, and `ref` on the outer element.
+- Use `animated={false}` for immediate updates. Reduced-motion preferences also disable animation.
+- `direction` accepts `up`, `down`, `left`, or `right`. It overrides motion angles and `trend`. Default `trend="auto"` compares raw finite numbers, not formatted strings; explicit motion angles override it.
+- `preservePrefix={false}` replaces the entire value. This prop overrides `motion.preserveMatching`.
+- Pass optional `GustMotionOptions` through `motion`. Entry and exit default to 440ms, with a spring entrance and a 30% stagger spread.
+- Single-line plain text only, without cross-character kerning or ligatures. Format values before passing them to Gust.
+- Visual duplicates are hidden from assistive technology. Add a live region when text changes need announcements.

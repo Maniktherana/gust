@@ -1,40 +1,35 @@
 import * as React from "react";
-import { codeToHtml } from "shiki";
 
 import { CopyButton } from "@/components/copy-button";
 import { cn } from "@/lib/utils";
-
-const variantClassNames = {
-  bare: "",
-  default: "rounded-xl bg-surface-raised px-5 py-4",
-};
+import { highlightCode } from "@/lib/highlight-code";
 
 export function CodeBlock({
   code,
+  html: highlightedHtml,
   lang = "tsx",
   variant = "default",
 }: {
   code: string;
+  html?: string;
   lang?: string;
-  variant?: keyof typeof variantClassNames;
+  variant?: "bare" | "default";
 }) {
-  const [html, setHtml] = React.useState<string | null>(null);
-  const blockClassName = cn("overflow-x-auto font-mono text-code", variantClassNames[variant]);
+  const [clientHtml, setHtml] = React.useState<string | null>(null);
+  const html = highlightedHtml ?? clientHtml;
 
   React.useEffect(() => {
+    if (highlightedHtml !== undefined) return;
     let cancelled = false;
 
-    codeToHtml(code, {
-      lang,
-      themes: { dark: "vesper", light: "min-light" },
-    }).then((highlighted) => {
+    highlightCode(code, lang).then((highlighted) => {
       if (!cancelled) setHtml(highlighted);
     });
 
     return () => {
       cancelled = true;
     };
-  }, [code, lang]);
+  }, [code, lang, highlightedHtml]);
 
   return (
     <div className="group/code relative">
@@ -53,9 +48,21 @@ export function CodeBlock({
       />
       {html ? (
         // oxlint-disable-next-line react/no-danger -- shiki output generated from our own static snippet
-        <div className={blockClassName} dangerouslySetInnerHTML={{ __html: html }} />
+        <div
+          className={cn(
+            "code-block overflow-x-auto",
+            variant === "default" && "rounded-xl bg-surface-raised px-5 py-4",
+          )}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
       ) : (
-        <pre className={cn(blockClassName, "text-secondary-foreground")}>
+        <pre
+          className={cn(
+            "code-block overflow-x-auto",
+            variant === "default" && "rounded-xl bg-surface-raised px-5 py-4",
+            "text-secondary-foreground",
+          )}
+        >
           <code>{code}</code>
         </pre>
       )}

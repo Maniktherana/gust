@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Gust } from "@maniktherana/gust";
+import { cn } from "@/lib/utils";
 
 const stops = [12, 3, 8, 1, 15, 6];
 const floorMs = 520;
@@ -37,25 +38,27 @@ export function ElevatorExample({ paused = false }: { paused?: boolean }) {
         <svg
           viewBox="0 0 12 12"
           aria-hidden="true"
-          className={`size-4 transition-[transform,opacity] duration-300 ${descending ? "rotate-180" : ""} ${arrived ? "opacity-30" : ""}`}
+          className={cn(
+            "size-4 transition-[transform,opacity] duration-300",
+            descending && "rotate-180",
+            arrived && "opacity-30",
+          )}
         >
           <path d="M6 2 L11 10 L1 10 Z" className="fill-foreground" />
         </svg>
         <span className="min-w-[2ch] font-mono text-5xl font-medium tabular-nums">
           <Gust
-            value={String(floor)}
-            down={descending}
-            duration={320}
-            exitDuration={280}
-            stagger={0}
-          />
+            trend={descending ? "down" : "up"}
+            motion={{ duration: 320, exitDuration: 280, stagger: 0 }}
+          >
+            {String(floor)}
+          </Gust>
         </span>
       </div>
       <span className="text-sm text-muted-foreground">
-        <Gust
-          value={arrived ? "Doors opening" : descending ? "Going down" : "Going up"}
-          {...smallText}
-        />
+        <Gust motion={smallText}>
+          {arrived ? "Doors opening" : descending ? "Going down" : "Going up"}
+        </Gust>
       </span>
     </div>
   );

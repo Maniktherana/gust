@@ -105,24 +105,18 @@ export function WindExample({ paused = false }: { paused?: boolean }) {
       <div className="flex w-28 flex-col gap-1">
         <span className="flex items-baseline gap-2 text-3xl font-medium tracking-tight tabular-nums">
           <span className="inline-flex w-[2ch] shrink-0 justify-end">
-            <Gust
-              value={String(wind.speed)}
-              enterAngle={travel}
-              exitAngle={travel}
-              {...windMotion}
-            />
+            <Gust motion={{ enterAngle: travel, exitAngle: travel, ...windMotion }}>
+              {String(wind.speed)}
+            </Gust>
           </span>
           <span>mph</span>
         </span>
         <span className="flex items-baseline gap-1 text-sm text-muted-foreground">
           <span>from</span>
           <span className="inline-flex w-[3ch]">
-            <Gust
-              value={compassPoint(wind.bearing)}
-              enterAngle={travel}
-              exitAngle={travel}
-              {...windMotion}
-            />
+            <Gust motion={{ enterAngle: travel, exitAngle: travel, ...windMotion }}>
+              {compassPoint(wind.bearing)}
+            </Gust>
           </span>
         </span>
       </div>

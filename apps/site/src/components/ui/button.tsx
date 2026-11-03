@@ -10,6 +10,7 @@ const buttonVariants = cva(
       variant: {
         default:
           "bg-[var(--button-primary)] bg-clip-border text-[var(--button-primary-foreground)] shadow-[var(--shadow-button-primary)] hover:bg-[var(--button-primary-pressed)] hover:text-[var(--button-primary-foreground)]",
+        flat: "bg-field text-foreground shadow-none hover:bg-[var(--field-hover)] active:bg-[var(--field-hover)]",
         secondary:
           "border-transparent bg-[var(--button-secondary)] bg-clip-border text-[var(--button-secondary-foreground)] shadow-[var(--shadow-card)] hover:bg-[var(--button-secondary-hover)] hover:text-[var(--button-secondary-foreground)] active:bg-[var(--button-secondary-hover)] data-[active=true]:bg-[var(--button-secondary-hover)] aria-expanded:bg-[var(--button-secondary-hover)] data-popup-open:bg-[var(--button-secondary-hover)]",
         outline:
@@ -22,11 +23,11 @@ const buttonVariants = cva(
       },
       size: {
         default:
-          "h-8 min-h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+          "h-9 min-h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         xs: "h-6 gap-1 px-2 text-xs has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg]:size-3",
         sm: "h-7 gap-1 px-2.5 text-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg]:size-3.5",
         lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        icon: "size-8",
+        icon: "size-9",
         "icon-xs": "size-6 [&_svg]:size-3",
         "icon-sm": "size-7",
         "icon-lg": "size-9",

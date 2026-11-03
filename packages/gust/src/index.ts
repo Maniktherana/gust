@@ -1,5 +1,7 @@
 export { Gust } from "./gust";
-export type { GustProps } from "./gust";
+export type { GustProps, GustTag } from "./gust";
+export type { GustMotionOptions, GustEasing, GustDirection } from "./config";
+export { DEFAULT_MOTION, resolveMotionOptions, resolveTransitionConfig } from "./config";
 export {
   DEFAULT_DURATION_MS,
   DEFAULT_ENTER_ANGLE,

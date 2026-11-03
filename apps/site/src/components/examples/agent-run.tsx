@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Gust } from "@maniktherana/gust";
 import { CheckIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const steps = [
   { label: "Reading gust.tsx", ms: 1500 },
@@ -12,8 +13,6 @@ const steps = [
   { label: "Done", ms: 2800 },
 ];
 const smallText = { entranceHeight: 60, exitBlur: 1, exitHeight: 60 };
-const shown = "scale-100 opacity-100";
-const hidden = "scale-50 opacity-0";
 
 // "Reading " is a shared prefix between the first two steps, so only the file
 // name changes there. The spinner and check cross-fade in one spot.
@@ -49,19 +48,25 @@ export function AgentRunExample({ paused = false }: { paused?: boolean }) {
       <span className="grid size-4 shrink-0 place-items-center">
         <span
           aria-hidden="true"
-          className={`col-start-1 row-start-1 size-3.5 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-foreground transition-[opacity,scale] duration-300 ${done ? hidden : shown}`}
+          className={cn(
+            "col-start-1 row-start-1 size-3.5 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-foreground transition-[opacity,scale] duration-300",
+            done ? "scale-50 opacity-0" : "scale-100 opacity-100",
+          )}
         />
         <CheckIcon
           aria-hidden="true"
-          className={`col-start-1 row-start-1 size-4 text-emerald-600 transition-[opacity,scale] duration-300 dark:text-emerald-400 ${done ? shown : hidden}`}
+          className={cn(
+            "col-start-1 row-start-1 size-4 text-emerald-600 transition-[opacity,scale] duration-300 dark:text-emerald-400",
+            done ? "scale-100 opacity-100" : "scale-50 opacity-0",
+          )}
         />
       </span>
       <span className="min-w-0 flex-1 text-sm">
-        <Gust value={done ? `Done in ${seconds}s` : current.label} {...smallText} />
+        <Gust motion={smallText}>{done ? `Done in ${seconds}s` : current.label}</Gust>
       </span>
       {done ? null : (
         <span className="font-mono text-[13px] text-muted-foreground tabular-nums">
-          <Gust value={`${seconds}s`} stagger={0} {...smallText} />
+          <Gust motion={{ stagger: 0, ...smallText }}>{`${seconds}s`}</Gust>
         </span>
       )}
     </div>

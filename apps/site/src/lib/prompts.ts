@@ -1,43 +1,16 @@
 export const agentGuideUrl = "https://gust.manikrana.dev/gust.md";
 
-export const agentInstallPrompt = `Gust setup reference
+export const agentInstallPrompt = `Add Gust to my React project.
 
-Gust animates changes to a React text value.
-Package: @maniktherana/gust
-Install: bun add @maniktherana/gust
-Stylesheet (once at the app root): @maniktherana/gust/styles.css
+Install from npm:
+npm install @maniktherana/gust
 
 import { Gust } from "@maniktherana/gust";
-import "@maniktherana/gust/styles.css";
 
-<Gust value={text} />
-
-Source install: bunx --bun shadcn@latest add https://gust.manikrana.dev/r/gust.json
-Source import: import { Gust } from "@/components/ui/gust";
-The shadcn install includes the styles.
+Use <Gust>{text}</Gust> to animate an existing changing text value. Gust includes its styles; no stylesheet import is needed.
 
 API and examples: ${agentGuideUrl}`;
 
-export function componentPrompt({
-  dependencies = [],
-  source,
-  title,
-}: {
-  dependencies?: string[];
-  source: string;
-  title: string;
-}) {
-  const packages = ["@maniktherana/gust", ...dependencies].join(", ");
-
-  return `${title} — Gust example
-
-Dependencies: ${packages}
-Stylesheet (once at the app root): @maniktherana/gust/styles.css
-Styling: Tailwind CSS with shadcn color tokens.
-
-\`\`\`tsx
-${source.trim()}
-\`\`\`
-
-Gust API: ${agentGuideUrl}`;
+export function componentPrompt({ source, title }: { source: string; title: string }) {
+  return `Add the "${title}" example from Gust to my React project. Adapt the following complete source to my project's structure and styling.\n\n${source}`;
 }

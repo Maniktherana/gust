@@ -3,7 +3,7 @@ import * as React from "react";
 import { IconBadgeCheck, IconCloneFilled } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Gust, type GustProps } from "@maniktherana/gust";
+import { Gust, type GustMotionOptions } from "@maniktherana/gust";
 
 type CopyButtonProps = Omit<
   React.ComponentProps<typeof Button>,
@@ -11,15 +11,12 @@ type CopyButtonProps = Omit<
 > & {
   copiedLabel?: string;
   animateLabel?: boolean;
-  gustProps?: Omit<GustProps, "value">;
+  gustProps?: GustMotionOptions;
   label?: string;
   resetAfter?: number;
   showLabel?: boolean;
   value: string | (() => string);
 };
-
-const glyphTransition =
-  "transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]";
 
 export function CopyButton({
   className,
@@ -59,7 +56,7 @@ export function CopyButton({
       {...buttonProps}
       type="button"
       aria-label={copied ? copiedLabel : label}
-      className={className}
+      className={cn("text-sm [&_svg]:size-3.5", className)}
       onClick={copy}
     >
       <span
@@ -68,20 +65,20 @@ export function CopyButton({
       >
         <IconCloneFilled
           className={cn(
-            glyphTransition,
+            "transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
             copied ? "scale-25 opacity-0 blur-[4px]" : "scale-100 opacity-100 blur-none",
           )}
         />
         <IconBadgeCheck
           className={cn(
-            glyphTransition,
+            "transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
             copied ? "scale-100 opacity-100 blur-none" : "scale-25 opacity-0 blur-[4px]",
           )}
         />
       </span>
       {showLabel ? (
         animateLabel ? (
-          <Gust {...gustProps} value={copied ? copiedLabel : label} />
+          <Gust motion={gustProps}>{copied ? copiedLabel : label}</Gust>
         ) : (
           <span>{label}</span>
         )

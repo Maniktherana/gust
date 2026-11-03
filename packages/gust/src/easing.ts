@@ -1,7 +1,3 @@
-// Generic easing math shared by the keyframe baker: a cubic-bezier solver
-// (Newton-Raphson) matching the curves Motion feeds to its transitions, plus
-// the strong ease-out Gust uses everywhere.
-
 export const easeOutStrong: [number, number, number, number] = [0.16, 1, 0.3, 1];
 export const easeOutStrongCss = "cubic-bezier(0.16, 1, 0.3, 1)";
 
@@ -30,12 +26,24 @@ export function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
     for (let index = 0; index < 8; index += 1) {
       const currentSlope = slope(guess, x1, x2);
 
-      if (currentSlope === 0) return guess;
+      if (Math.abs(currentSlope) < 1e-7) break;
 
-      guess -= (sample(guess, x1, x2) - x) / currentSlope;
+      const next = guess - (sample(guess, x1, x2) - x) / currentSlope;
+      if (next < 0 || next > 1) break;
+      guess = next;
     }
 
-    return guess;
+    if (Math.abs(sample(guess, x1, x2) - x) < 1e-7) return guess;
+
+    // Flat tangents can defeat Newton's method even for valid CSS curves.
+    let low = 0;
+    let high = 1;
+    for (let index = 0; index < 30; index += 1) {
+      guess = (low + high) / 2;
+      if (sample(guess, x1, x2) < x) low = guess;
+      else high = guess;
+    }
+    return (low + high) / 2;
   };
 
   return (x: number) => {

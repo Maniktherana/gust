@@ -66,14 +66,28 @@ export const Route = createRootRoute({
     links: [
       {
         rel: "preload",
-        href: "/fonts/open-runde/OpenRunde-Regular.woff2",
+        href: "/fonts/open-runde/OpenRunde-Regular-Tabular.woff2",
         as: "font",
         type: "font/woff2",
         crossOrigin: "anonymous",
       },
       {
         rel: "preload",
-        href: "/fonts/open-runde/OpenRunde-Medium.woff2",
+        href: "/fonts/open-runde/OpenRunde-Medium-Tabular.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        href: "/fonts/open-runde/OpenRunde-Semibold-Tabular.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        href: "/fonts/jetbrains-mono/jetbrains-mono-latin.woff2",
         as: "font",
         type: "font/woff2",
         crossOrigin: "anonymous",
@@ -117,7 +131,14 @@ function RootDocument() {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body
+        onPointerDownCapture={() => {
+          document.documentElement.dataset.focusInput = "pointer";
+        }}
+        onKeyDownCapture={(event) => {
+          if (event.key === "Tab") document.documentElement.dataset.focusInput = "keyboard";
+        }}
+      >
         <div className="relative isolate min-h-dvh overflow-x-clip">
           <Outlet />
         </div>

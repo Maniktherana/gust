@@ -1,6 +1,5 @@
 import type * as React from "react";
 
-import { DemoCopyButton } from "@/components/demo-copy-button";
 import { useInView } from "@/hooks/use-element";
 import { useDemoMotion, type DemoMotion } from "@/hooks/use-demo-motion";
 import { cn } from "@/lib/utils";
@@ -32,7 +31,15 @@ export type Example = {
 };
 
 // Examples stop their timers while the card is off screen.
-export function ExampleCard({ example, className }: { example: Example; className?: string }) {
+export function ExampleCard({
+  example,
+  className,
+  children,
+}: {
+  example: Example;
+  className?: string;
+  children?: React.ReactNode;
+}) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const paused = !inView;
   const motion = useDemoMotion(
@@ -52,7 +59,7 @@ export function ExampleCard({ example, className }: { example: Example; classNam
         className,
       )}
     >
-      <DemoCopyButton prompt={example.prompt} title={example.title} />
+      {children}
       <div className={cn("grid h-full min-w-0 place-items-center", !example.fullBleed && "px-5")}>
         {example.profiles?.length ? (
           <AdditionalMotionExample example={example} profileIndex={0} values={{ motion, paused }} />

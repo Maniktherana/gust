@@ -8,6 +8,7 @@ export default defineConfig({
   dts: true,
   entry: { index: "src/index.ts" },
   external: ["react", "react/jsx-runtime"],
+  loader: { ".css": "text" },
   format: ["esm"],
   minify: false,
   outDir: "dist",

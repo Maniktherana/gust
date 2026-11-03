@@ -35,10 +35,10 @@ export function HelloExample({ paused = false }: { paused?: boolean }) {
   return (
     <div className="flex flex-col items-center gap-2">
       <span className="text-4xl font-medium tracking-tight">
-        <Gust value={greeting.text} />
+        <Gust>{greeting.text}</Gust>
       </span>
       <span className="text-sm text-muted-foreground">
-        <Gust value={greeting.language} {...smallText} />
+        <Gust motion={smallText}>{greeting.language}</Gust>
       </span>
     </div>
   );

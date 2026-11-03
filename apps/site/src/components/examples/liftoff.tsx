@@ -27,14 +27,17 @@ export function LiftoffExample({ paused = false }: { paused?: boolean }) {
   return (
     <span className="font-mono text-5xl font-medium tracking-tight tabular-nums">
       <Gust
-        value={launched ? "Liftoff" : `T−${String(count).padStart(2, "0")}`}
-        down={!launched}
-        duration={launched ? 900 : 360}
-        stagger={launched ? 40 : 0}
-        entranceHeight={launched ? 160 : 90}
-        entranceOvershoot={launched ? 36 : 8}
-        entranceScale={launched ? 1.3 : 1.05}
-      />
+        trend={launched ? "up" : "down"}
+        motion={{
+          duration: launched ? 900 : 360,
+          stagger: launched ? 40 : 0,
+          entranceHeight: launched ? 160 : 90,
+          entranceOvershoot: launched ? 36 : 8,
+          entranceScale: launched ? 1.3 : 1.05,
+        }}
+      >
+        {launched ? "Liftoff" : `T−${String(count).padStart(2, "0")}`}
+      </Gust>
     </span>
   );
 }

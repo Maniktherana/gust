@@ -1,28 +1,9 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { Gust, type GustProps } from "@maniktherana/gust";
+import { DEFAULT_MOTION, Gust, type GustMotionOptions } from "@maniktherana/gust";
 
-export const colorSwatchesMotion: Omit<GustProps, "value"> = {
-  duration: 360,
-  exitDuration: 360,
-  stagger: 37,
-  down: false,
-  enterAngle: 180,
-  exitAngle: 180,
-  entranceOvershoot: 24,
-  entranceHeight: 80,
-  entranceScale: 1.19,
-  entranceBlur: 2.5,
-  exitHeight: 90,
-  exitBlur: 2.5,
-  exitScale: 0.4,
-  blur: true,
-  scale: true,
-  preservePrefix: true,
-};
-
-const colors = [
+export const colors = [
   "#F87171",
   "#FB923C",
   "#FBBF24",
@@ -51,20 +32,22 @@ function usePrefersReducedMotion() {
 
 export function ColorSwatchesExample({
   paused = false,
-  motion = {},
+  motion = DEFAULT_MOTION,
 }: {
   paused?: boolean;
-  motion?: Omit<GustProps, "value">;
+  motion?: GustMotionOptions;
 }) {
   const reducedMotion = usePrefersReducedMotion();
   const [selection, setSelection] = useState({ index: 4, angle: 180 });
   const [selectionVersion, setSelectionVersion] = useState(0);
   const selected = selection.index;
-  const gentleMotion: Omit<GustProps, "value"> = reducedMotion
+  const gentleMotion: GustMotionOptions = reducedMotion
     ? {
         duration: 120,
         exitDuration: 80,
         stagger: 0,
+        enterStagger: 0,
+        exitStagger: 0,
         entranceOvershoot: 0,
         entranceHeight: 0,
         exitHeight: 0,
@@ -101,13 +84,11 @@ export function ColorSwatchesExample({
         style={{ color: colors[selected] }}
       >
         <Gust
-          value={colors[selected]}
-          {...colorSwatchesMotion}
-          {...motion}
-          enterAngle={motion.enterAngle ?? (motion.down ? 90 : selection.angle)}
-          exitAngle={motion.exitAngle ?? (motion.down ? 90 : selection.angle)}
-          {...gentleMotion}
-        />
+          direction={selection.angle === 180 ? "left" : "right"}
+          motion={{ ...motion, ...gentleMotion }}
+        >
+          {colors[selected]}
+        </Gust>
       </div>
       <div role="group" aria-label="Color swatches" className="grid w-fit grid-cols-3 self-center">
         {colors.map((color, index) => (

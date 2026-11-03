@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { Gust, type GustProps } from "@maniktherana/gust";
+import { Gust, type GustMotionOptions } from "@maniktherana/gust";
 
 import { PlaybackIcon, SkipIcon } from "./playback-icon";
 
@@ -13,7 +13,7 @@ const tracks = [
 ];
 // Browse tracks until someone uses the player, then leave track choice to them.
 const autoSkipSeconds = 6;
-export const playerMotion: Omit<GustProps, "value"> = {
+export const playerMotion: GustMotionOptions = {
   duration: 440,
   exitDuration: 400,
   stagger: 20,
@@ -25,7 +25,7 @@ export const playerMotion: Omit<GustProps, "value"> = {
   blur: true,
   scale: true,
 };
-export const playerNumberMotion: Omit<GustProps, "value"> = {
+export const playerNumberMotion: GustMotionOptions = {
   duration: 320,
   exitDuration: 320,
   stagger: 0,
@@ -36,9 +36,6 @@ export const playerNumberMotion: Omit<GustProps, "value"> = {
   blur: true,
   scale: true,
 };
-const controlClassName =
-  "grid size-11 shrink-0 place-items-center rounded-xl text-muted-foreground transition-[color,transform] duration-150 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:text-foreground active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 motion-reduce:transition-none motion-reduce:active:scale-100";
-
 const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
 
 function subscribeToReducedMotion(onChange: () => void) {
@@ -67,8 +64,8 @@ export function NowPlayingExample({
   numberMotion = playerNumberMotion,
 }: {
   paused?: boolean;
-  motion?: Omit<GustProps, "value">;
-  numberMotion?: Omit<GustProps, "value">;
+  motion?: GustMotionOptions;
+  numberMotion?: GustMotionOptions;
 }) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [state, setState] = useState({
@@ -144,22 +141,14 @@ export function NowPlayingExample({
         />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="block h-6 text-base font-medium">
-            <Gust
-              value={track.title}
-              {...motion}
-              {...reduced}
-              enterAngle={angle}
-              exitAngle={angle}
-            />
+            <Gust motion={{ ...motion, ...reduced, enterAngle: angle, exitAngle: angle }}>
+              {track.title}
+            </Gust>
           </span>
           <span className="block h-5 text-sm text-muted-foreground">
-            <Gust
-              value={track.artist}
-              {...motion}
-              {...reduced}
-              enterAngle={angle}
-              exitAngle={angle}
-            />
+            <Gust motion={{ ...motion, ...reduced, enterAngle: angle, exitAngle: angle }}>
+              {track.artist}
+            </Gust>
           </span>
         </div>
       </div>
@@ -179,10 +168,10 @@ export function NowPlayingExample({
         </span>
         <span className="flex justify-between text-[13px] text-muted-foreground tabular-nums">
           <span className="inline-block h-5 w-[4ch]">
-            <Gust value={clock(state.elapsed)} {...smallText} />
+            <Gust motion={smallText}>{clock(state.elapsed)}</Gust>
           </span>
           <span className="inline-block h-5 w-[4ch]">
-            <Gust value={clock(track.length)} {...smallText} />
+            <Gust motion={smallText}>{clock(track.length)}</Gust>
           </span>
         </span>
       </div>
@@ -191,7 +180,7 @@ export function NowPlayingExample({
           type="button"
           aria-label="Previous track"
           onClick={() => skip(false)}
-          className={controlClassName}
+          className="grid size-11 shrink-0 place-items-center rounded-xl text-muted-foreground transition-[color,transform] duration-150 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:text-foreground active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 motion-reduce:transition-none motion-reduce:active:scale-100"
         >
           <SkipIcon direction="previous" className="size-4" />
         </button>
@@ -206,7 +195,7 @@ export function NowPlayingExample({
               playing: !current.playing,
             }))
           }
-          className={`${controlClassName} bg-foreground/5 text-foreground`}
+          className="grid size-11 shrink-0 place-items-center rounded-xl text-muted-foreground transition-[color,transform] duration-150 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:text-foreground active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 motion-reduce:transition-none motion-reduce:active:scale-100 bg-foreground/5 text-foreground"
         >
           <PlaybackIcon playing={state.playing} className="size-4" />
         </button>
@@ -214,7 +203,7 @@ export function NowPlayingExample({
           type="button"
           aria-label="Next track"
           onClick={() => skip(true)}
-          className={controlClassName}
+          className="grid size-11 shrink-0 place-items-center rounded-xl text-muted-foreground transition-[color,transform] duration-150 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:text-foreground active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 motion-reduce:transition-none motion-reduce:active:scale-100"
         >
           <SkipIcon direction="next" className="size-4" />
         </button>

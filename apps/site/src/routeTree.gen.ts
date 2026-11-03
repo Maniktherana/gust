@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgentRouteImport } from './routes/agent'
+import { Route as EngineRouteImport } from './routes/engine'
 import { Route as ExamplesRouteImport } from './routes/examples'
 import { Route as LabRouteImport } from './routes/lab'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const AgentRoute = AgentRouteImport.update({
   id: '/agent',
   path: '/agent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EngineRoute = EngineRouteImport.update({
+  id: '/engine',
+  path: '/engine',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExamplesRoute = ExamplesRouteImport.update({
@@ -38,12 +44,14 @@ const LabRoute = LabRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agent': typeof AgentRoute
+  '/engine': typeof EngineRoute
   '/examples': typeof ExamplesRoute
   '/lab': typeof LabRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agent': typeof AgentRoute
+  '/engine': typeof EngineRoute
   '/examples': typeof ExamplesRoute
   '/lab': typeof LabRoute
 }
@@ -51,20 +59,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/agent': typeof AgentRoute
+  '/engine': typeof EngineRoute
   '/examples': typeof ExamplesRoute
   '/lab': typeof LabRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/agent' | '/examples' | '/lab'
+  fullPaths: '/' | '/agent' | '/engine' | '/examples' | '/lab'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/agent' | '/examples' | '/lab'
-  id: '__root__' | '/' | '/agent' | '/examples' | '/lab'
+  to: '/' | '/agent' | '/engine' | '/examples' | '/lab'
+  id: '__root__' | '/' | '/agent' | '/engine' | '/examples' | '/lab'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgentRoute: typeof AgentRoute
+  EngineRoute: typeof EngineRoute
   ExamplesRoute: typeof ExamplesRoute
   LabRoute: typeof LabRoute
 }
@@ -83,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/agent'
       fullPath: '/agent'
       preLoaderRoute: typeof AgentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/engine': {
+      id: '/engine'
+      path: '/engine'
+      fullPath: '/engine'
+      preLoaderRoute: typeof EngineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/examples': {
@@ -105,6 +122,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgentRoute: AgentRoute,
+  EngineRoute: EngineRoute,
   ExamplesRoute: ExamplesRoute,
   LabRoute: LabRoute,
 }
