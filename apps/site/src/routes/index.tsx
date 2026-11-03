@@ -119,7 +119,7 @@ function Home() {
   const [install, setInstall] = useState<InstallOption>(installOptions[0]);
   return (
     <SiteShell>
-      <main className="flex flex-col gap-10 pt-1">
+      <main className="flex flex-col gap-8 pt-1">
         <div className="flex flex-col gap-6">
           <h1 className="text-base text-muted-foreground">Text transitions for React.</h1>
           <DemoGrid />

@@ -10,7 +10,7 @@ export const Route = createFileRoute("/lab")({
 function Lab() {
   return (
     <SiteShell>
-      <main className="flex flex-col gap-8 pt-4">
+      <main className="flex flex-col gap-6 pt-1">
         <h1 className="text-lg font-medium">Lab</h1>
         <PropReference />
       </main>
