@@ -1,5 +1,10 @@
 import type { GustCharacterMeasure, GustRootRect } from "./measure";
-import { measureElementRect, measureElementScale, measureGustCharacterSlots } from "./measure";
+import {
+  measureElementRect,
+  measureElementScale,
+  measureElementSize,
+  measureGustCharacterSlots,
+} from "./measure";
 import { isWhitespaceCharacter, splitGraphemes } from "./characters";
 import type { GustConfig } from "./config";
 import { easingToCss, resolveLayoutDuration, resolveTransitionConfig } from "./config";
@@ -42,7 +47,7 @@ export class GustAnimator {
   ) {
     const view = root.ownerDocument.defaultView;
     this.media = view?.matchMedia?.("(prefers-reduced-motion: reduce)") ?? null;
-    this.size = sizer.getBoundingClientRect();
+    this.size = measureElementSize(sizer);
     this.positionGlyphs();
     this.media?.addEventListener("change", this.onVisibility);
     root.ownerDocument.addEventListener("visibilitychange", this.onVisibility);
@@ -62,8 +67,7 @@ export class GustAnimator {
   };
 
   private onFonts = () => {
-    this.settle();
-    this.positionGlyphs();
+    this.refresh();
   };
 
   private typographySignature() {
@@ -74,7 +78,7 @@ export class GustAnimator {
   }
 
   refresh() {
-    const size = this.sizer.getBoundingClientRect();
+    const size = measureElementSize(this.sizer);
     if (
       Math.abs(size.width - this.size.width) > 0.1 ||
       Math.abs(size.height - this.size.height) > 0.1 ||
@@ -111,7 +115,7 @@ export class GustAnimator {
         slot.style.height = `${line.height / scale.y}px`;
       });
     this.root.dataset.gustReady = "true";
-    this.size = this.sizer.getBoundingClientRect();
+    this.size = measureElementSize(this.sizer);
     this.typography = this.typographySignature();
   }
 

@@ -383,6 +383,48 @@ test("bounded exit-only batches exclude whitespace without scheduling an empty l
   await page.close();
 });
 
+test("font loading events preserve active motion when text metrics are unchanged", async () => {
+  const page = await pageWith({ children: "Agentsims" });
+  await render(page, { children: "Gust", motion: { duration: 2000, exitDuration: 2000 } });
+  const result = await page.evaluate(() => {
+    const animations = document.getAnimations();
+    animations.forEach((animation) => animation.pause());
+    document.fonts.dispatchEvent(new Event("loadingdone"));
+    return {
+      count: animations.length,
+      preserved: animations.every((animation) => animation.playState === "paused"),
+    };
+  });
+  expect(result.count).toBeGreaterThan(0);
+  expect(result.preserved).toBe(true);
+  await page.close();
+});
+
+test("ancestor scale changes do not turn a pending resize notification into a text resize", async () => {
+  const page = await pageWith({ children: "Copy prompt" });
+  const result = await page.evaluate(async () => {
+    const parent = document.getElementById("app")!;
+    parent.style.transform = "scale(0.96)";
+    window.gustTest.render({
+      children: "Prompt copied",
+      motion: { duration: 2000, exitDuration: 2000 },
+    });
+    const animations = document.getAnimations();
+    animations.forEach((animation) => animation.pause());
+    parent.style.transform = "scale(1)";
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    );
+    return {
+      count: animations.length,
+      preserved: animations.every((animation) => animation.playState === "paused"),
+    };
+  });
+  expect(result.count).toBeGreaterThan(0);
+  expect(result.preserved).toBe(true);
+  await page.close();
+});
+
 test("center/right alignment and scaled ancestors keep vertical entrances and exits anchored", async () => {
   for (const alignment of ["center", "right"] as const) {
     for (const scale of [0.8, 1, 2.5]) {
