@@ -1,6 +1,6 @@
 {
   "name": "@maniktherana/gust",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Animated text transitions for React.",
   "homepage": "https://gust.manikrana.dev",
   "license": "MIT",
